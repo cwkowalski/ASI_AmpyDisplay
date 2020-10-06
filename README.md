@@ -1,7 +1,7 @@
 # ASI_AmpyDisplay
 This project aims to improve the functionality of the incredibly high-performance field-oriented controllers created by Accelerated Systems. Most EV hotrodders using these controllers have plenty of tinkering abilities but the programming skills required for amateurs to fully utilize the abilities of this controller, which is designed as a base system for commercial development, are nontrivial. Generic displays like Kingmeter don't display or control all relevant information, while more versatile universal displays like Justin Le's CycleAnalyst require an external shunt instead of reading the controllers internal shunt values. This initial version in open Python is intended for use with the piCore branch of Tinycore Linux and will be tested on a Raspberry Pi4, with a large e-ink display and touchscreen overlay. RPi was chosen since it has enough headroom for not only these display functions, but many other potential functions in future revisions e.g. dashcam logger, a lowjack that can enable controller antitheft functions or alarms/horn, possibly a bluetooth BMS interface, etc.
 
-The GUI uses PyQT5, so users will be able to easily edit their own GUI's by arranging the base widget elements of this display using QT Designer to edit the ampy.ui file to fit the desired display, for a custom implementation.
+Discussion and suggestions here: https://endless-sphere.com/forums/viewtopic.php?f=2&t=108580
 
 Key display elements:
 1. Time of day
