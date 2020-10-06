@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="root">
+    <file>L.png</file>
+    <file>R.png</file>
+    <file>radio_off.png</file>
+    <file>radio_on.png</file>
+  </qresource>
+</RCC>
