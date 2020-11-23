@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1872</width>
-    <height>1404</height>
+    <height>1402</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,6 +52,11 @@ border radius : 1px}
 QCheckBox::indicator {
      width: 60px;
      height: 60px;
+ }
+
+ QProgressBar::chunk {
+     background-color: black;
+     width: 1px;
  }</string>
   </property>
   <property name="toolButtonStyle">
@@ -65,15 +70,15 @@ QCheckBox::indicator {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>950</y>
+      <y>910</y>
       <width>521</width>
-      <height>401</height>
+      <height>231</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Mistral</family>
-      <pointsize>100</pointsize>
+      <family>Impact</family>
+      <pointsize>80</pointsize>
       <stylestrategy>PreferDefault</stylestrategy>
      </font>
     </property>
@@ -94,13 +99,13 @@ font: 80pt 'Mistral'}</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>120</y>
+       <y>90</y>
        <width>501</width>
-       <height>274</height>
+       <height>135</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1">
+      <item row="0" column="1">
        <widget class="QPushButton" name="ProfileRb2">
         <property name="sizeIncrement">
          <size>
@@ -138,7 +143,7 @@ font: 80pt 'Mistral'}</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="0" column="0">
        <widget class="QPushButton" name="ProfileRb1">
         <property name="font">
          <font>
@@ -170,21 +175,7 @@ font: 80pt 'Mistral'}</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0" alignment="Qt::AlignHCenter">
-       <widget class="QLabel" name="ProfileRb1Label">
-        <property name="text">
-         <string>1</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2" alignment="Qt::AlignHCenter|Qt::AlignBottom">
-       <widget class="QLabel" name="ProfileRb3Label">
-        <property name="text">
-         <string>3</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
+      <item row="0" column="2">
        <widget class="QPushButton" name="ProfileRb3">
         <property name="font">
          <font>
@@ -216,26 +207,6 @@ font: 80pt 'Mistral'}</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1" alignment="Qt::AlignHCenter">
-       <widget class="QLabel" name="ProfileRb2Label">
-        <property name="text">
-         <string>2</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
      </layout>
     </widget>
    </widget>
@@ -243,20 +214,20 @@ font: 80pt 'Mistral'}</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>729</y>
+      <y>700</y>
       <width>521</width>
       <height>201</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Mistral</family>
-      <pointsize>100</pointsize>
+      <family>Impact</family>
+      <pointsize>80</pointsize>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-font: 80pt 'Mistral'}
+font: 80pt 'Arial'}
 
 QSlider::groove:horizontal {
 border: 1px solid;
@@ -330,7 +301,7 @@ margin: 0px 0px;}</string>
    <widget class="AnalogGaugeWidget" name="SpeedGauge" native="true">
     <property name="geometry">
      <rect>
-      <x>600</x>
+      <x>20</x>
       <y>10</y>
       <width>680</width>
       <height>680</height>
@@ -395,6 +366,7 @@ margin: 0px 0px;}</string>
      </property>
      <property name="font">
       <font>
+       <family>Impact</family>
        <pointsize>40</pointsize>
       </font>
      </property>
@@ -406,8 +378,8 @@ margin: 0px 0px;}</string>
    <widget class="AnalogGaugeWidget" name="PowerGauge" native="true">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>670</y>
+      <x>1180</x>
+      <y>10</y>
       <width>680</width>
       <height>680</height>
      </rect>
@@ -482,16 +454,16 @@ margin: 0px 0px;}</string>
    <widget class="QGroupBox" name="RangeBox">
     <property name="geometry">
      <rect>
-      <x>1340</x>
-      <y>1130</y>
-      <width>520</width>
-      <height>221</height>
+      <x>9</x>
+      <y>1150</y>
+      <width>521</width>
+      <height>201</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Mistral</family>
-      <pointsize>100</pointsize>
+      <family>Impact</family>
+      <pointsize>80</pointsize>
      </font>
     </property>
     <property name="styleSheet">
@@ -522,9 +494,9 @@ margin: 0px 0px;}</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>120</y>
+       <y>100</y>
        <width>501</width>
-       <height>91</height>
+       <height>81</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0">
@@ -589,18 +561,18 @@ margin: 0px 0px;}</string>
      </layout>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="RangeBox_2">
+   <widget class="QGroupBox" name="TripBox">
     <property name="geometry">
      <rect>
-      <x>1340</x>
-      <y>10</y>
-      <width>520</width>
-      <height>1111</height>
+      <x>540</x>
+      <y>700</y>
+      <width>1321</width>
+      <height>651</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Mistral</family>
+      <family>Impact</family>
       <pointsize>100</pointsize>
      </font>
     </property>
@@ -629,170 +601,689 @@ margin: 0px 0px;}</string>
     <widget class="QWidget" name="gridLayoutWidget_5">
      <property name="geometry">
       <rect>
-       <x>9</x>
-       <y>139</y>
-       <width>1121</width>
-       <height>961</height>
+       <x>10</x>
+       <y>130</y>
+       <width>1301</width>
+       <height>511</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout_6">
-      <item row="10" column="0">
-       <widget class="QLabel" name="label_12">
+     <layout class="QGridLayout" name="TripBoxGrid">
+      <item row="0" column="1">
+       <widget class="QLabel" name="Trip_1_2">
         <property name="text">
-         <string/>
+         <string>Trip Regen</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="TripDistance">
+      <item row="0" column="0">
+       <widget class="QLabel" name="Trip_1_1">
+        <property name="font">
+         <font>
+          <family>Arial</family>
+          <pointsize>40</pointsize>
+          <weight>50</weight>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Trip Distance</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="EstRange">
-        <property name="text">
-         <string>Estimated Range (Trip Wh/mi &amp; SOC)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="WhmiInstantaneous">
-        <property name="text">
-         <string>Instantaneous Wh/mi</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="TripRegen">
-        <property name="text">
-         <string>Trip %Regen (wh / negative wh</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="WhmiTrip">
+       <widget class="QLabel" name="Trip_2_1">
         <property name="text">
          <string>Trip Wh/mi</string>
         </property>
        </widget>
       </item>
+      <item row="5" column="1">
+       <widget class="QLabel" name="Trip_2_3">
+        <property name="text">
+         <string>Estimated Range </string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="Trip_1_4">
+        <property name="text">
+         <string>Estimated Range </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="Trip_2_2">
+        <property name="text">
+         <string>Instant Wh/mi</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLabel" name="Trip_2_4">
+        <property name="text">
+         <string>Estimated Range </string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="Trip_1_3">
+        <property name="text">
+         <string>Estimated Range </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="Trip_3_1">
+        <property name="text">
+         <string>Trip Regen</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="Trip_3_2">
+        <property name="text">
+         <string>Trip Regen</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLabel" name="Trip_3_3">
+        <property name="text">
+         <string>Trip Regen</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLabel" name="Trip_3_4">
+        <property name="text">
+         <string>Trip Regen</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="TripReset">
      <property name="geometry">
       <rect>
-       <x>260</x>
-       <y>60</y>
-       <width>241</width>
+       <x>910</x>
+       <y>30</y>
+       <width>161</width>
        <height>71</height>
       </rect>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>-1</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="text">
-      <string>RESET</string>
+      <string>RST</string>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>12</width>
+       <height>16</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Trip_Selector_1">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>10</y>
+       <width>121</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Impactt</family>
+       <pointsize>-1</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 100px;
+    font-family: &quot;Impactt&quot;;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 6px;
+	border-radius:50px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Trip_Selector_2">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>10</y>
+       <width>121</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Impactt</family>
+       <pointsize>-1</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 100px;
+    font-family: &quot;Impactt&quot;;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 6px;
+	border-radius:50px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>2</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Trip_Selector_3">
+     <property name="geometry">
+      <rect>
+       <x>590</x>
+       <y>10</y>
+       <width>121</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Impactt</family>
+       <pointsize>-1</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 100px;
+    font-family: &quot;Impactt&quot;;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 6px;
+	border-radius:50px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>3</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Trip_Selector_4">
+     <property name="geometry">
+      <rect>
+       <x>740</x>
+       <y>10</y>
+       <width>121</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Impactt</family>
+       <pointsize>-1</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 100px;
+    font-family: &quot;Impactt&quot;;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 6px;
+	border-radius:50px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>4</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="StatusGroupBox">
+   <widget class="QPushButton" name="FaultReset">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>521</width>
-      <height>711</height>
+      <x>1020</x>
+      <y>550</y>
+      <width>131</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>-1</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>RST</string>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>12</width>
+      <height>16</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ProfileRb1Label">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>1000</y>
+      <width>41</width>
+      <height>127</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <family>Mistral</family>
-      <pointsize>100</pointsize>
-      <stylestrategy>PreferDefault</stylestrategy>
+      <pointsize>80</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>123</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ProfileRb2Label">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>1000</y>
+      <width>43</width>
+      <height>127</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Mistral</family>
+      <pointsize>80</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>2</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ProfileRb3Label">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>1000</y>
+      <width>41</width>
+      <height>127</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Mistral</family>
+      <pointsize>80</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>3</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="BatteryVoltageBar">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>490</y>
+      <width>441</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>52</number>
+    </property>
+    <property name="maximum">
+     <number>89</number>
+    </property>
+    <property name="value">
+     <number>52</number>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BatteryVoltageLabel">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>410</y>
+      <width>211</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Impact</family>
+      <pointsize>50</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-font: 80pt 'Mistral'}</string>
+	font: 50pt &quot;Impact&quot;;
+}</string>
     </property>
-    <property name="title">
-     <string/>
+    <property name="text">
+     <string>V: 88.2</string>
     </property>
-    <property name="flat">
+   </widget>
+   <widget class="QProgressBar" name="MotorTemperatureBar">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>360</y>
+      <width>441</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>110</number>
+    </property>
+    <property name="value">
+     <number>75</number>
+    </property>
+    <property name="textVisible">
      <bool>false</bool>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="MotorTemperatureLabel">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>280</y>
+      <width>421</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Impact</family>
+      <pointsize>50</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+	font: 50pt &quot;Impact&quot;;
+}</string>
+    </property>
+    <property name="text">
+     <string>MotTemp</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="BatterySOCBar">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>630</y>
+      <width>441</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="value">
+     <number>75</number>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BatterySOCLabel">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>550</y>
+      <width>291</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Impact</family>
+      <pointsize>50</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+	font: 50pt &quot;Impact&quot;;
+}</string>
+    </property>
+    <property name="text">
+     <string>SOC:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="Time">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>10</y>
+      <width>451</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>60</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Time of day</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="LockButton">
+    <property name="geometry">
+     <rect>
+      <x>1060</x>
+      <y>160</y>
+      <width>101</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>tt-icon-font</family>
+      <pointsize>-1</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	background: white;
+	font: 120px;
+    font-family: &quot;tt-icon-font&quot;;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 6px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+    </property>
+    <property name="text">
+     <string>&lt;</string>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>16</width>
+      <height>16</height>
+     </size>
     </property>
     <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BatteryVoltageDropLabel">
+    <property name="geometry">
+     <rect>
+      <x>940</x>
+      <y>410</y>
+      <width>221</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Impact</family>
+      <pointsize>50</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+	font: 50pt &quot;Impact&quot;;
+}</string>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;V&lt;span style=&quot; vertical-align:sub;&quot;&gt;d&lt;/span&gt;: -8.5&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="CheckEngineButton">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>160</y>
+      <width>121</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>tt-icon-font</family>
+      <pointsize>-1</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	background: white;
+	font: 120px;
+    font-family: &quot;tt-icon-font&quot;;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 6px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+    </property>
+    <property name="text">
+     <string>W</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
      <bool>false</bool>
     </property>
-    <widget class="QWidget" name="gridLayoutWidget_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>501</width>
-       <height>641</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <property name="spacing">
-       <number>0</number>
-      </property>
-      <item row="2" column="0">
-       <widget class="QLabel" name="VoltageDrop">
-        <property name="text">
-         <string>Voltage Drop </string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="BatterySOC">
-        <property name="text">
-         <string>Battery SOC</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="Time">
-        <property name="font">
-         <font>
-          <family>Mistral</family>
-          <pointsize>80</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Time of day</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="FaultCodes">
-        <property name="font">
-         <font>
-          <family>Mistral</family>
-          <pointsize>80</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <property name="text">
-         <string>Fault Codes</string>
-        </property>
-        <property name="textFormat">
-         <enum>Qt::PlainText</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

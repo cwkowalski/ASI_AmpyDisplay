@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1872, 1404)
+        MainWindow.resize(1872, 1402)
         MainWindow.setStyleSheet("QMainWindow{\n"
 "    background: solid white; }\n"
 "\n"
@@ -52,16 +52,21 @@ class Ui_MainWindow(object):
 "QCheckBox::indicator {\n"
 "     width: 60px;\n"
 "     height: 60px;\n"
+" }\n"
+"\n"
+" QProgressBar::chunk {\n"
+"     background-color: black;\n"
+"     width: 1px;\n"
 " }")
         MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.profileGroup = QtWidgets.QGroupBox(self.centralwidget)
-        self.profileGroup.setGeometry(QtCore.QRect(10, 950, 521, 401))
+        self.profileGroup.setGeometry(QtCore.QRect(10, 910, 521, 231))
         font = QtGui.QFont()
-        font.setFamily("Mistral")
-        font.setPointSize(100)
+        font.setFamily("Impact")
+        font.setPointSize(80)
         font.setStyleStrategy(QtGui.QFont.PreferDefault)
         self.profileGroup.setFont(font)
         self.profileGroup.setStyleSheet("QLabel{\n"
@@ -70,7 +75,7 @@ class Ui_MainWindow(object):
         self.profileGroup.setCheckable(False)
         self.profileGroup.setObjectName("profileGroup")
         self.gridLayoutWidget = QtWidgets.QWidget(self.profileGroup)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 120, 501, 274))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 90, 501, 135))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
@@ -92,7 +97,7 @@ class Ui_MainWindow(object):
         self.ProfileRb2.setCheckable(True)
         self.ProfileRb2.setAutoExclusive(True)
         self.ProfileRb2.setObjectName("ProfileRb2")
-        self.gridLayout.addWidget(self.ProfileRb2, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.ProfileRb2, 0, 1, 1, 1)
         self.ProfileRb1 = QtWidgets.QPushButton(self.gridLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -106,13 +111,7 @@ class Ui_MainWindow(object):
         self.ProfileRb1.setCheckable(True)
         self.ProfileRb1.setAutoExclusive(True)
         self.ProfileRb1.setObjectName("ProfileRb1")
-        self.gridLayout.addWidget(self.ProfileRb1, 1, 0, 1, 1)
-        self.ProfileRb1Label = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.ProfileRb1Label.setObjectName("ProfileRb1Label")
-        self.gridLayout.addWidget(self.ProfileRb1Label, 0, 0, 1, 1, QtCore.Qt.AlignHCenter)
-        self.ProfileRb3Label = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.ProfileRb3Label.setObjectName("ProfileRb3Label")
-        self.gridLayout.addWidget(self.ProfileRb3Label, 0, 2, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignBottom)
+        self.gridLayout.addWidget(self.ProfileRb1, 0, 0, 1, 1)
         self.ProfileRb3 = QtWidgets.QPushButton(self.gridLayoutWidget)
         font = QtGui.QFont()
         font.setPointSize(-1)
@@ -126,20 +125,15 @@ class Ui_MainWindow(object):
         self.ProfileRb3.setCheckable(True)
         self.ProfileRb3.setAutoExclusive(True)
         self.ProfileRb3.setObjectName("ProfileRb3")
-        self.gridLayout.addWidget(self.ProfileRb3, 1, 2, 1, 1)
-        self.ProfileRb2Label = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.ProfileRb2Label.setObjectName("ProfileRb2Label")
-        self.gridLayout.addWidget(self.ProfileRb2Label, 0, 1, 1, 1, QtCore.Qt.AlignHCenter)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout.addItem(spacerItem, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.ProfileRb3, 0, 2, 1, 1)
         self.AssistBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.AssistBox.setGeometry(QtCore.QRect(10, 729, 521, 201))
+        self.AssistBox.setGeometry(QtCore.QRect(10, 700, 521, 201))
         font = QtGui.QFont()
-        font.setFamily("Mistral")
-        font.setPointSize(100)
+        font.setFamily("Impact")
+        font.setPointSize(80)
         self.AssistBox.setFont(font)
         self.AssistBox.setStyleSheet("QLabel{\n"
-"font: 80pt \'Mistral\'}\n"
+"font: 80pt \'Arial\'}\n"
 "\n"
 "QSlider::groove:horizontal {\n"
 "border: 1px solid;\n"
@@ -174,7 +168,7 @@ class Ui_MainWindow(object):
         self.AssistSlider.setObjectName("AssistSlider")
         self.gridLayout_3.addWidget(self.AssistSlider, 0, 1, 1, 1)
         self.SpeedGauge = AnalogGaugeWidget(self.centralwidget)
-        self.SpeedGauge.setGeometry(QtCore.QRect(600, 10, 680, 680))
+        self.SpeedGauge.setGeometry(QtCore.QRect(20, 10, 680, 680))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -195,11 +189,12 @@ class Ui_MainWindow(object):
         self.SpeedGaugeLabelUnits = QtWidgets.QLabel(self.SpeedGauge)
         self.SpeedGaugeLabelUnits.setGeometry(QtCore.QRect(490, 600, 150, 80))
         font = QtGui.QFont()
+        font.setFamily("Impact")
         font.setPointSize(40)
         self.SpeedGaugeLabelUnits.setFont(font)
         self.SpeedGaugeLabelUnits.setObjectName("SpeedGaugeLabelUnits")
         self.PowerGauge = AnalogGaugeWidget(self.centralwidget)
-        self.PowerGauge.setGeometry(QtCore.QRect(600, 670, 680, 680))
+        self.PowerGauge.setGeometry(QtCore.QRect(1180, 10, 680, 680))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -217,17 +212,17 @@ class Ui_MainWindow(object):
         self.PowerGaugeLabel.setFont(font)
         self.PowerGaugeLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.PowerGaugeLabel.setObjectName("PowerGaugeLabel")
-        self.label = QtWidgets.QLabel(self.PowerGauge)
-        self.label.setGeometry(QtCore.QRect(530, 620, 150, 80))
+        self.PowerGaugeLabelUnits = QtWidgets.QLabel(self.PowerGauge)
+        self.PowerGaugeLabelUnits.setGeometry(QtCore.QRect(530, 620, 150, 80))
         font = QtGui.QFont()
         font.setPointSize(40)
-        self.label.setFont(font)
-        self.label.setObjectName("label")
+        self.PowerGaugeLabelUnits.setFont(font)
+        self.PowerGaugeLabelUnits.setObjectName("PowerGaugeLabelUnits")
         self.RangeBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.RangeBox.setGeometry(QtCore.QRect(1340, 1130, 520, 221))
+        self.RangeBox.setGeometry(QtCore.QRect(9, 1150, 521, 201))
         font = QtGui.QFont()
-        font.setFamily("Mistral")
-        font.setPointSize(100)
+        font.setFamily("Impact")
+        font.setPointSize(80)
         self.RangeBox.setFont(font)
         self.RangeBox.setStyleSheet("QLabel{\n"
 "font: 80pt \'Mistral\'}\n"
@@ -250,7 +245,7 @@ class Ui_MainWindow(object):
 "margin: 0px 0px;}")
         self.RangeBox.setObjectName("RangeBox")
         self.gridLayoutWidget_4 = QtWidgets.QWidget(self.RangeBox)
-        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(10, 120, 501, 91))
+        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(10, 100, 501, 81))
         self.gridLayoutWidget_4.setObjectName("gridLayoutWidget_4")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.gridLayoutWidget_4)
         self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
@@ -276,13 +271,13 @@ class Ui_MainWindow(object):
         self.RangeCheck.setIconSize(QtCore.QSize(16, 13))
         self.RangeCheck.setObjectName("RangeCheck")
         self.gridLayout_4.addWidget(self.RangeCheck, 0, 0, 1, 1)
-        self.RangeBox_2 = QtWidgets.QGroupBox(self.centralwidget)
-        self.RangeBox_2.setGeometry(QtCore.QRect(1340, 10, 520, 1111))
+        self.TripBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.TripBox.setGeometry(QtCore.QRect(540, 700, 1321, 651))
         font = QtGui.QFont()
-        font.setFamily("Mistral")
+        font.setFamily("Impact")
         font.setPointSize(100)
-        self.RangeBox_2.setFont(font)
-        self.RangeBox_2.setStyleSheet("QLabel{\n"
+        self.TripBox.setFont(font)
+        self.TripBox.setStyleSheet("QLabel{\n"
 "font: 40pt \'Arial\'}\n"
 "QCheckBox::indicator {\n"
 "     width: 60px;\n"
@@ -299,83 +294,337 @@ class Ui_MainWindow(object):
 "height: 100px;\n"
 "width: 70px; \n"
 "margin: 0px 0px;}")
-        self.RangeBox_2.setObjectName("RangeBox_2")
-        self.gridLayoutWidget_5 = QtWidgets.QWidget(self.RangeBox_2)
-        self.gridLayoutWidget_5.setGeometry(QtCore.QRect(9, 139, 1121, 961))
+        self.TripBox.setObjectName("TripBox")
+        self.gridLayoutWidget_5 = QtWidgets.QWidget(self.TripBox)
+        self.gridLayoutWidget_5.setGeometry(QtCore.QRect(10, 130, 1301, 511))
         self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_5")
-        self.gridLayout_6 = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
-        self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_6.setObjectName("gridLayout_6")
-        self.label_12 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.label_12.setText("")
-        self.label_12.setObjectName("label_12")
-        self.gridLayout_6.addWidget(self.label_12, 10, 0, 1, 1)
-        self.TripDistance = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.TripDistance.setObjectName("TripDistance")
-        self.gridLayout_6.addWidget(self.TripDistance, 2, 0, 1, 1)
-        self.EstRange = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.EstRange.setObjectName("EstRange")
-        self.gridLayout_6.addWidget(self.EstRange, 8, 0, 1, 1)
-        self.WhmiInstantaneous = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.WhmiInstantaneous.setObjectName("WhmiInstantaneous")
-        self.gridLayout_6.addWidget(self.WhmiInstantaneous, 0, 0, 1, 1)
-        self.TripRegen = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.TripRegen.setObjectName("TripRegen")
-        self.gridLayout_6.addWidget(self.TripRegen, 9, 0, 1, 1)
-        self.WhmiTrip = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.WhmiTrip.setObjectName("WhmiTrip")
-        self.gridLayout_6.addWidget(self.WhmiTrip, 1, 0, 1, 1)
-        self.pushButton = QtWidgets.QPushButton(self.RangeBox_2)
-        self.pushButton.setGeometry(QtCore.QRect(260, 60, 241, 71))
-        self.pushButton.setObjectName("pushButton")
-        self.StatusGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.StatusGroupBox.setGeometry(QtCore.QRect(10, 10, 521, 711))
+        self.TripBoxGrid = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
+        self.TripBoxGrid.setContentsMargins(0, 0, 0, 0)
+        self.TripBoxGrid.setObjectName("TripBoxGrid")
+        self.Trip_1_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_1_2.setObjectName("Trip_1_2")
+        self.TripBoxGrid.addWidget(self.Trip_1_2, 0, 1, 1, 1)
+        self.Trip_1_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
         font = QtGui.QFont()
-        font.setFamily("Mistral")
-        font.setPointSize(100)
-        font.setStyleStrategy(QtGui.QFont.PreferDefault)
-        self.StatusGroupBox.setFont(font)
-        self.StatusGroupBox.setStyleSheet("QLabel{\n"
-"font: 80pt \'Mistral\'}")
-        self.StatusGroupBox.setTitle("")
-        self.StatusGroupBox.setFlat(False)
-        self.StatusGroupBox.setCheckable(False)
-        self.StatusGroupBox.setObjectName("StatusGroupBox")
-        self.gridLayoutWidget_2 = QtWidgets.QWidget(self.StatusGroupBox)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(10, 60, 501, 641))
-        self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
-        self.gridLayout_2 = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
-        self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_2.setSpacing(0)
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.VoltageDrop = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.VoltageDrop.setObjectName("VoltageDrop")
-        self.gridLayout_2.addWidget(self.VoltageDrop, 2, 0, 1, 1)
-        self.BatterySOC = QtWidgets.QLabel(self.gridLayoutWidget_2)
-        self.BatterySOC.setObjectName("BatterySOC")
-        self.gridLayout_2.addWidget(self.BatterySOC, 1, 0, 1, 1)
-        self.Time = QtWidgets.QLabel(self.gridLayoutWidget_2)
+        font.setFamily("Arial")
+        font.setPointSize(40)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.Trip_1_1.setFont(font)
+        self.Trip_1_1.setObjectName("Trip_1_1")
+        self.TripBoxGrid.addWidget(self.Trip_1_1, 0, 0, 1, 1)
+        self.Trip_2_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_1.setObjectName("Trip_2_1")
+        self.TripBoxGrid.addWidget(self.Trip_2_1, 1, 0, 1, 1)
+        self.Trip_2_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_3.setObjectName("Trip_2_3")
+        self.TripBoxGrid.addWidget(self.Trip_2_3, 5, 1, 1, 1)
+        self.Trip_1_4 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_1_4.setObjectName("Trip_1_4")
+        self.TripBoxGrid.addWidget(self.Trip_1_4, 6, 0, 1, 1)
+        self.Trip_2_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_2.setObjectName("Trip_2_2")
+        self.TripBoxGrid.addWidget(self.Trip_2_2, 1, 1, 1, 1)
+        self.Trip_2_4 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_4.setObjectName("Trip_2_4")
+        self.TripBoxGrid.addWidget(self.Trip_2_4, 6, 1, 1, 1)
+        self.Trip_1_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_1_3.setObjectName("Trip_1_3")
+        self.TripBoxGrid.addWidget(self.Trip_1_3, 5, 0, 1, 1)
+        self.Trip_3_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_1.setObjectName("Trip_3_1")
+        self.TripBoxGrid.addWidget(self.Trip_3_1, 0, 2, 1, 1)
+        self.Trip_3_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_2.setObjectName("Trip_3_2")
+        self.TripBoxGrid.addWidget(self.Trip_3_2, 1, 2, 1, 1)
+        self.Trip_3_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_3.setObjectName("Trip_3_3")
+        self.TripBoxGrid.addWidget(self.Trip_3_3, 5, 2, 1, 1)
+        self.Trip_3_4 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_4.setObjectName("Trip_3_4")
+        self.TripBoxGrid.addWidget(self.Trip_3_4, 6, 2, 1, 1)
+        self.TripReset = QtWidgets.QPushButton(self.TripBox)
+        self.TripReset.setGeometry(QtCore.QRect(910, 30, 161, 71))
+        font = QtGui.QFont()
+        font.setPointSize(-1)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.TripReset.setFont(font)
+        self.TripReset.setStyleSheet("")
+        self.TripReset.setIconSize(QtCore.QSize(12, 16))
+        self.TripReset.setObjectName("TripReset")
+        self.Trip_Selector_1 = QtWidgets.QPushButton(self.TripBox)
+        self.Trip_Selector_1.setGeometry(QtCore.QRect(290, 10, 121, 111))
+        font = QtGui.QFont()
+        font.setFamily("Impactt")
+        font.setPointSize(-1)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.Trip_Selector_1.setFont(font)
+        self.Trip_Selector_1.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 100px;\n"
+"    font-family: \"Impactt\";\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 6px;\n"
+"    border-radius:50px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        self.Trip_Selector_1.setCheckable(True)
+        self.Trip_Selector_1.setChecked(False)
+        self.Trip_Selector_1.setObjectName("Trip_Selector_1")
+        self.Trip_Selector_2 = QtWidgets.QPushButton(self.TripBox)
+        self.Trip_Selector_2.setGeometry(QtCore.QRect(440, 10, 121, 111))
+        font = QtGui.QFont()
+        font.setFamily("Impactt")
+        font.setPointSize(-1)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.Trip_Selector_2.setFont(font)
+        self.Trip_Selector_2.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 100px;\n"
+"    font-family: \"Impactt\";\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 6px;\n"
+"    border-radius:50px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        self.Trip_Selector_2.setCheckable(True)
+        self.Trip_Selector_2.setChecked(False)
+        self.Trip_Selector_2.setObjectName("Trip_Selector_2")
+        self.Trip_Selector_3 = QtWidgets.QPushButton(self.TripBox)
+        self.Trip_Selector_3.setGeometry(QtCore.QRect(590, 10, 121, 111))
+        font = QtGui.QFont()
+        font.setFamily("Impactt")
+        font.setPointSize(-1)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.Trip_Selector_3.setFont(font)
+        self.Trip_Selector_3.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 100px;\n"
+"    font-family: \"Impactt\";\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 6px;\n"
+"    border-radius:50px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        self.Trip_Selector_3.setCheckable(True)
+        self.Trip_Selector_3.setChecked(False)
+        self.Trip_Selector_3.setObjectName("Trip_Selector_3")
+        self.Trip_Selector_4 = QtWidgets.QPushButton(self.TripBox)
+        self.Trip_Selector_4.setGeometry(QtCore.QRect(740, 10, 121, 111))
+        font = QtGui.QFont()
+        font.setFamily("Impactt")
+        font.setPointSize(-1)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.Trip_Selector_4.setFont(font)
+        self.Trip_Selector_4.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 100px;\n"
+"    font-family: \"Impactt\";\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 6px;\n"
+"    border-radius:50px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        self.Trip_Selector_4.setCheckable(True)
+        self.Trip_Selector_4.setChecked(False)
+        self.Trip_Selector_4.setObjectName("Trip_Selector_4")
+        self.FaultReset = QtWidgets.QPushButton(self.centralwidget)
+        self.FaultReset.setGeometry(QtCore.QRect(1020, 550, 131, 71))
+        font = QtGui.QFont()
+        font.setPointSize(-1)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.FaultReset.setFont(font)
+        self.FaultReset.setIconSize(QtCore.QSize(12, 16))
+        self.FaultReset.setObjectName("FaultReset")
+        self.ProfileRb1Label = QtWidgets.QLabel(self.centralwidget)
+        self.ProfileRb1Label.setGeometry(QtCore.QRect(80, 1000, 41, 127))
         font = QtGui.QFont()
         font.setFamily("Mistral")
         font.setPointSize(80)
+        self.ProfileRb1Label.setFont(font)
+        self.ProfileRb1Label.setObjectName("ProfileRb1Label")
+        self.ProfileRb2Label = QtWidgets.QLabel(self.centralwidget)
+        self.ProfileRb2Label.setGeometry(QtCore.QRect(250, 1000, 43, 127))
+        font = QtGui.QFont()
+        font.setFamily("Mistral")
+        font.setPointSize(80)
+        self.ProfileRb2Label.setFont(font)
+        self.ProfileRb2Label.setObjectName("ProfileRb2Label")
+        self.ProfileRb3Label = QtWidgets.QLabel(self.centralwidget)
+        self.ProfileRb3Label.setGeometry(QtCore.QRect(420, 1000, 41, 127))
+        font = QtGui.QFont()
+        font.setFamily("Mistral")
+        font.setPointSize(80)
+        self.ProfileRb3Label.setFont(font)
+        self.ProfileRb3Label.setObjectName("ProfileRb3Label")
+        self.BatteryVoltageBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.BatteryVoltageBar.setGeometry(QtCore.QRect(720, 490, 441, 51))
+        self.BatteryVoltageBar.setMinimum(52)
+        self.BatteryVoltageBar.setMaximum(89)
+        self.BatteryVoltageBar.setProperty("value", 52)
+        self.BatteryVoltageBar.setTextVisible(False)
+        self.BatteryVoltageBar.setOrientation(QtCore.Qt.Horizontal)
+        self.BatteryVoltageBar.setObjectName("BatteryVoltageBar")
+        self.BatteryVoltageLabel = QtWidgets.QLabel(self.centralwidget)
+        self.BatteryVoltageLabel.setGeometry(QtCore.QRect(720, 410, 211, 80))
+        font = QtGui.QFont()
+        font.setFamily("Impact")
+        font.setPointSize(50)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.BatteryVoltageLabel.setFont(font)
+        self.BatteryVoltageLabel.setStyleSheet("QLabel{\n"
+"    font: 50pt \"Impact\";\n"
+"}")
+        self.BatteryVoltageLabel.setObjectName("BatteryVoltageLabel")
+        self.MotorTemperatureBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.MotorTemperatureBar.setGeometry(QtCore.QRect(720, 360, 441, 51))
+        self.MotorTemperatureBar.setMaximum(110)
+        self.MotorTemperatureBar.setProperty("value", 75)
+        self.MotorTemperatureBar.setTextVisible(False)
+        self.MotorTemperatureBar.setOrientation(QtCore.Qt.Horizontal)
+        self.MotorTemperatureBar.setObjectName("MotorTemperatureBar")
+        self.MotorTemperatureLabel = QtWidgets.QLabel(self.centralwidget)
+        self.MotorTemperatureLabel.setGeometry(QtCore.QRect(720, 280, 421, 80))
+        font = QtGui.QFont()
+        font.setFamily("Impact")
+        font.setPointSize(50)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.MotorTemperatureLabel.setFont(font)
+        self.MotorTemperatureLabel.setStyleSheet("QLabel{\n"
+"    font: 50pt \"Impact\";\n"
+"}")
+        self.MotorTemperatureLabel.setObjectName("MotorTemperatureLabel")
+        self.BatterySOCBar = QtWidgets.QProgressBar(self.centralwidget)
+        self.BatterySOCBar.setGeometry(QtCore.QRect(720, 630, 441, 51))
+        self.BatterySOCBar.setMaximum(100)
+        self.BatterySOCBar.setProperty("value", 75)
+        self.BatterySOCBar.setTextVisible(False)
+        self.BatterySOCBar.setOrientation(QtCore.Qt.Horizontal)
+        self.BatterySOCBar.setObjectName("BatterySOCBar")
+        self.BatterySOCLabel = QtWidgets.QLabel(self.centralwidget)
+        self.BatterySOCLabel.setGeometry(QtCore.QRect(720, 550, 291, 81))
+        font = QtGui.QFont()
+        font.setFamily("Impact")
+        font.setPointSize(50)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.BatterySOCLabel.setFont(font)
+        self.BatterySOCLabel.setStyleSheet("QLabel{\n"
+"    font: 50pt \"Impact\";\n"
+"}")
+        self.BatterySOCLabel.setObjectName("BatterySOCLabel")
+        self.Time = QtWidgets.QLabel(self.centralwidget)
+        self.Time.setGeometry(QtCore.QRect(720, 10, 451, 151))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(60)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
         self.Time.setFont(font)
+        self.Time.setAlignment(QtCore.Qt.AlignCenter)
         self.Time.setObjectName("Time")
-        self.gridLayout_2.addWidget(self.Time, 0, 0, 1, 1)
-        self.FaultCodes = QtWidgets.QLabel(self.gridLayoutWidget_2)
+        self.LockButton = QtWidgets.QPushButton(self.centralwidget)
+        self.LockButton.setGeometry(QtCore.QRect(1060, 160, 101, 111))
         font = QtGui.QFont()
-        font.setFamily("Mistral")
-        font.setPointSize(80)
+        font.setFamily("tt-icon-font")
+        font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
-        self.FaultCodes.setFont(font)
-        self.FaultCodes.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.FaultCodes.setTextFormat(QtCore.Qt.PlainText)
-        self.FaultCodes.setObjectName("FaultCodes")
-        self.gridLayout_2.addWidget(self.FaultCodes, 3, 0, 1, 1)
+        self.LockButton.setFont(font)
+        self.LockButton.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 120px;\n"
+"    font-family: \"tt-icon-font\";\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 6px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        self.LockButton.setIconSize(QtCore.QSize(16, 16))
+        self.LockButton.setCheckable(True)
+        self.LockButton.setObjectName("LockButton")
+        self.BatteryVoltageDropLabel = QtWidgets.QLabel(self.centralwidget)
+        self.BatteryVoltageDropLabel.setGeometry(QtCore.QRect(940, 410, 221, 80))
+        font = QtGui.QFont()
+        font.setFamily("Impact")
+        font.setPointSize(50)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.BatteryVoltageDropLabel.setFont(font)
+        self.BatteryVoltageDropLabel.setStyleSheet("QLabel{\n"
+"    font: 50pt \"Impact\";\n"
+"}")
+        self.BatteryVoltageDropLabel.setObjectName("BatteryVoltageDropLabel")
+        self.CheckEngineButton = QtWidgets.QPushButton(self.centralwidget)
+        self.CheckEngineButton.setGeometry(QtCore.QRect(720, 160, 121, 111))
+        font = QtGui.QFont()
+        font.setFamily("tt-icon-font")
+        font.setPointSize(-1)
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.CheckEngineButton.setFont(font)
+        self.CheckEngineButton.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 120px;\n"
+"    font-family: \"tt-icon-font\";\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 6px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        self.CheckEngineButton.setCheckable(True)
+        self.CheckEngineButton.setChecked(False)
+        self.CheckEngineButton.setObjectName("CheckEngineButton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1872, 21))
@@ -392,25 +641,40 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.profileGroup.setTitle(_translate("MainWindow", "Profiles"))
-        self.ProfileRb1Label.setText(_translate("MainWindow", "1"))
-        self.ProfileRb3Label.setText(_translate("MainWindow", "3"))
-        self.ProfileRb2Label.setText(_translate("MainWindow", "2"))
         self.AssistBox.setTitle(_translate("MainWindow", "Assist: #"))
         self.SpeedGaugeLabel.setText(_translate("MainWindow", "88"))
         self.SpeedGaugeLabelUnits.setText(_translate("MainWindow", "mph"))
         self.PowerGaugeLabel.setText(_translate("MainWindow", "24.00"))
-        self.label.setText(_translate("MainWindow", "kW"))
+        self.PowerGaugeLabelUnits.setText(_translate("MainWindow", "kW"))
         self.RangeBox.setTitle(_translate("MainWindow", "Range: #"))
-        self.RangeBox_2.setTitle(_translate("MainWindow", "Trip"))
-        self.TripDistance.setText(_translate("MainWindow", "Trip Distance"))
-        self.EstRange.setText(_translate("MainWindow", "Estimated Range (Trip Wh/mi & SOC)"))
-        self.WhmiInstantaneous.setText(_translate("MainWindow", "Instantaneous Wh/mi"))
-        self.TripRegen.setText(_translate("MainWindow", "Trip %Regen (wh / negative wh"))
-        self.WhmiTrip.setText(_translate("MainWindow", "Trip Wh/mi"))
-        self.pushButton.setText(_translate("MainWindow", "RESET"))
-        self.VoltageDrop.setText(_translate("MainWindow", "Voltage Drop "))
-        self.BatterySOC.setText(_translate("MainWindow", "Battery SOC"))
+        self.TripBox.setTitle(_translate("MainWindow", "Trip"))
+        self.Trip_1_2.setText(_translate("MainWindow", "Trip Regen"))
+        self.Trip_1_1.setText(_translate("MainWindow", "Trip Distance"))
+        self.Trip_2_1.setText(_translate("MainWindow", "Trip Wh/mi"))
+        self.Trip_2_3.setText(_translate("MainWindow", "Estimated Range "))
+        self.Trip_1_4.setText(_translate("MainWindow", "Estimated Range "))
+        self.Trip_2_2.setText(_translate("MainWindow", "Instant Wh/mi"))
+        self.Trip_2_4.setText(_translate("MainWindow", "Estimated Range "))
+        self.Trip_1_3.setText(_translate("MainWindow", "Estimated Range "))
+        self.Trip_3_1.setText(_translate("MainWindow", "Trip Regen"))
+        self.Trip_3_2.setText(_translate("MainWindow", "Trip Regen"))
+        self.Trip_3_3.setText(_translate("MainWindow", "Trip Regen"))
+        self.Trip_3_4.setText(_translate("MainWindow", "Trip Regen"))
+        self.TripReset.setText(_translate("MainWindow", "RST"))
+        self.Trip_Selector_1.setText(_translate("MainWindow", "1"))
+        self.Trip_Selector_2.setText(_translate("MainWindow", "2"))
+        self.Trip_Selector_3.setText(_translate("MainWindow", "3"))
+        self.Trip_Selector_4.setText(_translate("MainWindow", "4"))
+        self.FaultReset.setText(_translate("MainWindow", "RST"))
+        self.ProfileRb1Label.setText(_translate("MainWindow", "123"))
+        self.ProfileRb2Label.setText(_translate("MainWindow", "2"))
+        self.ProfileRb3Label.setText(_translate("MainWindow", "3"))
+        self.BatteryVoltageLabel.setText(_translate("MainWindow", "V: 88.2"))
+        self.MotorTemperatureLabel.setText(_translate("MainWindow", "MotTemp"))
+        self.BatterySOCLabel.setText(_translate("MainWindow", "SOC:"))
         self.Time.setText(_translate("MainWindow", "Time of day"))
-        self.FaultCodes.setText(_translate("MainWindow", "Fault Codes"))
+        self.LockButton.setText(_translate("MainWindow", "<"))
+        self.BatteryVoltageDropLabel.setText(_translate("MainWindow", "<html><head/><body><p>V<span style=\" vertical-align:sub;\">d</span>: -8.5</p></body></html>"))
+        self.CheckEngineButton.setText(_translate("MainWindow", "W"))
 from analoggaugewidget import AnalogGaugeWidget
 import ampy_rc
