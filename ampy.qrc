@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="root">
+    <file>icon_charged.png</file>
+    <file>reset.png</file>
     <file>L.png</file>
     <file>R.png</file>
     <file>radio_off.png</file>

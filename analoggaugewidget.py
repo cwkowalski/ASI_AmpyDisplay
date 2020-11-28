@@ -142,10 +142,12 @@ class AnalogGaugeWidget(QWidget):
         self.font = QFont('Decorative', 20)
 
         self.scale_polygon_colors = []
-        self.set_scale_polygon_colors([[.00, Qt.red],
-                                     [.1, Qt.yellow],
-                                     [.15, Qt.green],
-                                     [1, Qt.transparent]])
+        ############################################### Edited for grayscale
+        self.set_scale_polygon_colors([[0.00, Qt.black], [1, Qt.black]])
+        #self.set_scale_polygon_colors([[.00, Qt.red],
+        #                             [.1, Qt.yellow],
+        #                             [.15, Qt.green],
+        #                             [1, Qt.transparent]])
 
         # initialize Scale value text
         # self.enable_scale_text = True
@@ -540,7 +542,7 @@ class AnalogGaugeWidget(QWidget):
 
         # my_painter.setPen(Qt.NoPen)
         self.pen = QPen(QColor(0, 0, 0, 255))
-        self.pen.setWidth(2)
+        self.pen.setWidth(5)
         # # if outline_pen_with > 0:
         my_painter.setPen(self.pen)
 
@@ -569,7 +571,8 @@ class AnalogGaugeWidget(QWidget):
         pen_shadow.setBrush(self.ScaleValueColor)
         painter.setPen(pen_shadow)
 
-        text_radius_factor = 0.8
+        #text_radius_factor = 0.8 ################### This line was the reason self.text_radius_factor did nothing.
+        text_radius_factor = self.text_radius_factor
         text_radius = self.widget_diameter/2 * text_radius_factor
 
         scale_per_div = int((self.value_max - self.value_min) / self.scala_main_count)
@@ -597,7 +600,8 @@ class AnalogGaugeWidget(QWidget):
         # Koordinatenursprung in die Mitte der Flaeche legen
         my_painter.translate(self.width() / 2, self.height() / 2)
 
-        my_painter.setPen(Qt.black)
+        #my_painter.setPen(Qt.black)
+        my_painter.setPen(QPen(Qt.black, 3, Qt.SolidLine))
         my_painter.rotate(self.scale_angle_start_value - self.angle_offset)
         steps_size = (float(self.scale_angle_size) / float(self.scala_main_count * self.scala_subdiv_count))
         scale_line_outer_start = self.widget_diameter/2
@@ -665,7 +669,7 @@ class AnalogGaugeWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         # Koordinatenursprung in die Mitte der Flaeche legen
         painter.translate(self.width() / 2, self.height() / 2)
-        painter.setPen(Qt.NoPen)
+        painter.setPen(QPen(Qt.black, 7, Qt.SolidLine))
         painter.setBrush(self.NeedleColor)
         painter.rotate(((self.value - self.value_offset - self.value_min) * self.scale_angle_size /
                         (self.value_max - self.value_min)) + 90 + self.scale_angle_start_value)
