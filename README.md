@@ -40,4 +40,4 @@ Key display elements:
 
 Users can easily construct or theme the existing .ui file using Qt Designer standalone gui application, and pyuic5 command-line converter (e.g. >pyuic5 ampy.ui -o ampy.py) to draw from these existing widgets as desired for any type of display.
 
-Currently Battery Ah, Wh, number of series groups, state-of-charge map if not using Li-NCA or similar Lithium chemistry, and wheel circumference attributes need to be specified in the beginning __init__ of AppWindow in Main to function properly for various configurations.
+Currently Battery Ah, Wh, number of series groups, state-of-charge map if not using Li-NCA or similar Lithium chemistry, and wheel circumference attributes should be specified in the beginning __init__ of AppWindow in Main for your configuration. Eventually these will be specified in a setup.csv for for easier initial setup.
