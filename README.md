@@ -9,28 +9,28 @@ Key display elements:
 1. Time of day
 2. Battery SOC -- derived from Simpsons-integrated Ah, and reset with the battery charge button after charging from a cubic fit of a high-resolution voltage:state-of-charge array that can be swapped out for different chemistries. 
 4. Controller fault codes -- Check controller button appears when fault is detected, that creates popup to check and optionally clear fault codes. 
-5. Trip statistics:
+5. Trip statistics -- Optionally a trip selector button can be enabled to switch labels between various combinations of the following parameters:
   Instantaneous Wh/mi
-  Average Wh/mi
-  Wh used
-  Wh remaining
-  Amp-hours used
-  Amp-hours remaining
-  Regenerative braking Wh gained
-  Regenerative braking Ah gained
-  Distance
-  Range remaining
-  Total trip time
-  Moving time
-  Average moving speed
-  Max current
-  Minimum voltage
-  Max motor temperature
-  Battery internal resistance
-  Lifetime battery cycles
-  Lifetime Ah discharged
-  Lifetime Wh discharged
-  Lifetime distance
+  |Average Wh/mi
+  |Wh used
+  |Wh remaining
+  |Amp-hours used
+  |Amp-hours remaining
+  |Regenerative braking Wh gained
+  |Regenerative braking Ah gained
+  |Distance
+  |Range remaining
+  |Total trip time
+  |Moving time
+  |Average moving speed
+  |Max current
+  |Minimum voltage
+  |Max motor temperature
+  |Battery internal resistance
+  |Lifetime battery cycles
+  |Lifetime Ah discharged
+  |Lifetime Wh discharged
+  |Lifetime distance
 6. Speed gauge (mph default, analog gauge + text)
 7. Power gauge (kW, analog gauge + text)
 8. Minimum range slider -- Enable and drag to minimum miles of range needed, to enable a PID control loop that will limit maximum battery current when instantaneous Wh/mi exceeds what would be required for minimum range. This limit is recalculated and updated in <20 milliseconds intervals.
