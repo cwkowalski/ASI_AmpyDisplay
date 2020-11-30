@@ -10,8 +10,8 @@ import serial
 import modbus_tk
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
-from scipy import interpolate as interp
-from numpy import trapz, seterr, mean, errstate, divide, array, array2string
+from scipy import integrate as integrate
+from numpy import trapz, seterr, mean, errstate, divide, ndarray, array, prod, array2string
 import logging
 import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
@@ -20,6 +20,12 @@ Process = psutil.Process(os.getpid())
 
 
 # KNOWN ISSUES / TO IMPLEMENT
+# In order to accurately integrate distance, will have to use RPM instead of speed. Thus, need to program wheel diam.
+# BAC original programmed wheel diameter:367mm?! this was tune with gps!?
+# Meaured circumference: 75.875" or 1927.225mm
+# Actual diameter: 613.454770401mm
+# Consider making a setup.csv for wheel diameter, battwh, battah, etc
+
 # Can fit at least 5, perhaps 6 rows in Trip window with current Magneto profile.
 
 # Keeps crashing with too many gui updates, failing paint events. Perhaps, need to move the floop slot to
@@ -91,21 +97,29 @@ class AppWindow(QtWidgets.QMainWindow):
         self.message = {}
         self.profile = 0
         self.battseries = 21
-        self.battwh = 3000
+        self.battwh = 3000  # Consider remove-- depends on voltage! Est remaining from ah/SOC.
+                            # 0.2C of 30Q; 11Wh; 10amp, 10.1Wh.
         self.battah = 42
-        self.trip_batt_volts = float(0)  # Mean(batt_volts[-N:]) slice
-        self.batt_max_volts = float(0)   # Max(batt.volts[-N:]) slice, IF slice > current value.
-        self.batt_min_volts = float(0)   # Min(batt.volts[-N:]) slice, IF slice < current value.
-        self.batt_vdrop = float(0)       # Rolling calc of trip_batt_volts - batt_min_volts
+        self.wheelcircum = 1927.225  # In mm
+        #self.trip_batt_volts = float(0)  # Mean(batt_volts[-N:]) slice
+        #self.batt_max_volts = float(0)   # Max(batt.volts[-N:]) slice, IF slice > current value.
+        #self.batt_min_volts = float(0)   # Min(batt.volts[-N:]) slice, IF slice < current value.
+        #self.batt_vdrop = float(0)       # Rolling calc of trip_batt_volts - batt_min_volts
 
         # self.motor_temp = float(0)  # self.floop['Motor_Temperature']
-        self.trip_motor_amps = float(0)
-        #self.batt_volts, self.batt_amps, self.motor_amps, self.motor_temp, self.speed = [], [], [], [], []
-        self.batt_volts = []
-        self.batt_amps = []
-        self.motor_amps = []
-        self.motor_temp = []
-        self.soc = []                      # Not needed...?
+        # For floop_to_list
+        self.batt_amps, self.batt_volts, self.motor_amps, self.motor_temp, self.speed, self.motor_rpm, self.floop_interval = \
+            [], [], [], [], [], [], []
+        # self.batt_amps, self.batt_volts = array(), array()  # Need array for power product
+        # For floop_process
+        self.trip_batt_volts, self.batt_max_volts, self.batt_min_volts, self.batt_vdrop, self.trip_motor_amps, \
+        self.trip_soc, self.trip_range, self.trip_range_limit, self.inst_whmi, self.trip_whmi, self.trip_dist, \
+        self.trip_wh, self.trip_ah, self.trip_whregen, self.trip_ahregen, = \
+        float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0),\
+        float(0), float(0), float(0), float(0), float(0), float(0), float(0)
+        # For floop_process
+        self.interp_interval = []
+
         self.trip_soc = float(0)           # Generate from (Wh used - total wh)/total_wh
         self.trip_range = float(0)         # Generate from (Wh used - total wh) / trip_whmi
         self.trip_range_limit = float(0)   # Set value with Range slider. Set range slider range to ~3x .trip_range
@@ -128,37 +142,34 @@ class AppWindow(QtWidgets.QMainWindow):
         # Kd = 0.5*dead time
         # Positive motoring torque ramp = 100ms (6.25 cycles)
 
-
-        self.inst_whmi = float(0)          # Generate from interp(v*a, interp_interval) each prepare_gui
-        self.trip_whmi = float(0)          # Generate from wh used, distance each prepare_gui
-        self.dist = []
-        self.trip_dist = float(1)          # Generate from interp(pop(self.dist), self.interp_interval) each prepare_gui
-        self.trip_wh = float(0)            # += from positive interp(pop(batt_volts)*pop(batt_amps), interp_interval)
-        self.trip_ah = float(0)            # += from positive interp(pop(batt_amps), interp_interval
-        self.trip_whregen = float(0)       # First subdivide the volt*amps X interval array into pos/neg segments
+        #self.inst_whmi = float(0)          # Generate from interp(v*a, interp_interval) each prepare_gui
+        #self.trip_whmi = float(0)          # Generate from wh used, distance each prepare_gui
+        #self.dist = []
+        #self.trip_dist = float(1)          # Generate from interp(pop(self.dist), self.interp_interval) each prepare_gui
+        #self.trip_wh = float(0)            # += from positive interp(pop(batt_volts)*pop(batt_amps), interp_interval)
+        #self.trip_ah = float(0)            # += from positive interp(pop(batt_amps), interp_interval
+        #self.trip_whregen = float(0)       # First subdivide the volt*amps X interval array into pos/neg segments
                                            # before interp, to accurately catch regen current (60 cycles = 1 sec
-        self.trip_ahregen = float(0)
+        #self.trip_ahregen = float(0)
 
-        self.trip_floop_interval = []      # Pop and sum values into self.interp_interval each prepare_gui
+        #self.trip_floop_interval = []      # Pop and sum values into self.interp_interval each prepare_gui
         self.start_time = self.ms()
         self.time1 = self.ms()
         self.time2 = None
-        self.floop_interval = None
-        self.interp_interval = None
-        # self.floop_interval_hours = None
 
         self.exceptions = 0
-        self.iterator_floop = 0
-        self.iterator_gui_refresh = 0
+        self.iter_attribute_slicer = 0
+        self.iter = 0
         self.trip_selector = 1
         self.trip_selected = True
         self.gui_dict = {}
-        self.mean_length = 90000
+        self.mean_length = 18750  # Average trip_ floats over last 5 minutes (300s / 16ms)
+                                  # trip_wh, trip_ah, trip_soc, trip_range based on cumulative integrals instead
         # Set up the GUI
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         #self.ui.FaultCodes.setFont(QtGui.QFont('Arial', 30))  # No effect?
-
+        self.ui.BatterySOCReset.clicked.connect(self.socreset)
         self.ui.PID_Kp_Slider.valueChanged.connect(lambda: self.pid_tuner_update(self.ui.PID_Kp_Slider.value(),
                                                                     self.ui.PID_Ki_Slider.value(),
                                                                     self.ui.PID_Kd_Slider.value()))
@@ -239,14 +250,15 @@ class AppWindow(QtWidgets.QMainWindow):
         if self.trip_range_bool:
             self.trip_range_limiter()
         #print('Time: {}, Memory: {}, SOC: {}, Wh: {}, Battvolt: {}, MotAmps: {}, Dist: {}, Itercount: {}, Faults: {}'.format(
-        #        (self.floop_interval), Process.memory_info()[0], self.trip_soc, self.trip_wh, self.trip_batt_volts,
-        #        self.trip_motor_amps, self.trip_dist, self.iterator_floop, self.floop['Faults']))  # self.time1 - self.start_time for time-since-start
-        if self.iterator_floop >= 20:
+        #        (self.floop_interval[-1:]), Process.memory_info()[0], self.trip_soc, self.trip_wh, self.trip_batt_volts,
+        #        self.trip_motor_amps, self.trip_dist, self.iter, self.floop['Faults']))  # self.time1 - self.start_time for time-since-start
+        if self.iter_attribute_slicer >= 37500:  # Every 10 minutes, cut lists to last 5 minutes.
             self.attribute_slicer()
-        if self.iterator_gui_refresh >= 19:
+        if self.iter >= 19: # Ideally an odd number to pass even number of *intervals* to Simpsons quadratic integrator
+            self.floop_process()
             self.prepare_gui()
             self.update_gui()
-            self.iterator_gui_refresh = 0
+            self.iter = 0
         ##################
         # Message indices:
         # [0] = 258 = Faults
@@ -259,57 +271,74 @@ class AppWindow(QtWidgets.QMainWindow):
         # [7] = 265 = Battery_Voltage
         # [8] = 266 = Battery_Current
 
+    def floop_process(self):
+        # Prepare floop list data for Simpsons-method quadratic integration
+        self.interp_interval.append(sum(self.floop_interval[-self.iter:]))  # May not be needed
+        ## X interval needs to be sequential sums of slice!!
+        #l2 = [l1[:i] for i in range(1, 9, 1)]
+        #[sum(l2[i]) for i in range(len(l2))]
+        # times = self.floop_interval[-self.iter:]  # Slice of last .iter time intervals
+        # cumulative_times = [times[:i] for i in range(1, self.iter + 1, 1)]  # list of times from 1st to .iter for each time
+        # x_interval = array([sum(cumulative_times[i]) for i in range(19)])  # For each list, sum times
+        x_interval = array([sum(([(self.floop_interval[-self.iter:])[:i] for i in range(1, self.iter + 1, 1)])
+                                [i]) for i in range(self.iter)])  # calc cumulative time from list of intervals
+        #x_interval = array(self.floop_interval[-self.iter:])
 
-    def floop_to_list(self): # Make short function which iterates floop into attribute lists, then calcs other list attributes.
-        self.soc.append(BAC.socmapper((self.floop['Battery_Voltage'] / self.battseries)))
-        self.batt_volts.append(self.floop['Battery_Voltage'])
-        self.motor_amps.append(self.floop['Motor_Current'])
-        y_speed = [self.lastfloop['Vehicle_Speed'] * 0.621371192,
-                   self.floop['Vehicle_Speed'] * 0.621371192]
-        y_power = [self.lastfloop['Battery_Voltage'] * self.lastfloop['Motor_Current'],  # Removed /3600 from current
-                   self.floop['Battery_Voltage'] * self.floop['Motor_Current']]  # Switch to battery after testing
-        distance = (trapz(y_speed, x=None, dx=self.floop_interval))
-        # self.dist.append(distance)
+        #y_speed = array(self.speed[-self.iter:])
+        y_revsec = array([(self.motor_rpm[-self.iter:])[i]/60 for i in range(self.iter)])  # revolutions per second
+        # Integrate distance fromm speed and increment distance counter
+        revolutions = integrate.simps(y_revsec, x=x_interval, even='avg')
+        distance = (revolutions*self.wheelcircum)/(1609344)  ## miles
         self.trip_dist += distance
-        wattsec = trapz(y_power, x=None, dx=self.floop_interval) # Consider update less often, from averages?
-                                                                # Currently ~0.5% accuracy due to float rounding
+        ##### CALCULATE SPEED FROM RPM FOR ACCURACY! Currently using miles per hour as miles per second.
+        # Speed = revolutions per minute * 60 * 1927.225 = mm/H: (mm/H)/1609344mm/Mi = mi/H
+        # Integrate revolutions/second --> revolutions.
+        # (Revolutions * 1927.225) = mm traveled. /1609344 mm/mile --> miles.
+
+        # y_power = self.batt_volts[-self.iter:] * self.batt_amps[-self.iter:]  # Use numpy.Array!
+        array_volts, array_amps = array(self.batt_volts[-self.iter:]), array(self.motor_amps[-self.iter:])
+        y_power = [prod(array_volts[i]*array_amps[i]) for i in range(self.iter)]
+        y_current = array(self.batt_amps[-self.iter:])
+
+        # Integrate watt-seconds from speed and increment watt-hour counter
+        wattsec = integrate.simps(y_power, x=x_interval, even='avg')
         if wattsec >= 0:
-            self.trip_wh += wattsec / 3600 # 60x60 = Watt-hour
+            self.trip_wh += wattsec / 3600  # /(60x60) = Watt-hour
         elif wattsec < 0:
-            # self.trip_wh += wattsec / 3600  # This line will reduce used Wh by regen value
+            self.trip_wh += wattsec / 3600  # This line will reduce used Wh by regen value
             self.trip_whregen += abs(wattsec)
+        # Integrate amp-seconds from speed and increment amp-hour counter
+        ampsec = integrate.simps(y_current, x=x_interval, even='avg')
+        if ampsec >= 0:
+            self.trip_ah += ampsec / 3600
+        elif ampsec < 0:
+            self.trip_ah += ampsec / 3600
+            self.trip_ahregen += abs(wattsec)
 
-        # seterr(invalid='raise')  # Triggers FloatingPointError with near-zero values
-        # From hereon, generate means from lists:
-        # optionally separate for performance e.g. trip_attributer()?
-
-        with errstate(divide='raise', invalid='raise'):
+        self.trip_soc = ((self.battah - self.trip_ah)/self.battah) * 100  # Percent SOC from Ah (charge)
+        try:
+            self.trip_range = (self.trip_soc * self.battwh) / self.trip_whmi  # Wh for range to account for eff.
+        except ZeroDivisionError:
+            self.trip_range = 0
+        with errstate(divide='raise', invalid='raise'): # Triggers FloatingPointError with near-zero values
             try:  # trip_whmi now float, derived from trip_dist and trip_wh as already set
                 self.trip_whmi = divide(self.trip_wh, self.trip_dist)
             except FloatingPointError:
                 self.trip_whmi = 0
+        # Calculate displayed stats from interval set by self.mean_length (18750 = 5 minutes)
+        self.trip_batt_volts = mean(self.batt_volts[-self.mean_length:])
+        self.batt_max_volts = max(self.batt_volts[-self.mean_length:])  # Float obj not iterable batt_volts
+        self.batt_min_volts = min(self.batt_volts[-self.mean_length:])
+        self.batt_vdrop = self.batt_min_volts - self.batt_max_volts
+        self.trip_motor_amps = mean(self.motor_amps[-self.mean_length:])
 
-        if len(self.soc) < self.mean_length:
-            self.trip_soc = mean(self.soc)
-        else:
-            self.trip_soc = mean(self.soc[-self.mean_length])
-        ##########
-        self.trip_range = (self.trip_soc * self.battwh) / self.trip_whmi
-
-        if len(self.batt_volts) < self.mean_length:
-            self.trip_batt_volts = mean(self.batt_volts)
-            self.batt_max_volts = max(self.batt_volts)
-            self.batt_min_volts = min(self.batt_volts)
-        else:
-            self.trip_batt_volts = mean(self.batt_volts[-self.mean_length:])
-            self.batt_max_volts = max(self.batt_volts[-self.mean_length:]) # Float obj not iterable batt_volts
-            self.batt_min_volts = min(self.batt_volts[-self.mean_length:])
-        self.batt_vdrop = '{:.1f}'.format(self.batt_min_volts - self.batt_max_volts)
-
-        if len(self.motor_amps) < self.mean_length:
-            self.trip_motor_amps = mean(self.motor_amps)
-        else:
-            self.trip_motor_amps = mean(self.motor_amps[-self.mean_length:])
+    def floop_to_list(self): # Make short function which iterates floop into attribute lists, then calcs other list attributes.
+        self.speed.append(self.floop['Vehicle_Speed'] * 0.621371192) # 0.621371192 is Km -> Mph conversion
+        self.motor_temp.append(self.floop['Motor_Temperature'])
+        self.motor_amps.append(self.floop['Motor_Current'])
+        self.batt_volts.append(self.floop['Battery_Voltage'])
+        self.batt_amps.append(self.floop['Battery_Current'])
+        self.motor_rpm.append(self.floop['Motor_RPM'])
 
     def attribute_slicer(self):
         pass
@@ -320,7 +349,7 @@ class AppWindow(QtWidgets.QMainWindow):
         self.gui_dict['MotorTemperatureLabel'] = '{:.0f}'.format(self.floop['Motor_Temperature']) + '\xB0'+'C'  # 'T<sub>M</sub>:' +
         self.gui_dict['MotorTemperatureBar'] = int(self.floop['Motor_Temperature'])
         self.gui_dict['BatteryVoltageLabel'] = '{:.1f}'.format(self.floop['Battery_Voltage']) + '<sub>V</sub>  ' \
-                                               + '<sub>' + self.batt_vdrop + '</sub>'
+                                               + '<sub>' + '{:.1f}'.format(self.batt_vdrop) + '</sub>'
         self.gui_dict['BatteryVoltageBar'] = int(self.floop['Battery_Voltage'])
         #self.gui_dict['BatteryVoltageDropLabel'] = '| ' + self.batt_vdrop
         self.gui_dict['BatterySOCLabel'] = 'SOC: ' + '{:.1f}'.format(self.trip_soc)
@@ -495,17 +524,17 @@ class AppWindow(QtWidgets.QMainWindow):
         if button_bool == True:
             self.trip_selector = command
             self.trip_selected = True
+    def socreset(self):
+        self.trip_ah = self.battah * (1-(0.01*BAC.socmapper(mean(self.batt_volts)/21)))  # battah * SOC used coefficient
     def ms(self):  # function for nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
     def gettime(self):
-        self.iterator_floop += 1
-        self.iterator_gui_refresh += 1
+        self.iter_attribute_slicer += 1
+        self.iter += 1
         self.time2 = self.ms()
-        self.floop_interval = self.time2 - self.time1
-        # self.floop_interval_hours = self.floop_interval
-        self.trip_floop_interval.append(self.floop_interval)
+        self.floop_interval.append(self.time2 - self.time1)
         self.time1 = self.ms()
-        self.lastfloop = self.floop
+        # self.lastfloop = self.floop  # Deprecated
 
 
 class QThreader(QtCore.QThread):

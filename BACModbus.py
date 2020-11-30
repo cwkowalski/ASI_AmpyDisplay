@@ -120,5 +120,3 @@ class BACModbus():
         return procdata
     def socmapper(self, cell_v):
         return float(self.socmap(cell_v))
-
-print('debug')
