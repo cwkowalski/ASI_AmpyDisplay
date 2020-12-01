@@ -103,7 +103,7 @@ class BACModbus():
                 output.append(self.ObdicBit[address][position])
         return output
 
-    def floop_parse(self, rawdata):
+    def floop_parse(self, rawdata):  # Replace with a floop-specific function? Bitflags slow!
         data = []
         labels = []
         procdata = {}
