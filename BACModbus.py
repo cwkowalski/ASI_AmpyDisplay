@@ -35,15 +35,19 @@ class BACModbus():
         self.ObdicBits = {}
         self.RegsDic = {}
 
-        socmap_volts = []
-        socmap_soc = []
+        self.socmap_volts = [] # init as empty array..?
+        self.socmap_soc = []
         reader = csv.reader(open('socmap_ahv.csv', mode='r'))
         for row in reader:
-            socmap_volts.append(float(row[1]))
-            socmap_soc.append(float(row[2]))
-        x = array(socmap_volts)
-        y = array(socmap_soc)
-        self.socmap = interp.interp1d(x, y, kind='cubic')
+            self.socmap_volts.append(float(row[1]))
+            self.socmap_soc.append(float(row[2]))
+        self.socmap_volts = array(self.socmap_volts)
+        self.socmap_soc = array(self.socmap_soc)
+        self.socmap_wh = []
+        for n, val in enumerate(self.socmap_volts):
+            pass
+            #self.socmap_wh.append(self.socmap_volts[])
+        self.socmap = interp.interp1d(self.socmap_volts, self.socmap_soc, kind='cubic')
 
         for parent in Obdic:  # InternalAppEntity/Parameters/ParameterDescription children
             scale = parent.find('Scale').text
@@ -103,7 +107,7 @@ class BACModbus():
                 output.append(self.ObdicBit[address][position])
         return output
 
-    def floop_parse(self, rawdata):  # Replace with a floop-specific function? Bitflags slow!
+    def floop_parse(self, rawdata):  # Parse 'fast-loop' and perhaps other registers-- return bitstrings, scaled values.
         data = []
         labels = []
         procdata = {}

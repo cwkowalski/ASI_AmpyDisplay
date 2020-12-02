@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 from sys import exit
 from os import getpid
 import time
+import datetime
 import BACModbus
 from ampy import Ui_MainWindow
 import serial
@@ -9,7 +10,7 @@ import modbus_tk
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 from scipy import integrate as integrate
-from numpy import mean, isnan, array, prod
+from numpy import mean, isnan, array, prod, argmin, abs
 import logging
 # import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
@@ -69,6 +70,14 @@ Process = psutil.Process(getpid())
 #Time: 0.016000986099243164, Memory: 197459968, SOC: 32.23330976354521, Wh: 302.5084956957796, Battvolt: 74.81587951388889, MotAmps: 0.5220930555555555, Dist: 1.0, Itercount: 1457539, Faults: []
 #Time: 0.016033172607421875, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.50876641214126, Battvolt: 74.81587916666666, MotAmps: 0.5220944444444444, Dist: 1.0, Itercount: 1457540, Faults: []
 
+#SOC rundown test, while polling;
+#12:25 AM
+# 38.7% SOC (16.2567Ahrem)
+#9:46 AM
+#37.4% SOC (15.7276Ahrem
+# 0.134974971 percent SOC per hour
+# 0.056689306 AH/H
+# 4.32681378 Watt-hours/H
 # ~5.14285714 watts idle controller power not detected by shunt-- factor into mileage?
 
 # Self. vars used only for labels should be updated as formatted string, instead of np_float64's.
@@ -86,18 +95,20 @@ BAC = BACModbus.BACModbus()
 # sys.stdout = orig_stdout
 # f.close()
 
-class AppWindow(QtWidgets.QMainWindow):
+class AmpyDisplay(QtWidgets.QMainWindow):
     workmsg = QtCore.pyqtSignal(int)
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # DISPLAY DATA VARIABLES
-        #self.lastfloop = {}
+        # Todo: Initialize floop from sql.
         self.floop = {'Faults': [], 'Powerboard_Temperature': 0, 'Vehicle_Speed': 0.0, 'Motor_Temperature': 0, 'Motor_Current': 0, 'Motor_RPM': 0.0, 'Percent_Of_Rated_RPM': 0.0, 'Battery_Voltage': 0, 'Battery_Current': 0}
         self.message = {}
         self.profile = 0
+        self.assist_level = 0
         self.battseries = 21
-        self.battwh = 3000  # Consider remove-- depends on voltage! Est remaining from ah/SOC.
-                            # 0.2C of 30Q; 11Wh; 10amp, 10.1Wh.
+        self.battparallel = 14
+        #self.battwh = 3234  # Consider remove-- depends on voltage! Est remaining from ah/SOC?
+        #                    # 0.2C of 30Q; 11Wh; 10amp, 10.1Wh for total of 3234 to 2969.4 Wh respectively.
         self.battah = 42
         self.wheelcircum = 1927.225  # In mm
         self.trip_range_enabled = False       # Check Wh/mi every interval with floop/lastfloop for Range fxn only
@@ -128,7 +139,13 @@ class AppWindow(QtWidgets.QMainWindow):
         # self.trip_whmi = []                     # Not needed if interpolating from volts[-N:]*amps[-N:] array?
                                            # Or, update every prepare_gui, append tuple(sum(interval), whmi)
                                            # May need this time-course of whmi to forecast range limiter.
-
+        # For lifestats:
+        self.lifestat_iter_ID = 0
+        #Todo: update on SQL_init_setup to display lifestats; update lifestats, from trip on socreset.
+        self.lifestat_ah, self.lifestat_ahregen, self.lifestat_wh, self.lifestat_whregen, \
+        self.lifestat_dist, self.lifestat_Rbatt = \
+            float(0), float(0), float(0), float(0), float(0), float(0)
+        # PID:
         self.pid_kp = 0.09375
         self.pid_ki = 0.032
         self.pid_kd = 0.008
@@ -152,12 +169,6 @@ class AppWindow(QtWidgets.QMainWindow):
                                            # before interp, to accurately catch regen current (60 cycles = 1 sec
         #self.trip_ahregen = float(0)
         #self.trip_floop_interval = []      # Pop and sum values into self.interp_interval each prepare_gui
-        # Setup SQL databases
-        self.sql_conn = sqlite3.connect(r'ampy.db')
-        self.sql = self.sql_conn.cursor()
-        self.iter_sql_tripID = 0
-        self.iter_sql_lifeID = 0
-        self.SQL_init_tables()  # Updates ID's to latest in table, creates tables if not exists.
 
         self.mean_length = 18750  # Average for trip_ floats over last 5 minutes (300s / 16ms)
         # trip_wh, trip_ah, trip_soc, trip_range based on cumulative integrals instead
@@ -188,14 +199,14 @@ class AppWindow(QtWidgets.QMainWindow):
             self.ui.RangeBtn.isChecked(), self.ui.RangeSlider.value()))
         self.ui.RangeSlider.valueChanged.connect(lambda: self.trip_range_enable(
             self.trip_range_enabled, self.ui.RangeSlider.value()))
-        self.ui.AssistSlider.valueChanged.connect(self.assiststate)
+        self.ui.AssistSlider.valueChanged.connect(self.update_assist_level)
         self.ui.AssistSlider.setMaximum(9)
         #self.ui.AssistSlider.setTickInterval(1)
         #self.ui.AssistSlider.setTickPosition(QtWidgets.QSlider.TicksBothSides)
-        self.ui.ProfileRb1.toggled.connect(lambda: self.profilestate(self.ui.ProfileRb1.isChecked(), 'profile1'))
+        self.ui.ProfileRb1.toggled.connect(lambda: self.update_profile(self.ui.ProfileRb1.isChecked(), -11))
         ################# Convert profile1 to integers? floop = 0? Faultreset = 10, assist = 11?
-        self.ui.ProfileRb2.toggled.connect(lambda: self.profilestate(self.ui.ProfileRb2.isChecked(), 'profile2'))
-        self.ui.ProfileRb3.toggled.connect(lambda: self.profilestate(self.ui.ProfileRb3.isChecked(), 'profile3'))
+        self.ui.ProfileRb2.toggled.connect(lambda: self.update_profile(self.ui.ProfileRb2.isChecked(), -12))
+        self.ui.ProfileRb3.toggled.connect(lambda: self.update_profile(self.ui.ProfileRb3.isChecked(), -13))
         self.ui.Trip_Selector_1.toggled.connect(lambda: self.tripselect(self.ui.Trip_Selector_1.isChecked(), 1))
         self.ui.Trip_Selector_2.toggled.connect(lambda: self.tripselect(self.ui.Trip_Selector_2.isChecked(), 2))
         self.ui.Trip_Selector_3.toggled.connect(lambda: self.tripselect(self.ui.Trip_Selector_3.isChecked(), 3))
@@ -242,13 +253,34 @@ class AppWindow(QtWidgets.QMainWindow):
         self.ui.Trip_1_2_prefix.sizePolicy().setHorizontalStretch(1)
         self.ui.Trip_1_3_prefix.sizePolicy().setHorizontalStretch(1)
 
+        # For get_battwh:
+        # 0.0084294 scalar is to both convert % to coefficient, and to correct estimated delta-Wh for 0.5C current drop.
+        self.whdiffmap = []
+        for x, y in zip((BAC.socmap_soc * 0.00856133089 * (self.battah/self.battparallel)*BAC.socmap_volts)[0::],
+                        (BAC.socmap_soc * 0.00856133089 * (self.battah/self.battparallel)*BAC.socmap_volts)[1::]):
+            self.whdiffmap.append(x-y)
+        #for n, val in enumerate(BAC.socmap_volts):
+        #    self.whmap.append((val - BAC.socmap_volts[n]) *
+        #                      ((BAC.socmap_soc[n-1]*0.01*(self.battah/self.battparallel))-
+        #                        (BAC.socmap_soc[n]*0.01*(self.battah/self.battparallel))))
+
+        #idx = abs((BAC.socmap_soc * 0.01 * (self.battah/self.battparallel)) -  # from cell ah remaining:
+        #          ((self.battah-self.flt_ah)/self.battparallel)).argmin()            # get matching index
+        #return (((BAC.socmap_soc[idx] * 0.01 * (self.battah/self.battparallel))*mean(BAC.socmap_volts[idx:]))
+        #        *self.battseries*self.battparallel)  # Battery watt-hours
+
+
         #self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
         #self.showMaximized()
+        # Setup SQL databases
+        self.sql_conn = sqlite3.connect(r'ampy.db')
+        self.sql = self.sql_conn.cursor()
+        self.SQL_init()  # Updates ID's to latest in table, creates tables if not exists.
+
         self.start_time = self.ms()
         self.time1 = self.ms()
         self.time2 = None
         self.show()
-#    def assiststate(self, value):
     @QtCore.pyqtSlot(object)
     def receive_floop(self, message): # You can update the UI from here.
         self.gettime()  # Calculate msg interval, increment iterators
@@ -283,7 +315,7 @@ class AppWindow(QtWidgets.QMainWindow):
         # [7] = 265 = Battery_Voltage
         # [8] = 266 = Battery_Current
 
-    def floop_to_list(self): # Make short function which iterates floop into attribute lists, then calcs other list attributes.
+    def floop_to_list(self): # iterates floop into instance attribute lists
         self.list_speed.append(self.floop['Vehicle_Speed'] * 0.621371192) # 0.621371192 is Km -> Mph conversion
         self.list_motor_temp.append(self.floop['Motor_Temperature'])
         self.list_motor_amps.append(self.floop['Motor_Current'])
@@ -356,7 +388,7 @@ class AppWindow(QtWidgets.QMainWindow):
         self.flt_whmi_avg = mean(self.list_whmi[-self.iter_interp_threshold:])  # 18750 / 19 self.iter =
         #self.flt_whmi_inst = self.divzero((wattsec/3600), distance)  # Too erratic esp. at low speed
         self.flt_whmi_inst = mean(self.list_whmi[-3:])  # Approximately 1-sec rolling mean
-        self.flt_range = self.divzero((self.flt_soc * self.battwh), self.flt_whmi_inst)  # Wh for range to account for eff.
+        self.flt_range = self.divzero((self.get_battwh()), self.flt_whmi_inst)  # Wh for range to account for eff.
         self.flt_batt_volts = mean(self.list_batt_volts)
         self.flt_batt_volts_max = max(self.list_batt_volts)
         self.flt_batt_volts_min = min(self.list_batt_volts)
@@ -383,7 +415,8 @@ class AppWindow(QtWidgets.QMainWindow):
             self.gui_dict['Trip_1_1'] = '{:.2f}'.format(self.flt_wh)
             self.gui_dict['Trip_1_2'] = '{:.2f}'.format(self.flt_whmi_avg)
             self.gui_dict['Trip_1_3'] = '{:.1f}'.format(self.flt_ah)
-            self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.battwh - self.flt_wh)
+            self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.get_battwh())
+            # For remaining wh, consider using socmap_soc *0.03 = ah_rem/cell and simps over volts
             self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_inst)
             self.gui_dict['Trip_2_3'] = '{:.1f}'.format(self.battah - self.flt_ah)
             self.gui_dict['Trip_3_1'] = '{:.0f}'.format(self.flt_whregen)
@@ -496,10 +529,10 @@ class AppWindow(QtWidgets.QMainWindow):
             max_amps = 200
         elif self.profile == -13:
             max_amps = 15
-        range_div = ((self.battwh - self.flt_wh) / (self.flt_whmi_inst)) / self.flt_range_limit
+        range_div = ((self.get_battwh()) / (self.flt_whmi_inst)) / self.flt_range_limit
         # Instantaneous range / range limit
         # Setpoint is 1, :. range / range limit = 1 is target.
-        limit = self.pid.__call__(range_div, self.list_floop_interval)
+        limit = self.pid.__call__(range_div, self.list_floop_interval[-1:])
         self.workmsg.emit(int(limit*max_amps))
 
     def pid_tuner_update(self, kp, ki, kd):
@@ -525,7 +558,7 @@ class AppWindow(QtWidgets.QMainWindow):
         self.workmsg.emit('faultreset')
         #print('Button: ', i)
         #pdb.set_trace()
-    def assiststate(self):
+    def update_assist_level(self):
         level = self.ui.AssistSlider.value()
         # print('Assist State is now ', level)
         title = 'Assist: ' + str(level)
@@ -535,9 +568,9 @@ class AppWindow(QtWidgets.QMainWindow):
         #self.ui.SpeedGauge.update_value(level)  # Test couple assist level to speedo
         #self.ui.SpeedGaugeLabel.setText(str(level))
 
-    def profilestate(self, button_bool, command):
+    def update_profile(self, button_bool, command):
         if button_bool == True:  # only if toggled on, then:
-            self.workmsg.emit(command)  # command is string in lambdas
+            self.workmsg.emit(command)  # command is integer (-11 = profile1, -12 = profile2...)
         self.profile = command
 
     def tripselect(self, button_bool, command):
@@ -547,6 +580,7 @@ class AppWindow(QtWidgets.QMainWindow):
             self.trip_selected = True
     def socreset(self):
         self.flt_ah = self.battah * (1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts) / 21)))  # battah * SOC used coefficient
+        self.SQL_lifestat_upload()
     def ms(self):  # function for nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
     def gettime(self):
@@ -558,7 +592,8 @@ class AppWindow(QtWidgets.QMainWindow):
         # self.lastfloop = self.floop  # Deprecated
     def divzero(self, n, d):  # Helper to convert division by zero to zero
         return n/d if d else 0
-    def SQL_init_tables(self):
+    def SQL_init(self):
+        # Ensure tables exist, then update lifeID
         self.sql.execute('CREATE TABLE IF NOT EXISTS lifestat (id integer PRIMARY KEY, '
                          'datetime string, ah float, ahregen float, wh float, whregen float, dist float)')
         self.sql.execute('CREATE TABLE IF NOT EXISTS tripstat (id integer PRIMARY KEY, '
@@ -566,29 +601,40 @@ class AppWindow(QtWidgets.QMainWindow):
                          'motor_rpm float, floop_interval float, whmi float)')
         self.sql.execute('CREATE TABLE IF NOT EXISTS interpstat (id integer PRIMARY KEY, '
                          'interp_interval float, whmi float)')
-        # Get max ID in tripstats, update self.iter_sql_tripID
+        self.sql.execute('CREATE TABLE IF NOT EXISTS setup (id integer PRIMARY KEY, '
+                         'profile integer, assist integer, range_enabled integer, '
+                         'battseries integer, battwh float, battah float, wheelcircum float)')
         # Get max ID from lifestats:
         self.sql.execute('select max(id) from lifestat')
         ID = self.sql.fetchone()[0]
         if ID == None:  # If empty database:
-            self.iter_sql_lifeID = 0
+            self.lifestat_iter_ID = 0
         else:
-            self.iter_sql_lifeID = ID
+            self.lifestat_iter_ID = ID
+
+        lifestats = []
+        self.sql.execute('select total(ah), total(ahregen), total(wh), '
+                         'total(whregen), total(dist) from lifestat')
+        for i in self.sql:
+            lifestats.append(i)
+        print('lifestats: ', lifestats)
+        self.lifestat_ah, self.lifestat_ahregen, self.lifestat_wh, self.lifestat_whregen, self.lifestat_dist
         # Get max ID from tripstats: Possible deprecate; using iter_attribute_slicer
-        self.sql.execute('select max(id) from tripstat')  # Just use self.iter_attribute_slicer instead?
-        ID = self.sql.fetchone()[0]
-        if ID == None:
-            self.iter_sql_tripID = 0
-        else:
-            self.iter_sql_tripID = ID
+        #self.sql.execute('select max(id) from tripstat')  # Just use self.iter_attribute_slicer instead?
+        #ID = self.sql.fetchone()[0]
+        #if ID == None:
+        #    self.iter_sql_tripID = 0
+        #else:
+        #    self.iter_sql_tripID = ID
         # self.iter_sql_tripID = [i[0] for i in self.sql][0]
-    def SQL_init_values(self):
+
+    def SQL_init_setup(self):
         #
         input = []
         self.sql.execute('select max(id), total(ah), total(ahregen), total(wh), '
-                         'total(whregen), total(dist) from tripstat')
+                         'total(whregen), total(dist) from lifestat')
         for i in self.sql:
-            pass
+            input.append(i)
     def SQL_tripstat_upload_deprecated(self):
         # Call this after attribute_slicer to update trip database log.
         # TOO SLOW; adjust to call after each floop.
@@ -607,26 +653,31 @@ class AppWindow(QtWidgets.QMainWindow):
                    self.floop['Motor_RPM'], self.list_floop_interval[-1:][0])
         self.sql.execute('replace into tripstat values (?,?,?,?,?,?,?,?)', payload)
     def SQL_lifestat_upload(self):
-        # Setup to increment ID and write new row each startup, AND when resetting BatterySOC.
-        datetime = time.strftime('%D, %I:%M:%S', time.localtime())
-        payload = (self.iter_sql_lifeID, datetime, self.self.flt_ah, self.flt_ahregen, self.flt_wh, self.flt_whregen, self.flt_dist)
-        self.sql.execute('insert into lifestat (?,?,?,?,?,?,?)', payload)
-
-"""# Never do this -- insecure!
-symbol = 'IBM'
-c.execute("... where symbol = '%s'" % symbol)
-
-# Do this instead
-t = (symbol,)
-c.execute('select * from stocks where symbol=?', t)
-
-# Larger example
-for t in [('2006-03-28', 'BUY', 'IBM', 1000, 45.00),
-          ('2006-04-05', 'BUY', 'MSOFT', 1000, 72.00),
-          ('2006-04-06', 'SELL', 'IBM', 500, 53.00),
-         ]:
-    c.execute('insert into stocks values (?,?,?,?,?)', t)"""
-
+        # If has been >5min since lifestat upload/socreset:
+        #todo: Init lifestats in sql_setup. Create extra variable to measure Ah below battah on socreset,
+        # so that only actually discharged Ah are permanently logged, and not gap to full charge after partial charge.
+        self.sql.execute("SELECT datetime FROM lifestat ORDER BY id DESC LIMIT 1")
+        last_time = self.sql.fetchone()[0]
+        dif_time = datetime.datetime.strptime(last_time, '%m/%d/%y, %I:%M:%S') - datetime.datetime.now()
+        delta_time = datetime.timedelta(minutes=5)  # Minimum time between updating lifestat database.
+        if dif_time < delta_time:
+            self.lifestat_iter_ID += 1
+            current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
+            payload = (self.lifestat_iter_ID, current_datetime, (self.battah - self.flt_ah), self.flt_ahregen, self.flt_wh,
+                       self.flt_whregen, self.flt_dist)
+            self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?)', payload)
+    def get_battwh(self):
+        # Use socmap to map BattAh to expected Wh, relying on 'stable' socmap_volts.
+        idx = abs((BAC.socmap_soc * 0.01 * (self.battah/self.battparallel)) -  # from cell ah remaining:
+                  ((self.battah-self.flt_ah)/self.battparallel)).argmin()            # get matching index
+        #return (((BAC.socmap_soc[idx] * 0.01 * (self.battah/self.battparallel))*mean(BAC.socmap_volts[idx:]))
+        #        *self.battseries*self.battparallel)  # Battery watt-hours
+        return integrate.simps(self.whdiffmap[idx:])*self.battseries*self.battparallel
+        # Alternative; polynomial fit
+        # y = cellwh = 0.0012x^2 - 0.3058x + 10.912 (R^2 = -.9997 of interp)
+        #cell_wh = (0.0012*pow(((self.battah-self.flt_ah)/self.battparallel), 2) - \
+        #       0.3058*((self.battah-self.flt_ah)/self.battparallel) + 10.912)
+        #return cell_wh*self.battseries*self.battparallel
 
 class QThreader(QtCore.QThread):
     msg = QtCore.pyqtSignal(object)
@@ -733,7 +784,7 @@ if __name__ == '__main__':
     logging.basicConfig(level='INFO')
 
     app = QtWidgets.QApplication([])
-    window = AppWindow()
+    window = AmpyDisplay()
     thread1 = QThreader()
 
     thread1.msg.connect(window.receive_floop)
