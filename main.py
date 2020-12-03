@@ -18,6 +18,14 @@ import psutil
 import sqlite3
 Process = psutil.Process(getpid())
 
+# Personal todo:
+# Throttle bypass assist level: 6.015+ Features3 Bit0 enable, to ignore assist level and use 100% throttle input.
+# Human Power Assist Standard: If enabled: https://support.accelerated-systems.com/KB/?p=2175
+    # Full Pedelec Assistance Speed: Point at which foldback on Max Pedelec Assistance Gain terminates.
+    # Pedelec gain = 0 when speed = Vehicle_Maximum_Speed (for assistance only, addr 1920)
+    # re
+# PFS/Cruise/Headlight input setting via Modbus, for Antitheft without GPIO!
+    # HW Configuration Vector: Bit12, PFS Pullup; Bit13, Cruise Pullup, Bit15, Headlight Pullup
 
 # KNOWN ISSUES / TO IMPLEMENT
 # In order to accurately integrate distance, will have to use RPM instead of speed. Thus, need to program wheel diam.
@@ -288,7 +296,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # attributes for this class from BAC.BACModbus, e.g. the scales/keynames, and bring bitflags function into
         # this class also. TWO THIRDS of recieve_floop time is spent on this one line!!!
         self.floop_to_list()
-        self.SQL_tripstat_upload()
         if self.trip_range_enabled:
             self.trip_range_limiter()
         #print('Time: {}, Memory: {}, SOC: {}, Wh: {}, Battvolt: {}, MotAmps: {}, Dist: {}, Itercount: {}, Faults: {}'.format(
@@ -299,6 +306,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.iter_attribute_slicer = 0
         if self.iter >= self.iter_threshold: # Ideally an odd number to pass even number of *intervals* to Simpsons quadratic integrator
             self.floop_process()
+            self.SQL_tripstat_upload()
+            self.SQL_update_setup()
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
             self.prepare_gui()
             self.update_gui()
@@ -333,17 +342,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def floop_process(self):
         # Prepare floop list data for Simpsons-method quadratic integration
         self.list_interp_interval.append(sum(self.list_floop_interval[-self.iter:]))  # May not be needed
-        ## X interval needs to be sequential sums of slice!!
-        #l2 = [l1[:i] for i in range(1, 9, 1)]
-        #[sum(l2[i]) for i in range(len(l2))]
-        # times = self.floop_interval[-self.iter:]  # Slice of last .iter time intervals
-        # cumulative_times = [times[:i] for i in range(1, self.iter + 1, 1)]  # list of times from 1st to .iter for each time
-        # x_interval = array([sum(cumulative_times[i]) for i in range(19)])  # For each list, sum times
+
         x_interval = array([sum(([(self.list_floop_interval[-self.iter:])[:i] for i in range(1, self.iter + 1, 1)])
                                 [i]) for i in range(self.iter)])  # calc cumulative time from list of intervals
-        #x_interval = array(self.floop_interval[-self.iter:])
 
-        #y_speed = array(self.speed[-self.iter:])
         y_revsec = array([(self.list_motor_rpm[-self.iter:])[i] / 60 for i in range(self.iter)])  # revolutions per second
         # Integrate distance fromm speed and increment distance counter
         revolutions = integrate.simps(y_revsec, x=x_interval, even='avg')
@@ -352,12 +354,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         else:
             distance = (revolutions*self.wheelcircum)/(1609344)  ## miles
         self.flt_dist += distance
-        ##### CALCULATE SPEED FROM RPM FOR ACCURACY! Currently using miles per hour as miles per second.
-        # Speed = revolutions per minute * 60 * 1927.225 = mm/H: (mm/H)/1609344mm/Mi = mi/H
-        # Integrate revolutions/second --> revolutions.
-        # (Revolutions * 1927.225) = mm traveled. /1609344 mm/mile --> miles.
 
-        # y_power = self.batt_volts[-self.iter:] * self.batt_amps[-self.iter:]  # Use numpy.Array!
         array_volts, array_amps = array(self.list_batt_volts[-self.iter:]), array(self.list_motor_amps[-self.iter:])
         y_power = [prod(array_volts[i]*array_amps[i]) for i in range(self.iter)]
         y_current = array(self.list_batt_amps[-self.iter:])
@@ -377,13 +374,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_ah += ampsec / 3600
             self.flt_ahregen += abs(wattsec)
 
+        # todo: try to move to prepare_gui, probably only needed for gui refresh EXCEPT for flt_range, whmi_inst
         self.flt_soc = ((self.battah - self.flt_ah) / self.battah) * 100  # Percent SOC from Ah (charge)
-        #with errstate(divide='raise', invalid='raise'): # Triggers FloatingPointError with near-zero values
-        #    try:  # trip_whmi now float, derived from trip_dist and trip_wh as already set
-        #        self.whmi = divide(self.trip_wh, self.trip_dist)
-        #        self.trip_whmi.append(self.whmi)
-        #    except FloatingPointError:
-        #        self.whmi = 0
         self.list_whmi.append(self.divzero(self.flt_wh, self.flt_dist))
         self.flt_whmi_avg = mean(self.list_whmi[-self.iter_interp_threshold:])  # 18750 / 19 self.iter =
         #self.flt_whmi_inst = self.divzero((wattsec/3600), distance)  # Too erratic esp. at low speed
@@ -509,7 +501,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.Trip_4_2.setText(self.gui_dict['Trip_4_2'])
         self.ui.Trip_4_3.setText(self.gui_dict['Trip_4_3'])
         # print('Gui updated!')
-
     def trip_range_enable(self, bool, range):
         if bool:
             self.trip_range_enabled = bool
@@ -523,6 +514,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
 
     def trip_range_limiter(self):
         # Check which profile is active. Wh =/= Ah but they are proportional, and no ASI pwr limit exists.
+        # todo: consider setting up attributes so that generic profile parameters
+        #  e.g. batt amps, field weakening import from setup.csv for easy profile config.
         if self.profile == -11:
             max_amps = 300
         elif self.profile == -12:
@@ -536,7 +529,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.workmsg.emit(int(limit*max_amps))
 
     def pid_tuner_update(self, kp, ki, kd):
-        self.pid_kp = kp/200
+        self.pid_kp = kp/200  # /200 to convert QSlider int to float coefficient
         self.pid_ki = ki/200
         self.pid_kd = kd/200
         print('PID tunings: ', self.pid_kp, self.pid_ki, self.pid_kd)
@@ -544,9 +537,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.PID_Kp_Label.setText('{:.2f}'.format(self.pid_kp))
         self.ui.PID_Ki_Label.setText('{:.2f}'.format(self.pid_ki))
         self.ui.PID_Kd_Label.setText('{:.2f}'.format(self.pid_kd))
-
-
-    def faultpopup(self):
+    def faultpopup(self):  # Check Controller indicator.
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle("Controller Fault Detected")
         msg.setText('Faults detected: ' + str(self.floop['Faults']).replace('[', '').replace(']', ''))
@@ -598,27 +589,46 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                          'datetime string, ah float, ahregen float, wh float, whregen float, dist float)')
         self.sql.execute('CREATE TABLE IF NOT EXISTS tripstat (id integer PRIMARY KEY, '
                          'batt_amps float, batt_volts float, motor_amps float, motor_temp float, '
-                         'motor_rpm float, floop_interval float, whmi float)')
+                         'speed float, motor_rpm float, floop_interval float)')
         self.sql.execute('CREATE TABLE IF NOT EXISTS interpstat (id integer PRIMARY KEY, '
                          'interp_interval float, whmi float)')
-        self.sql.execute('CREATE TABLE IF NOT EXISTS setup (id integer PRIMARY KEY, '
-                         'profile integer, assist integer, range_enabled integer, '
-                         'battseries integer, battwh float, battah float, wheelcircum float)')
-        # Get max ID from lifestats:
-        self.sql.execute('select max(id) from lifestat')
-        ID = self.sql.fetchone()[0]
-        if ID == None:  # If empty database:
-            self.lifestat_iter_ID = 0
-        else:
-            self.lifestat_iter_ID = ID
+        self.sql.execute('CREATE TABLE IF NOT EXISTS setup (id integer PRIMARY KEY, '  # Identifier/key
+                         'profile integer, assist integer, range_enabled integer, '  # Display/control parameters
+                         #'battseries integer, battparallel float, battah float, wheelcircum float, '  # Batt/veh parms
+                         'ah float, ahregen float, wh float, whregen float, dist float)')  # Trip counters
 
-        lifestats = []
-        self.sql.execute('select total(ah), total(ahregen), total(wh), '
+        lfs = []
+        self.sql.execute('select max(id), total(ah), total(ahregen), total(wh), '
                          'total(whregen), total(dist) from lifestat')
         for i in self.sql:
-            lifestats.append(i)
-        print('lifestats: ', lifestats)
-        self.lifestat_ah, self.lifestat_ahregen, self.lifestat_wh, self.lifestat_whregen, self.lifestat_dist
+            lfs.append(i)
+        if lfs[0][0] == None:
+            lfs[0] = 0  # If new table, else;
+        else:
+            self.lifestat_iter_ID, self.lifestat_ah, self.lifestat_ahregen, \
+            self.lifestat_wh, self.lifestat_whregen, self.lifestat_dist = \
+                lfs[0][0], lfs[0][1], lfs[0][2], lfs[0][3], lfs[0][4], lfs[0][5]
+
+
+        stp = []
+        self.sql.execute('SELECT * FROM setup')  # Replace into ID = 0 on update
+        for i in self.sql:
+            stp.append(i)
+        if len(stp) > 0:
+            self.profile, self.assist_level, self.trip_range_enabled, self.flt_ah, self.flt_ahregen, \
+            self.flt_wh, self.flt_whregen, self.flt_dist = \
+                stp[0][1], stp[0][2], stp[0][3], stp[0][4], stp[0][5], stp[0][6], stp[0][7], stp[0][8]
+
+        trp = []
+        self.sql.execute('select * from tripstat')
+        for x in self.sql.fetchall():
+            self.list_batt_amps.append(x[1])
+            self.list_batt_volts.append(x[2])
+            self.list_motor_amps.append(x[3])
+            self.list_motor_temp.append(x[4])
+            self.list_motor_rpm.append(x[5])
+            self.list_floop_interval.append(x[6])
+
         # Get max ID from tripstats: Possible deprecate; using iter_attribute_slicer
         #self.sql.execute('select max(id) from tripstat')  # Just use self.iter_attribute_slicer instead?
         #ID = self.sql.fetchone()[0]
@@ -635,49 +645,51 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                          'total(whregen), total(dist) from lifestat')
         for i in self.sql:
             input.append(i)
+
+    def SQL_update_setup(self):
+        self.sql.execute('replace into setup values (?,?,?,?,?,?,?,?,?)', (0, self.profile, self.assist_level,
+            int(self.trip_range_enabled), self.flt_ah, self.flt_ahregen, self.flt_wh, self.flt_whregen, self.flt_dist))
     def SQL_tripstat_upload_deprecated(self):
         # Call this after attribute_slicer to update trip database log.
-        # TOO SLOW; adjust to call after each floop.
         payload = []
-        for count in range(len(self.list_batt_amps)):
-            payload.append((count, self.list_batt_amps[count], self.list_batt_volts[count], self.list_motor_amps[count],
+        for count in range(self.iter_threshold):
+            payload.append(((self.iter_attribute_slicer-count), self.list_batt_amps[count], self.list_batt_volts[count], self.list_motor_amps[count],
                             self.list_motor_temp[count], self.list_speed[count], self.list_motor_rpm[count],
                             self.list_floop_interval[count]))
         for i in payload:
             self.sql.execute('replace into tripstat values (?,?,?,?,?,?,?,?)', i)
 
     def SQL_tripstat_upload(self):
-        # This is taking 3x resources as rest of program, most because of commit.
+        # Committed every iter_threshold (integration) interval in receive_floop.
         payload = (self.iter_attribute_slicer, self.floop['Battery_Current'], self.floop['Battery_Voltage'],
                    self.floop['Motor_Current'], self.floop['Motor_Temperature'], self.floop['Vehicle_Speed'],
                    self.floop['Motor_RPM'], self.list_floop_interval[-1:][0])
         self.sql.execute('replace into tripstat values (?,?,?,?,?,?,?,?)', payload)
     def SQL_lifestat_upload(self):
         # If has been >5min since lifestat upload/socreset:
-        #todo: Init lifestats in sql_setup. Create extra variable to measure Ah below battah on socreset,
+        #todo: Init lifestats in sql_setup. Create extra attributes to measure Ah below battah on socreset,
         # so that only actually discharged Ah are permanently logged, and not gap to full charge after partial charge.
         self.sql.execute("SELECT datetime FROM lifestat ORDER BY id DESC LIMIT 1")
-        last_time = self.sql.fetchone()[0]
-        dif_time = datetime.datetime.strptime(last_time, '%m/%d/%y, %I:%M:%S') - datetime.datetime.now()
-        delta_time = datetime.timedelta(minutes=5)  # Minimum time between updating lifestat database.
-        if dif_time < delta_time:
-            self.lifestat_iter_ID += 1
+        try:
+            last_time = self.sql.fetchone()[0]
+            dif_time = datetime.datetime.strptime(last_time, '%m/%d/%y, %I:%M:%S') - datetime.datetime.now()
+            delta_time = datetime.timedelta(minutes=5)  # Minimum time between updating lifestat database.
+            if dif_time < delta_time:
+                self.lifestat_iter_ID += 1
+                current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
+                payload = (self.lifestat_iter_ID, current_datetime, (self.battah - self.flt_ah), self.flt_ahregen,
+                           self.flt_wh,self.flt_whregen, self.flt_dist)
+                self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?)', payload)
+        except TypeError:
             current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
-            payload = (self.lifestat_iter_ID, current_datetime, (self.battah - self.flt_ah), self.flt_ahregen, self.flt_wh,
-                       self.flt_whregen, self.flt_dist)
+            payload = (self.lifestat_iter_ID, current_datetime, (self.battah - self.flt_ah), self.flt_ahregen,
+                       self.flt_wh, self.flt_whregen, self.flt_dist)
             self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?)', payload)
     def get_battwh(self):
-        # Use socmap to map BattAh to expected Wh, relying on 'stable' socmap_volts.
+        # Use socmap to map BattAh to expected Wh, relying on 'stable' socmap_volts!
         idx = abs((BAC.socmap_soc * 0.01 * (self.battah/self.battparallel)) -  # from cell ah remaining:
                   ((self.battah-self.flt_ah)/self.battparallel)).argmin()            # get matching index
-        #return (((BAC.socmap_soc[idx] * 0.01 * (self.battah/self.battparallel))*mean(BAC.socmap_volts[idx:]))
-        #        *self.battseries*self.battparallel)  # Battery watt-hours
         return integrate.simps(self.whdiffmap[idx:])*self.battseries*self.battparallel
-        # Alternative; polynomial fit
-        # y = cellwh = 0.0012x^2 - 0.3058x + 10.912 (R^2 = -.9997 of interp)
-        #cell_wh = (0.0012*pow(((self.battah-self.flt_ah)/self.battparallel), 2) - \
-        #       0.3058*((self.battah-self.flt_ah)/self.battparallel) + 10.912)
-        #return cell_wh*self.battseries*self.battparallel
 
 class QThreader(QtCore.QThread):
     msg = QtCore.pyqtSignal(object)
