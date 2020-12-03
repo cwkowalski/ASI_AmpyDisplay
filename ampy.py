@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1872, 1392)
+        MainWindow.resize(1876, 1383)
         MainWindow.setStyleSheet("QMainWindow{\n"
 "    background: solid white; }\n"
 "\n"
@@ -697,7 +697,7 @@ class Ui_MainWindow(object):
 "    height: 60px\n"
 "}\n"
 "    ")
-        self.PID_Kd_Slider.setMaximum(200)
+        self.PID_Kd_Slider.setMaximum(9)
         self.PID_Kd_Slider.setPageStep(2)
         self.PID_Kd_Slider.setOrientation(QtCore.Qt.Horizontal)
         self.PID_Kd_Slider.setInvertedAppearance(False)
@@ -937,7 +937,7 @@ class Ui_MainWindow(object):
         self.BatterySOCReset.setObjectName("BatterySOCReset")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1872, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1876, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)

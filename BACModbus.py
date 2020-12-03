@@ -106,17 +106,24 @@ class BACModbus():
             if bool(bit) == True:
                 output.append(self.ObdicBit[address][position])
         return output
-
-    def floop_parse(self, rawdata):  # Parse 'fast-loop' and perhaps other registers-- return bitstrings, scaled values.
+    def floop_parse(self, rawdata):
+        data = {'Faults': self.bitflags(0, 'Faults'), 'Powerboard_Temperature': rawdata[1],
+                    'Vehicle_Speed': rawdata[2] / 256, 'Motor_Temperature': rawdata[3],
+                    'Motor_Current': rawdata[4] / 32, 'Motor_RPM': rawdata[5],
+                    'Percent_Of_Rated_RPM': rawdata[6] / 40.96, 'Battery_Voltage': rawdata[7] / 32,
+                    'Battery_Current': rawdata[8] / 32}
+        return data
+    def parse(self, rawdata, address):
+        # Parse register(s)-- return bitstrings or scaled values as appropriate in dict of [label name]:val OR [strings]
         data = []
         labels = []
         procdata = {}
         for count, value in enumerate(rawdata):
-            address = int(self.ObdicAddress['Faults']) + count
+            address = int(self.ObdicAddress[address]) + count
             try:
                 scaledvalue = value / self.ObdicScale[address]
             except KeyError:
-                scaledvalue = self.bitflags(value, 'Faults')
+                scaledvalue = self.bitflags(value, address)
             data.append(scaledvalue)
             labels.append(list(self.ObdicAddress.keys())[list(self.ObdicAddress.values()).index(address)])
         for index, label in enumerate(labels):

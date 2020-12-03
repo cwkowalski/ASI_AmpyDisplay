@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1876</width>
-    <height>1392</height>
+    <height>1383</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1335,7 +1335,7 @@ QSlider::groove:horizontal {
 	</string>
      </property>
      <property name="maximum">
-      <number>200</number>
+      <number>9</number>
      </property>
      <property name="pageStep">
       <number>2</number>
@@ -1413,7 +1413,7 @@ QSlider::groove:horizontal {
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="PID_Kd_Label_2">
+    <widget class="QLabel" name="PID_Kd_Label">
      <property name="geometry">
       <rect>
        <x>880</x>
@@ -1467,7 +1467,7 @@ border-radius: 10px
 }</string>
     </property>
     <property name="minimum">
-     <number>63</number>
+     <number>52</number>
     </property>
     <property name="maximum">
      <number>89</number>
