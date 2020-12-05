@@ -35,19 +35,37 @@ class BACModbus():
         self.ObdicBits = {}
         self.RegsDic = {}
 
-        self.socmap_volts = [] # init as empty array..?
-        self.socmap_soc = []
-        reader = csv.reader(open('socmap_ahv.csv', mode='r'))
-        for row in reader:
-            self.socmap_volts.append(float(row[1]))
-            self.socmap_soc.append(float(row[2]))
+        self.socmap_volts, self.socmap_soc, self.socmap_ah, self.socmap_wh_volts, self.socmap_wh_wh = \
+            [],[],[],[],[]
+
+        with open('socmap_ahv.csv', mode='r') as file:
+            reader = csv.reader(file, delimiter=',')
+            for row in reader:  # If using own socmap, identify columns appropriately.
+                self.socmap_ah.append(float(row[0]))
+                self.socmap_volts.append(float(row[1]))
+                self.socmap_soc.append(float(row[2]))
         self.socmap_volts = array(self.socmap_volts)
         self.socmap_soc = array(self.socmap_soc)
-        self.socmap_wh = []
-        for n, val in enumerate(self.socmap_volts):
-            pass
+        self.socmap_ah = array(self.socmap_ah)
+        file.close()
+
+        with open('WhVmap.csv', mode='r') as file:
+            reader = csv.reader(file, delimiter=',')
+            for row in reader:  # If using own socmap, identify columns appropriately.
+                self.socmap_wh_wh.append(float(row[0]))
+                self.socmap_wh_volts.append(float(row[1]))
+        self.socmap_wh_wh = array(self.socmap_wh_wh)
+        self.socmap_wh_volts = array(self.socmap_wh_volts)
+        file.close()
+
+        #self.socmap_wh = []
+        #for n, val in enumerate(self.socmap_volts):
+        #    pass
             #self.socmap_wh.append(self.socmap_volts[])
-        self.socmap = interp.interp1d(self.socmap_volts, self.socmap_soc, kind='cubic')
+        self.socmap = interp.interp1d(self.socmap_volts, self.socmap_soc, kind='cubic', fill_value='extrapolate')
+        self.ahmap = interp.interp1d(self.socmap_volts, self.socmap_ah, kind='cubic', fill_value='extrapolate')
+        self.wh_a2v_map = interp.interp1d(self.socmap_ah, self.socmap_volts, kind='cubic', fill_value='extrapolate')
+        self.whmap = interp.interp1d(self.socmap_wh_volts, self.socmap_wh_wh, kind='cubic', fill_value='extrapolate')
 
         for parent in Obdic:  # InternalAppEntity/Parameters/ParameterDescription children
             scale = parent.find('Scale').text

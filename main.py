@@ -9,7 +9,8 @@ import serial
 import modbus_tk
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
-from scipy import integrate as integrate
+from scipy import integrate, interpolate
+from scipy.stats import linregress
 from numpy import mean, isnan, array, prod, argmin, abs
 import logging
 # import pdb  # pdb.set_trace() to add breakpoint
@@ -108,7 +109,6 @@ BAC = BACModbus.BACModbus()
 
 class AmpyDisplay(QtWidgets.QMainWindow):
     workmsg = QtCore.pyqtSignal(int)
-
     def __init__(self, bs, bp, ba, whl, sp, *args, **kwargs,):
         self.battseries = bs
         self.battparallel = bp
@@ -119,9 +119,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
         # DISPLAY AND VEHICLE VARIABLES
         # Todo: Initialize floop from sql.
-        self.floop = {'Faults': [], 'Powerboard_Temperature': 0, 'Vehicle_Speed': 0.0, 'Motor_Temperature': 0,
-                      'Motor_Current': 0, 'Motor_RPM': 0.0, 'Percent_Of_Rated_RPM': 0.0, 'Battery_Voltage': 0,
-                      'Battery_Current': 0}
+
         self.message = {}
         self.profile = 0
         self.assist_level = 0
@@ -143,9 +141,16 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # For lifestats:
         self.lifestat_iter_ID = 0
         # Todo: update on SQL_init_setup to display lifestats; update lifestats, from trip on socreset.
-        self.lifestat_ah, self.lifestat_ahregen, self.lifestat_wh, self.lifestat_whregen, \
+        self.lifestat_ah_used, self.lifestat_ah_charged, self.lifestat_ahregen, self.lifestat_wh, self.lifestat_whregen, \
         self.lifestat_dist, self.lifestat_Rbatt = \
-            float(0), float(0), float(0), float(0), float(0), float(0)
+            float(0), float(0), float(0), float(0), float(0), float(0), float(0)
+
+        # Setup SQL databases and populate lifestats attributes;
+        self.sql_conn = sqlite3.connect(r'ampy.db')
+        self.sql = self.sql_conn.cursor()
+        self.SQL_init()  # Updates ID's to latest in table, creates tables if not exists.
+
+
         # PID:
         self.pid_kp = 0.09375
         self.pid_ki = 0.032
@@ -175,6 +180,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.mean_length = 18750  # Average for trip_ floats over last 5 minutes (300s / 16ms)
         # trip_wh, trip_ah, trip_soc, trip_range based on cumulative integrals instead
         self.exceptions = 0
+        self.first_floop = True
         self.iter = 0
         self.iter_threshold = 19  # Must be odd number for accurate/low-resource Simpsons integration
         self.iter_attribute_slicer = 0
@@ -242,18 +248,22 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.SpeedGauge.set_MaxValue(80)
         self.ui.SpeedGauge.set_total_scale_angle_size(240)
         self.ui.SpeedGauge.set_start_scale_angle(150)
+        self.ui.SpeedGauge.set_scala_main_count(8)
+        self.ui.SpeedGauge.initial_scale_fontsize = 30
         self.ui.PowerGauge.set_enable_value_text(False)
         self.ui.PowerGauge.set_gauge_color_inner_radius_factor(950)
         self.ui.PowerGauge.set_enable_filled_Polygon(False)
         self.ui.PowerGauge.set_enable_barGraph(True)
-        self.ui.PowerGauge.set_enable_ScaleText(False)
         self.ui.PowerGauge.set_MaxValue(24)
         self.ui.PowerGauge.set_total_scale_angle_size(240)
         self.ui.PowerGauge.set_start_scale_angle(150)
+        self.ui.PowerGauge.set_scala_main_count(8)
+        self.ui.PowerGauge.scala_subdiv_count = 3
+        self.ui.PowerGauge.initial_scale_fontsize = 30
 
         # todo: check which one of these is adjusting stretch properly
-        for i in range(6):
-            self.ui.TripBoxGrid.setColumnMinimumWidth(i, 200)
+        #for i in range(6):
+        #    self.ui.TripBoxGrid.setColumnMinimumWidth(i, 200)
         self.ui.Trip_1_1.sizePolicy().setHorizontalStretch(1)
         self.ui.Trip_1_2.sizePolicy().setHorizontalStretch(1)
         self.ui.Trip_1_3.sizePolicy().setHorizontalStretch(1)
@@ -261,30 +271,16 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.Trip_1_2_prefix.sizePolicy().setHorizontalStretch(1)
         self.ui.Trip_1_3_prefix.sizePolicy().setHorizontalStretch(1)
 
-        # For get_battwh:
-        # 0.0084294 scalar is to both convert % to coefficient, and to correct estimated delta-Wh for 0.5C current drop.
-        self.whdiffmap = []
-        for x, y in zip((BAC.socmap_soc * 0.00856133089 * (self.battah / self.battparallel) * BAC.socmap_volts)[0::],
-                        (BAC.socmap_soc * 0.00856133089 * (self.battah / self.battparallel) * BAC.socmap_volts)[1::]):
-            self.whdiffmap.append(x - y)
-        # for n, val in enumerate(BAC.socmap_volts):
-        #    self.whmap.append((val - BAC.socmap_volts[n]) *
-        #                      ((BAC.socmap_soc[n-1]*0.01*(self.battah/self.battparallel))-
-        #                        (BAC.socmap_soc[n]*0.01*(self.battah/self.battparallel))))
-
-        # idx = abs((BAC.socmap_soc * 0.01 * (self.battah/self.battparallel)) -  # from cell ah remaining:
-        #          ((self.battah-self.flt_ah)/self.battparallel)).argmin()            # get matching index
-# return (((BAC.socmap_soc[idx] * 0.01 * (self.battah/self.battparallel))*mean(BAC.socmap_volts[idx:]))
-        #        *self.battseries*self.battparallel)  # Battery watt-hours
-
-        # To make frameless/maximized once on Rpi
-        # self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-        # self.showMaximized()
-
-        # Setup SQL databases
-        self.sql_conn = sqlite3.connect(r'ampy.db')
-        self.sql = self.sql_conn.cursor()
-        self.SQL_init()  # Updates ID's to latest in table, creates tables if not exists.
+        # Update floop with SQL-initiated tripstat lists for first run.
+        try:
+            self.floop = {'Faults': [], 'Powerboard_Temperature': 0, 'Vehicle_Speed': self.list_speed[-1:],
+                      'Motor_Temperature': self.list_motor_temp[-1:], 'Motor_Current': self.list_motor_amps[-1],
+                      'Motor_RPM': self.list_motor_rpm[-1], 'Percent_Of_Rated_RPM': 0.0,
+                      'Battery_Voltage': self.list_batt_volts[-1], 'Battery_Current': self.list_batt_amps[-1]}
+        except (IndexError, ValueError):
+            self.floop = {'Faults': [], 'Powerboard_Temperature': 0, 'Vehicle_Speed': 0, 'Motor_Temperature': 0,
+                          'Motor_Current': 0, 'Motor_RPM': 0, 'Percent_Of_Rated_RPM': 0,
+                          'Battery_Voltage': 0, 'Battery_Current': 0}
         # Run
         self.start_time = self.ms()
         self.time1 = self.ms()
@@ -295,12 +291,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def receive_floop(self, message):  # You can update the UI from here.
         self.gettime()  # Calculate msg interval, increment iterators
         if self.speedparse:
-            self.floop = BAC.floop_parse(message)  #
+            self.floop = BAC.floop_parse(message)
         else:
             self.floop = BAC.parse(message, 'Faults')
         # attributes for this class from BAC.BACModbus, e.g. the scales/keynames, and bring bitflags function into
         # this class also. TWO THIRDS of recieve_floop time is spent on this one line!!!
         self.floop_to_list()
+        self.SQL_tripstat_upload()
         if self.trip_range_enabled:
             self.trip_range_limiter()
         # print('Time: {}, SOC: {}, Wh: {}, Battvolt: {}, MotAmps: {}, Dist: {}, Itercount: {}, Faults: {}'.format(
@@ -310,13 +307,18 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.attribute_slicer()
             self.iter_attribute_slicer = 0
         if self.iter >= self.iter_threshold:  # Ideally an odd number to pass even number of *intervals* to Simpsons quadratic integrator
-            self.floop_process()
-            self.SQL_tripstat_upload()
-            self.SQL_update_setup()
-            self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
-            self.prepare_gui()
-            self.update_gui()
-            self.iter = 0
+            if self.first_floop:  # Needed so socreset(), SQL has data for first init
+                # Also will compensate for any self-discharge, charge since last start.
+                self.first_floop = False
+                self.floop_process()
+                self.socreset()
+            else:
+                self.floop_process()
+                self.SQL_update_setup()
+                self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
+                self.prepare_gui()
+                self.update_gui()
+                self.iter = 0
         ##################
         # Message indices:
         # [0] = 258 = Faults
@@ -364,7 +366,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             distance = (revolutions * self.wheelcircum) / (1609344)  ## miles
         self.flt_dist += distance
 
-        array_volts, array_amps = array(self.list_batt_volts[-self.iter:]), array(self.list_motor_amps[-self.iter:])
+        array_volts, array_amps = array(self.list_batt_volts[-self.iter:]), array(self.list_batt_amps[-self.iter:])
         y_power = [prod(array_volts[i] * array_amps[i]) for i in range(self.iter)]
         y_current = array(self.list_batt_amps[-self.iter:])
 
@@ -607,30 +609,31 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def SQL_init(self):
         # Ensure tables exist, then update lifeID
         self.sql.execute('CREATE TABLE IF NOT EXISTS lifestat (id integer PRIMARY KEY, '
-                         'datetime string, ah float, ahregen float, wh float, whregen float, dist float)')
+                         'datetime string, ah_used float, ah_charged float, ahregen float, wh float, whregen float, '
+                         'dist float, cycle int)')  # Cycle int is bool for perserving columns.
         self.sql.execute('CREATE TABLE IF NOT EXISTS tripstat (id integer PRIMARY KEY, '
                          'batt_amps float, batt_volts float, motor_amps float, motor_temp float, '
                          'speed float, motor_rpm float, floop_interval float)')
-        self.sql.execute('CREATE TABLE IF NOT EXISTS interpstat (id integer PRIMARY KEY, '
-                         'interp_interval float, whmi float)')
+        # Not used, could compute again from tripstat
+        #self.sql.execute('CREATE TABLE IF NOT EXISTS interpstat (id integer PRIMARY KEY, '
+        #                 'interp_interval float, whmi float)')
         self.sql.execute('CREATE TABLE IF NOT EXISTS setup (id integer PRIMARY KEY, '  # Identifier/key
                          'profile integer, assist integer, range_enabled integer, '  # Display/control parameters
                          # 'battseries integer, battparallel float, battah float, wheelcircum float, '  # Batt/veh parms
                          'ah float, ahregen float, wh float, whregen float, dist float, iter integer)')  # Trip counters
 
         lfs = []
-        self.sql.execute('select max(id), total(ah), total(ahregen), total(wh), '
+        self.sql.execute('select max(id), total(ah_used), total(ah_charged), total(ahregen), total(wh), '
                          'total(whregen), total(dist) from lifestat')
         for i in self.sql:
             lfs.append(i)
         if lfs[0][0] == None:
             lfs[0] = 0  # If new table, else;
         else:
-            self.lifestat_iter_ID, self.lifestat_ah, self.lifestat_ahregen, \
+            self.lifestat_iter_ID, self.lifestat_ah_used, self.lifestat_ah_charged, self.lifestat_ahregen, \
             self.lifestat_wh, self.lifestat_whregen, self.lifestat_dist = \
-                lfs[0][0], lfs[0][1], lfs[0][2], lfs[0][3], lfs[0][4], lfs[0][5]
+                lfs[0][0], lfs[0][1], lfs[0][2], lfs[0][3], lfs[0][4], lfs[0][5], lfs[0][6]
 
-        # todo: add iter_attribute_slicer, so tripstat is overwritten in same order on reset
         stp = []
         self.sql.execute('SELECT * FROM setup')  # Replace into ID = 0 on update
         for i in self.sql:
@@ -640,15 +643,15 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_wh, self.flt_whregen, self.flt_dist, self.iter_attribute_slicer = \
                 stp[0][1], stp[0][2], stp[0][3], stp[0][4], stp[0][5], stp[0][6], stp[0][7], stp[0][8], stp[0][9]
 
-        trp = []
         self.sql.execute('select * from tripstat')
         for x in self.sql.fetchall():
             self.list_batt_amps.append(x[1])
             self.list_batt_volts.append(x[2])
             self.list_motor_amps.append(x[3])
             self.list_motor_temp.append(x[4])
-            self.list_motor_rpm.append(x[5])
-            self.list_floop_interval.append(x[6])
+            self.list_speed.append(x[5])
+            self.list_motor_rpm.append(x[6])
+            self.list_floop_interval.append(x[7])
 
         # Get max ID from tripstats: Possible deprecate; using iter_attribute_slicer
         # self.sql.execute('select max(id) from tripstat')  # Just use self.iter_attribute_slicer instead?
@@ -659,7 +662,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #    self.iter_sql_tripID = ID
         # self.iter_sql_tripID = [i[0] for i in self.sql][0]
 
-    def SQL_init_setup(self):
+    def SQL_init_setup_deprecated(self):
         #
         input = []
         self.sql.execute('select max(id), total(ah), total(ahregen), total(wh), '
@@ -691,33 +694,50 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.sql.execute('replace into tripstat values (?,?,?,?,?,?,?,?)', payload)
 
     def SQL_lifestat_upload(self):
-        # If has been >5min since lifestat upload/socreset:
-        # todo: Setup so that only delta Ah between last log and curreng Ah are permanently logged,
-        #  and not gap to full charge after partial charge/idle discharge reset.
-        #  When time <5min, REPLACE recent entry with new difference instead of skipping.
-        #  When reading into lifestat attributes, iterate over rows to sort into charge/discharge lifestats.
-        self.sql.execute("SELECT datetime FROM lifestat ORDER BY id DESC LIMIT 1")
-        try:
-            last_time = self.sql.fetchone()[0]
-            dif_time = datetime.datetime.strptime(last_time, '%m/%d/%y, %I:%M:%S') - datetime.datetime.now()
-            delta_time = datetime.timedelta(minutes=5)  # Minimum time between updating lifestat database.
-            if dif_time < delta_time:
-                self.lifestat_iter_ID += 1
-                current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
-                payload = (self.lifestat_iter_ID, current_datetime, (self.battah - self.flt_ah), self.flt_ahregen,
-                           self.flt_wh, self.flt_whregen, self.flt_dist)
-                self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?)', payload)
-        except TypeError:
-            current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
-            payload = (self.lifestat_iter_ID, current_datetime, (self.battah - self.flt_ah), self.flt_ahregen,
-                       self.flt_wh, self.flt_whregen, self.flt_dist)
-            self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?)', payload)
+        # On SOC reset, take Ah and compare to last row to determine if you have charged or discharged.
+        # If you have charged, create new row with cycle bool = True to ensure it is preserved and sortable.
+        # If you have discharged, and last row was not charged (cycle = True) then it is replaced with updated values.
 
-    def get_battwh(self):
-        # Use socmap to map BattAh to expected Wh, relying on 'stable' socmap_volts!
-        idx = abs((BAC.socmap_soc * 0.01 * (self.battah / self.battparallel)) -  # from cell ah remaining:
-                  ((self.battah - self.flt_ah) / self.battparallel)).argmin()  # get matching index
-        return integrate.simps(self.whdiffmap[idx:]) * self.battseries * self.battparallel
+        # todo: Code comments below leftover from deprecated time-comparison-- consider re-implementing as
+        #  spamming socreset() can result in dif_ah < 0 from noise if dif_time is low
+        # self.sql.execute('SELECT datetime FROM lifestat ORDER BY id DESC LIMIT 1')
+        try:  # in case table is new/empty:
+            #last_time = self.sql.fetchone()[0]
+            current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
+            #dif_time = datetime.datetime.strptime(last_time, '%m/%d/%y, %I:%M:%S') - datetime.datetime.now()
+            #delta_time = datetime.timedelta(minutes=5)  # Minimum time between updating lifestat database.
+            self.sql.execute('SELECT * FROM lifestat ORDER BY id DESC LIMIT 1')
+            lastrow = self.sql.fetchall()[0]
+            dif_ah = self.flt_ah - lastrow[2]
+            if dif_ah < 0:  # If difference between current Ah_used and last is negative,
+                # you have just charged. A new row is created, with total Ah charged as negative float.
+                # cycle bool = True, to ensure this row is not replaced in discharged elif condition below.
+                self.lifestat_iter_ID += 1
+                payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, dif_ah, self.flt_ahregen,
+                       self.flt_wh, self.flt_whregen, self.flt_dist, True)
+                self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?)', payload)
+            elif dif_ah >= 0 and lastrow[7] == True:  # If difference is positive, you have discharged.
+                # If last row was finalized with charge data, create new row.
+                self.lifestat_iter_ID += 1
+                payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, 0, self.flt_ahregen,
+                       self.flt_wh, self.flt_whregen, self.flt_dist, False)
+                self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?)', payload)
+            elif dif_ah >= 0 and lastrow[7] == False:
+                # If last row was not finalized, update it instead:
+                payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, 0, self.flt_ahregen,
+                       self.flt_wh, self.flt_whregen, self.flt_dist, False)
+                self.sql.execute('replace into lifestat values (?,?,?,?,?,?,?,?,?)', payload)
+
+        except (TypeError, IndexError):  # In case of new/empty table, initialize:
+            current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
+            payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, 0, self.flt_ahregen,
+                       self.flt_wh, self.flt_whregen, self.flt_dist, False)
+            self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?)', payload)
+
+    def get_battwh(self):  # For non Li-NMC or typical lithium, derive curve experimentally.
+        # Many cell experiments are listed on https://lygte-info.dk/,
+        # and can be digitzed with https://automeris.io/WebPlotDigitizer/
+        return BAC.whmap(BAC.wh_a2v_map(self.flt_ah / self.battparallel))*self.battseries*self.battparallel
 
 
 class QThreader(QtCore.QThread):
@@ -848,6 +868,7 @@ if __name__ == '__main__':
     thread1.msg.connect(window.receive_floop)
     window.workmsg.connect(thread1.workercommand)
 
-    window.show()
+    # window.show()
+    # window.socreset()  # Was not starting before first floop when put into gui class __init__...
     thread1.start()
     exit(app.exec_())

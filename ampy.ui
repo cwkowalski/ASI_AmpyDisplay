@@ -699,7 +699,7 @@ margin: 0px 0px;}</string>
        <height>391</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="TripBoxGrid">
+     <layout class="QGridLayout" name="TripBoxGrid" columnminimumwidth="205,205,205,205,205,205">
       <property name="sizeConstraint">
        <enum>QLayout::SetFixedSize</enum>
       </property>
