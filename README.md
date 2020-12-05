@@ -5,6 +5,13 @@ Discussion and suggestions here: https://endless-sphere.com/forums/viewtopic.php
 
 Display example: https://i.imgur.com/vq930iW.png
 
+Users can easily construct or theme the existing .ui file using Qt Designer standalone gui application, and pyuic5 command-line converter (e.g. >pyuic5 ampy.ui -o ampy.py) to draw from these existing widgets as desired for any type of display.
+
+State-of-charge map if not using Li-NCA or similar Lithium chemistry should be replaced. This map is used because it is far more accurate than the linear approximation performed by the controller itself. https://lygte-info.dk/ and https://automeris.io/WebPlotDigitizer/ can be used to generate profiles for specific cells, but cells within a chemistry should be suitable enough. 
+
+Vehicle-specific parameters needed for calculations include battery series groups, parallel cells per group, total Amp-hours, and wheel circumference in millimeters; these can be specified as command-line arguments e.g. python main.py -battseries 21 -battparallel 14 -battah 42.0 -wheel 1972.0
+An additional argument -speedparse/-sp reduces CPU use meaningfully (~9% total) by assuming V6.xxx parameter addresses. If you use a older V5.xxx or newer version you must include the AsiParameterDictionary.xml provided with your copy of ASI's BacDoor application and firmware to get the right addresses.
+
 Key display elements:
 1. Time of day
 2. Battery SOC -- derived from Simpsons-integrated Ah, and reset with the battery charge button after charging from a cubic fit of a high-resolution voltage:state-of-charge array that can be swapped out for different chemistries. 
@@ -38,7 +45,3 @@ Key display elements:
 10. Digital assist level selector -- If using torque sensor or PAS, allows you to control the digital assist level from the display. Power limits can be set for each of 9 levels, regardless of the system/throttle power set in each profile; the smallest of the two determines the torque/PAS limit while the profile limit determines the throttle limit.
 11. Antitheft lock -- Tap lock button to enable antitheft and display PIN input dialog to unlock. This requires an additional hardware connection to the 'Pedal-First-Sensor' and either a 3.3v to 5V level shifter OR transistor gate to supply PFS with 5V when enabled, unless you have the very latest 6.015+ firmware which enables setting pullup resistors for this and Cruise input via MODBUS serial I/O.
 12. ACID-compliant SQL logging of all stats. A rolling database is used for trip statistics that produce incremental counters, and incremental counters are either updated into a row of lifetime statistics for the current discharge cycle, then when a charge is detected a new is created. Thus depth of discharge, regen stats, distance, dates, and other information can be checked for every past discharge cycle while keeping the database very small even for tens of thousands of cycles. 
-
-Users can easily construct or theme the existing .ui file using Qt Designer standalone gui application, and pyuic5 command-line converter (e.g. >pyuic5 ampy.ui -o ampy.py) to draw from these existing widgets as desired for any type of display.
-
-Currently Battery Ah, Wh, number of series groups, state-of-charge map if not using Li-NCA or similar Lithium chemistry, and wheel circumference attributes should be specified in the beginning __init__ of AppWindow in Main for your configuration. Eventually these will be specified in a setup.csv for for easier initial setup.
