@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1876, 1383)
+        MainWindow.resize(1872, 1404)
         MainWindow.setStyleSheet("QMainWindow{\n"
 "    background: solid white; }\n"
 "\n"
@@ -29,6 +29,25 @@ class Ui_MainWindow(object):
 "    left: 25px;\n"
 "    padding: -40 0 0 0\n"
 "}\n"
+"")
+        MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+        MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.profileGroup = QtWidgets.QGroupBox(self.centralwidget)
+        self.profileGroup.setGeometry(QtCore.QRect(10, 1120, 521, 231))
+        font = QtGui.QFont()
+        font.setFamily("Magneto")
+        font.setPointSize(64)
+        font.setStyleStrategy(QtGui.QFont.PreferDefault)
+        self.profileGroup.setFont(font)
+        self.profileGroup.setStyleSheet("QLabel{\n"
+"font: 80pt \'Mistral\'}\n"
+"QGroupBox::title{\n"
+"    font = 50pt \"Magneto\";\n"
+"    padding: -25 0px 0 0px\n"
+"}\n"
+"\n"
 "\n"
 "QPushButton { \n"
 "    background: white;\n"
@@ -53,23 +72,6 @@ class Ui_MainWindow(object):
 "     width: 60px;\n"
 "     height: 60px;\n"
 " }")
-        MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-        MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.profileGroup = QtWidgets.QGroupBox(self.centralwidget)
-        self.profileGroup.setGeometry(QtCore.QRect(10, 1120, 521, 231))
-        font = QtGui.QFont()
-        font.setFamily("Magneto")
-        font.setPointSize(64)
-        font.setStyleStrategy(QtGui.QFont.PreferDefault)
-        self.profileGroup.setFont(font)
-        self.profileGroup.setStyleSheet("QLabel{\n"
-"font: 80pt \'Mistral\'}\n"
-"QGroupBox::title{\n"
-"    font = 50pt \"Magneto\";\n"
-"    padding: -25 0px 0 0px\n"
-"}")
         self.profileGroup.setFlat(False)
         self.profileGroup.setCheckable(False)
         self.profileGroup.setObjectName("profileGroup")
@@ -287,7 +289,32 @@ class Ui_MainWindow(object):
 "border: 5px solid;\n"
 "height: 100px;\n"
 "width: 70px; \n"
-"margin: 0px 0px;}")
+"margin: 0px 0px;}\n"
+"\n"
+"\n"
+"QPushButton { \n"
+"    background: white;\n"
+"    font: 80px \"Magneto\";\n"
+"    border : none}\n"
+"\n"
+"QRadioButton {\n"
+"    border: 20;\n"
+"    padding: 10px;\n"
+"    background: white;\n"
+"    selectionbackgroundcolor: dark grey;\n"
+"    font: 50px;\n"
+"}\n"
+"\n"
+"QRadioButton::indicator{\n"
+"border : 5px solid black; \n"
+"width : 25px;\n"
+"height : 50px; \n"
+"border radius : 1px}\n"
+"\n"
+"QCheckBox::indicator {\n"
+"     width: 60px;\n"
+"     height: 60px;\n"
+" }")
         self.RangeBox.setObjectName("RangeBox")
         self.gridLayoutWidget_4 = QtWidgets.QWidget(self.RangeBox)
         self.gridLayoutWidget_4.setGeometry(QtCore.QRect(10, 80, 501, 127))
@@ -354,7 +381,7 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "QLabel{\n"
-"font: 40pt \'Magneto\'}\n"
+"font: 40pt \"QuickType II Mono\"}\n"
 "QCheckBox::indicator {\n"
 "     width: 60px;\n"
 "     height: 60px;\n"
@@ -372,30 +399,12 @@ class Ui_MainWindow(object):
 "margin: 0px 0px;}")
         self.TripBox.setObjectName("TripBox")
         self.gridLayoutWidget_5 = QtWidgets.QWidget(self.TripBox)
-        self.gridLayoutWidget_5.setGeometry(QtCore.QRect(10, 130, 1301, 391))
+        self.gridLayoutWidget_5.setGeometry(QtCore.QRect(10, 137, 1301, 391))
         self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_5")
         self.TripBoxGrid = QtWidgets.QGridLayout(self.gridLayoutWidget_5)
         self.TripBoxGrid.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.TripBoxGrid.setContentsMargins(0, 0, 0, 0)
         self.TripBoxGrid.setObjectName("TripBoxGrid")
-        self.Trip_4_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_4_1.setObjectName("Trip_4_1")
-        self.TripBoxGrid.addWidget(self.Trip_4_1, 6, 1, 1, 1)
-        self.Trip_1_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_1_2.setObjectName("Trip_1_2")
-        self.TripBoxGrid.addWidget(self.Trip_1_2, 0, 3, 1, 1)
-        self.Trip_4_2_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_4_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_4_2_prefix.setObjectName("Trip_4_2_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_4_2_prefix, 6, 2, 1, 1)
-        self.Trip_1_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_1_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_1_3_prefix.setObjectName("Trip_1_3_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_1_3_prefix, 0, 4, 1, 1)
-        self.Trip_3_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_3_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_3_1_prefix.setObjectName("Trip_3_1_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_3_1_prefix, 5, 0, 1, 1)
         self.Trip_2_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
         self.Trip_2_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.Trip_2_3_prefix.setObjectName("Trip_2_3_prefix")
@@ -403,20 +412,13 @@ class Ui_MainWindow(object):
         self.Trip_3_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
         self.Trip_3_1.setObjectName("Trip_3_1")
         self.TripBoxGrid.addWidget(self.Trip_3_1, 5, 1, 1, 1)
-        self.Trip_2_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_2_1.setObjectName("Trip_2_1")
-        self.TripBoxGrid.addWidget(self.Trip_2_1, 1, 1, 1, 1)
-        self.Trip_4_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_4_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_4_3_prefix.setObjectName("Trip_4_3_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_4_3_prefix, 6, 4, 1, 1)
-        self.Trip_3_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_3_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_3_3_prefix.setObjectName("Trip_3_3_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_3_3_prefix, 5, 4, 1, 1)
+        self.Trip_3_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_3_1_prefix.setObjectName("Trip_3_1_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_3_1_prefix, 5, 0, 1, 1)
         self.Trip_1_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
         font = QtGui.QFont()
-        font.setFamily("Magneto")
+        font.setFamily("QuickType II Mono")
         font.setPointSize(40)
         font.setBold(False)
         font.setItalic(False)
@@ -428,9 +430,92 @@ class Ui_MainWindow(object):
         self.Trip_2_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.Trip_2_2_prefix.setObjectName("Trip_2_2_prefix")
         self.TripBoxGrid.addWidget(self.Trip_2_2_prefix, 1, 2, 1, 1)
+        self.Trip_4_2_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_4_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_4_2_prefix.setObjectName("Trip_4_2_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_4_2_prefix, 6, 2, 1, 1)
+        self.Trip_4_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_4_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_4_1_prefix.setObjectName("Trip_4_1_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_4_1_prefix, 6, 0, 1, 1)
+        self.Trip_5_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_5_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_5_1_prefix.setObjectName("Trip_5_1_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_5_1_prefix, 7, 0, 1, 1)
+        self.Trip_3_2_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_3_2_prefix.setObjectName("Trip_3_2_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_3_2_prefix, 5, 2, 1, 1)
+        self.Trip_5_2_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_5_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_5_2_prefix.setObjectName("Trip_5_2_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_5_2_prefix, 7, 2, 1, 1)
+        self.Trip_1_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_1_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_1_3_prefix.setObjectName("Trip_1_3_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_1_3_prefix, 0, 4, 1, 1)
+        self.Trip_1_2_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_1_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_1_2_prefix.setObjectName("Trip_1_2_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_1_2_prefix, 0, 2, 1, 1)
+        self.Trip_2_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_2_1_prefix.setObjectName("Trip_2_1_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_2_1_prefix, 1, 0, 1, 1)
+        self.Trip_4_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_4_1.setObjectName("Trip_4_1")
+        self.TripBoxGrid.addWidget(self.Trip_4_1, 6, 1, 1, 1)
+        self.Trip_1_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_1_2.setObjectName("Trip_1_2")
+        self.TripBoxGrid.addWidget(self.Trip_1_2, 0, 3, 1, 1)
+        self.Trip_3_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_2.setObjectName("Trip_3_2")
+        self.TripBoxGrid.addWidget(self.Trip_3_2, 5, 3, 1, 1)
+        self.Trip_2_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_2.setObjectName("Trip_2_2")
+        self.TripBoxGrid.addWidget(self.Trip_2_2, 1, 3, 1, 1)
+        self.Trip_4_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_4_2.setObjectName("Trip_4_2")
+        self.TripBoxGrid.addWidget(self.Trip_4_2, 6, 3, 1, 1)
+        self.Trip_4_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_4_3.setObjectName("Trip_4_3")
+        self.TripBoxGrid.addWidget(self.Trip_4_3, 6, 5, 1, 1)
+        self.Trip_2_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_3.setObjectName("Trip_2_3")
+        self.TripBoxGrid.addWidget(self.Trip_2_3, 1, 5, 1, 1)
+        self.Trip_1_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_1_3.setObjectName("Trip_1_3")
+        self.TripBoxGrid.addWidget(self.Trip_1_3, 0, 5, 1, 1)
+        self.Trip_3_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_3.setObjectName("Trip_3_3")
+        self.TripBoxGrid.addWidget(self.Trip_3_3, 5, 5, 1, 1)
+        self.Trip_2_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_2_1.setObjectName("Trip_2_1")
+        self.TripBoxGrid.addWidget(self.Trip_2_1, 1, 1, 1, 1)
+        self.Trip_4_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_4_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_4_3_prefix.setObjectName("Trip_4_3_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_4_3_prefix, 6, 4, 1, 1)
+        self.Trip_3_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_3_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_3_3_prefix.setObjectName("Trip_3_3_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_3_3_prefix, 5, 4, 1, 1)
+        self.Trip_5_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_5_3.setObjectName("Trip_5_3")
+        self.TripBoxGrid.addWidget(self.Trip_5_3, 7, 5, 1, 1)
+        self.Trip_5_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_5_2.setObjectName("Trip_5_2")
+        self.TripBoxGrid.addWidget(self.Trip_5_2, 7, 3, 1, 1)
+        self.Trip_5_3_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_5_3_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.Trip_5_3_prefix.setObjectName("Trip_5_3_prefix")
+        self.TripBoxGrid.addWidget(self.Trip_5_3_prefix, 7, 4, 1, 1)
+        self.Trip_5_1 = QtWidgets.QLabel(self.gridLayoutWidget_5)
+        self.Trip_5_1.setObjectName("Trip_5_1")
+        self.TripBoxGrid.addWidget(self.Trip_5_1, 7, 1, 1, 1)
         self.Trip_1_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
         font = QtGui.QFont()
-        font.setFamily("Magneto")
+        font.setFamily("QuickType II Mono")
         font.setPointSize(40)
         font.setBold(False)
         font.setItalic(False)
@@ -439,49 +524,6 @@ class Ui_MainWindow(object):
         self.Trip_1_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.Trip_1_1_prefix.setObjectName("Trip_1_1_prefix")
         self.TripBoxGrid.addWidget(self.Trip_1_1_prefix, 0, 0, 1, 1)
-        self.Trip_1_2_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_1_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_1_2_prefix.setObjectName("Trip_1_2_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_1_2_prefix, 0, 2, 1, 1)
-        self.Trip_4_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_4_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_4_1_prefix.setObjectName("Trip_4_1_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_4_1_prefix, 6, 0, 1, 1)
-        self.Trip_2_1_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_2_1_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_2_1_prefix.setObjectName("Trip_2_1_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_2_1_prefix, 1, 0, 1, 1)
-        self.Trip_3_2_prefix = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_3_2_prefix.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.Trip_3_2_prefix.setObjectName("Trip_3_2_prefix")
-        self.TripBoxGrid.addWidget(self.Trip_3_2_prefix, 5, 2, 1, 1)
-        self.Trip_2_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_2_2.setObjectName("Trip_2_2")
-        self.TripBoxGrid.addWidget(self.Trip_2_2, 1, 3, 1, 1)
-        self.Trip_4_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_4_2.setObjectName("Trip_4_2")
-        self.TripBoxGrid.addWidget(self.Trip_4_2, 6, 3, 1, 1)
-        self.Trip_3_2 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_3_2.setObjectName("Trip_3_2")
-        self.TripBoxGrid.addWidget(self.Trip_3_2, 5, 3, 1, 1)
-        self.Trip_1_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_1_3.setObjectName("Trip_1_3")
-        self.TripBoxGrid.addWidget(self.Trip_1_3, 0, 5, 1, 1)
-        self.Trip_2_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_2_3.setObjectName("Trip_2_3")
-        self.TripBoxGrid.addWidget(self.Trip_2_3, 1, 5, 1, 1)
-        self.Trip_3_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_3_3.setObjectName("Trip_3_3")
-        self.TripBoxGrid.addWidget(self.Trip_3_3, 5, 5, 1, 1)
-        self.Trip_4_3 = QtWidgets.QLabel(self.gridLayoutWidget_5)
-        self.Trip_4_3.setObjectName("Trip_4_3")
-        self.TripBoxGrid.addWidget(self.Trip_4_3, 6, 5, 1, 1)
-        self.TripBoxGrid.setColumnMinimumWidth(0, 205)
-        self.TripBoxGrid.setColumnMinimumWidth(1, 205)
-        self.TripBoxGrid.setColumnMinimumWidth(2, 205)
-        self.TripBoxGrid.setColumnMinimumWidth(3, 205)
-        self.TripBoxGrid.setColumnMinimumWidth(4, 205)
-        self.TripBoxGrid.setColumnMinimumWidth(5, 205)
         self.Trip_Selector_1 = QtWidgets.QPushButton(self.TripBox)
         self.Trip_Selector_1.setGeometry(QtCore.QRect(690, 20, 121, 111))
         font = QtGui.QFont()
@@ -536,16 +578,16 @@ class Ui_MainWindow(object):
         self.Trip_Selector_2.setChecked(False)
         self.Trip_Selector_2.setAutoExclusive(True)
         self.Trip_Selector_2.setObjectName("Trip_Selector_2")
-        self.Trip_Selector_3 = QtWidgets.QPushButton(self.TripBox)
-        self.Trip_Selector_3.setGeometry(QtCore.QRect(990, 20, 121, 111))
+        self.Reverse = QtWidgets.QPushButton(self.TripBox)
+        self.Reverse.setGeometry(QtCore.QRect(990, 20, 121, 111))
         font = QtGui.QFont()
         font.setFamily("Impact")
         font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
-        self.Trip_Selector_3.setFont(font)
-        self.Trip_Selector_3.setStyleSheet("QPushButton { \n"
+        self.Reverse.setFont(font)
+        self.Reverse.setStyleSheet("QPushButton { \n"
 "    background: white;\n"
 "    font: 100px;\n"
 "    font-family: \"Impact\";\n"
@@ -559,15 +601,14 @@ class Ui_MainWindow(object):
 "    border-style:outset;\n"
 "\n"
 "}")
-        self.Trip_Selector_3.setCheckable(True)
-        self.Trip_Selector_3.setChecked(False)
-        self.Trip_Selector_3.setAutoExclusive(True)
-        self.Trip_Selector_3.setObjectName("Trip_Selector_3")
+        self.Reverse.setCheckable(True)
+        self.Reverse.setChecked(False)
+        self.Reverse.setAutoExclusive(True)
+        self.Reverse.setObjectName("Reverse")
         self.TripReset = QtWidgets.QPushButton(self.TripBox)
         self.TripReset.setGeometry(QtCore.QRect(400, 60, 81, 71))
         font = QtGui.QFont()
         font.setFamily("Magneto")
-        font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
@@ -756,8 +797,7 @@ class Ui_MainWindow(object):
         self.BatteryVoltageBar.setGeometry(QtCore.QRect(700, 490, 491, 51))
         self.BatteryVoltageBar.setStyleSheet(" QProgressBar::chunk {\n"
 "     background-color: black;\n"
-"     width: 44px;\n"
-"     margin:2px;\n"
+"margin: 0px;\n"
 " }\n"
 "QProgressBar {\n"
 "    border-style: solid;\n"
@@ -767,7 +807,7 @@ class Ui_MainWindow(object):
 "}")
         self.BatteryVoltageBar.setMinimum(52)
         self.BatteryVoltageBar.setMaximum(89)
-        self.BatteryVoltageBar.setProperty("value", 89)
+        self.BatteryVoltageBar.setProperty("value", 78)
         self.BatteryVoltageBar.setTextVisible(False)
         self.BatteryVoltageBar.setOrientation(QtCore.Qt.Horizontal)
         self.BatteryVoltageBar.setObjectName("BatteryVoltageBar")
@@ -787,18 +827,15 @@ class Ui_MainWindow(object):
         self.MotorTemperatureBar = QtWidgets.QProgressBar(self.centralwidget)
         self.MotorTemperatureBar.setGeometry(QtCore.QRect(730, 330, 421, 51))
         self.MotorTemperatureBar.setStyleSheet(" QProgressBar::chunk {\n"
-"     background-color: black;\n"
-"     width: 37px;\n"
-"     margin:2px;\n"
-" }\n"
+"     background-color: black;}\n"
 "QProgressBar {\n"
 "    border-style: solid;\n"
 "    border-color: gray;\n"
 "    border-width: 5px;\n"
 "border-radius: 10px\n"
 "}")
-        self.MotorTemperatureBar.setMaximum(110)
-        self.MotorTemperatureBar.setProperty("value", 110)
+        self.MotorTemperatureBar.setMaximum(120)
+        self.MotorTemperatureBar.setProperty("value", 90)
         self.MotorTemperatureBar.setTextVisible(False)
         self.MotorTemperatureBar.setOrientation(QtCore.Qt.Horizontal)
         self.MotorTemperatureBar.setObjectName("MotorTemperatureBar")
@@ -819,8 +856,7 @@ class Ui_MainWindow(object):
         self.BatterySOCBar.setGeometry(QtCore.QRect(640, 630, 611, 51))
         self.BatterySOCBar.setStyleSheet(" QProgressBar::chunk {\n"
 "     background-color: black;\n"
-"     width: 56px;\n"
-"     margin:2px;\n"
+"\n"
 " }\n"
 "QProgressBar {\n"
 "    border-style: solid;\n"
@@ -829,7 +865,7 @@ class Ui_MainWindow(object):
 "border-radius: 10px\n"
 "}")
         self.BatterySOCBar.setMaximum(100)
-        self.BatterySOCBar.setProperty("value", 100)
+        self.BatterySOCBar.setProperty("value", 50)
         self.BatterySOCBar.setTextVisible(False)
         self.BatterySOCBar.setOrientation(QtCore.Qt.Horizontal)
         self.BatterySOCBar.setObjectName("BatterySOCBar")
@@ -847,7 +883,7 @@ class Ui_MainWindow(object):
 "}")
         self.BatterySOCLabel.setObjectName("BatterySOCLabel")
         self.Time = QtWidgets.QLabel(self.centralwidget)
-        self.Time.setGeometry(QtCore.QRect(680, 0, 541, 131))
+        self.Time.setGeometry(QtCore.QRect(650, 0, 591, 131))
         font = QtGui.QFont()
         font.setFamily("Magneto")
         font.setPointSize(78)
@@ -860,7 +896,7 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "# \"Harlow Solid Italic\"")
-        self.Time.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.Time.setAlignment(QtCore.Qt.AlignCenter)
         self.Time.setObjectName("Time")
         self.LockButton = QtWidgets.QPushButton(self.centralwidget)
         self.LockButton.setGeometry(QtCore.QRect(1050, 110, 101, 111))
@@ -886,7 +922,7 @@ class Ui_MainWindow(object):
 "\n"
 "}")
         self.LockButton.setIconSize(QtCore.QSize(16, 16))
-        self.LockButton.setCheckable(True)
+        self.LockButton.setCheckable(False)
         self.LockButton.setObjectName("LockButton")
         self.CheckEngineButton = QtWidgets.QPushButton(self.centralwidget)
         self.CheckEngineButton.setGeometry(QtCore.QRect(880, 110, 121, 111))
@@ -918,7 +954,6 @@ class Ui_MainWindow(object):
         self.BatterySOCReset.setGeometry(QtCore.QRect(730, 110, 111, 111))
         font = QtGui.QFont()
         font.setFamily("Magneto")
-        font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
@@ -941,9 +976,37 @@ class Ui_MainWindow(object):
         self.BatterySOCReset.setIcon(icon2)
         self.BatterySOCReset.setIconSize(QtCore.QSize(76, 96))
         self.BatterySOCReset.setObjectName("BatterySOCReset")
+        self.line = QtWidgets.QFrame(self.centralwidget)
+        self.line.setGeometry(QtCore.QRect(1032, 375, 20, 16))
+        self.line.setStyleSheet("")
+        self.line.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.line.setLineWidth(5)
+        self.line.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line.setObjectName("line")
+        self.line_4 = QtWidgets.QFrame(self.centralwidget)
+        self.line_4.setGeometry(QtCore.QRect(1032, 319, 20, 16))
+        self.line_4.setStyleSheet("")
+        self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.line_4.setLineWidth(5)
+        self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_4.setObjectName("line_4")
+        self.line_2 = QtWidgets.QFrame(self.centralwidget)
+        self.line_2.setGeometry(QtCore.QRect(1032, 536, 20, 16))
+        self.line_2.setStyleSheet("")
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.line_2.setLineWidth(5)
+        self.line_2.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_2.setObjectName("line_2")
+        self.line_3 = QtWidgets.QFrame(self.centralwidget)
+        self.line_3.setGeometry(QtCore.QRect(1032, 479, 20, 16))
+        self.line_3.setStyleSheet("")
+        self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.line_3.setLineWidth(5)
+        self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_3.setObjectName("line_3")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1876, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1872, 21))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -964,33 +1027,39 @@ class Ui_MainWindow(object):
         self.PowerGaugeLabelUnits.setText(_translate("MainWindow", "kW"))
         self.RangeBox.setTitle(_translate("MainWindow", "Range: #"))
         self.TripBox.setTitle(_translate("MainWindow", "Trip"))
-        self.Trip_4_1.setText(_translate("MainWindow", "4_1"))
-        self.Trip_1_2.setText(_translate("MainWindow", "1_2"))
-        self.Trip_4_2_prefix.setText(_translate("MainWindow", "4_2"))
-        self.Trip_1_3_prefix.setText(_translate("MainWindow", "1_3"))
-        self.Trip_3_1_prefix.setText(_translate("MainWindow", "3_1"))
         self.Trip_2_3_prefix.setText(_translate("MainWindow", "2_3"))
         self.Trip_3_1.setText(_translate("MainWindow", "3_1"))
+        self.Trip_3_1_prefix.setText(_translate("MainWindow", "3_1"))
+        self.Trip_1_1.setText(_translate("MainWindow", "1_1"))
+        self.Trip_2_2_prefix.setText(_translate("MainWindow", "2_2"))
+        self.Trip_4_2_prefix.setText(_translate("MainWindow", "4_2"))
+        self.Trip_4_1_prefix.setText(_translate("MainWindow", "4_1"))
+        self.Trip_5_1_prefix.setText(_translate("MainWindow", "5_1"))
+        self.Trip_3_2_prefix.setText(_translate("MainWindow", "3_2"))
+        self.Trip_5_2_prefix.setText(_translate("MainWindow", "5_2"))
+        self.Trip_1_3_prefix.setText(_translate("MainWindow", "1_3"))
+        self.Trip_1_2_prefix.setText(_translate("MainWindow", "1_2"))
+        self.Trip_2_1_prefix.setText(_translate("MainWindow", "2_1"))
+        self.Trip_4_1.setText(_translate("MainWindow", "4_1"))
+        self.Trip_1_2.setText(_translate("MainWindow", "1_2"))
+        self.Trip_3_2.setText(_translate("MainWindow", "3_2"))
+        self.Trip_2_2.setText(_translate("MainWindow", "2_2"))
+        self.Trip_4_2.setText(_translate("MainWindow", "4_2"))
+        self.Trip_4_3.setText(_translate("MainWindow", "4_3"))
+        self.Trip_2_3.setText(_translate("MainWindow", "2_3"))
+        self.Trip_1_3.setText(_translate("MainWindow", "1_3"))
+        self.Trip_3_3.setText(_translate("MainWindow", "3_3"))
         self.Trip_2_1.setText(_translate("MainWindow", "2_1"))
         self.Trip_4_3_prefix.setText(_translate("MainWindow", "4_3"))
         self.Trip_3_3_prefix.setText(_translate("MainWindow", "3_3"))
-        self.Trip_1_1.setText(_translate("MainWindow", "1_1"))
-        self.Trip_2_2_prefix.setText(_translate("MainWindow", "2_2"))
+        self.Trip_5_3.setText(_translate("MainWindow", "5_3"))
+        self.Trip_5_2.setText(_translate("MainWindow", "5_2"))
+        self.Trip_5_3_prefix.setText(_translate("MainWindow", "5_3"))
+        self.Trip_5_1.setText(_translate("MainWindow", "5_1"))
         self.Trip_1_1_prefix.setText(_translate("MainWindow", "1_1"))
-        self.Trip_1_2_prefix.setText(_translate("MainWindow", "1_2"))
-        self.Trip_4_1_prefix.setText(_translate("MainWindow", "4_1"))
-        self.Trip_2_1_prefix.setText(_translate("MainWindow", "2_1"))
-        self.Trip_3_2_prefix.setText(_translate("MainWindow", "3_2"))
-        self.Trip_2_2.setText(_translate("MainWindow", "2_2"))
-        self.Trip_4_2.setText(_translate("MainWindow", "4_2"))
-        self.Trip_3_2.setText(_translate("MainWindow", "3_2"))
-        self.Trip_1_3.setText(_translate("MainWindow", "1_3"))
-        self.Trip_2_3.setText(_translate("MainWindow", "2_3"))
-        self.Trip_3_3.setText(_translate("MainWindow", "3_3"))
-        self.Trip_4_3.setText(_translate("MainWindow", "4_3"))
         self.Trip_Selector_1.setText(_translate("MainWindow", "1"))
         self.Trip_Selector_2.setText(_translate("MainWindow", "2"))
-        self.Trip_Selector_3.setText(_translate("MainWindow", "3"))
+        self.Reverse.setText(_translate("MainWindow", "D"))
         self.Trip_Selector_Debug.setText(_translate("MainWindow", "g"))
         self.PID_Kp_Label.setText(_translate("MainWindow", "Kp"))
         self.PID_Ki_Label.setText(_translate("MainWindow", "Ki"))

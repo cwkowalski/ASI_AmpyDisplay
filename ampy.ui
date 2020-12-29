@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1876</width>
-    <height>1383</height>
+    <width>1872</width>
+    <height>1404</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,30 +29,7 @@ QGroupBox::title {
 	left: 25px;
 	padding: -40 0 0 0
 }
-
-QPushButton { 
-	background: white;
-	font: 80px &quot;Magneto&quot;;
-	border : none}
-
-QRadioButton {
-	border: 20;
-	padding: 10px;
-	background: white;
-	selectionbackgroundcolor: dark grey;
-	font: 50px;
-}
-
-QRadioButton::indicator{
-border : 5px solid black; 
-width : 25px;
-height : 50px; 
-border radius : 1px}
-
-QCheckBox::indicator {
-     width: 60px;
-     height: 60px;
- }</string>
+</string>
   </property>
   <property name="toolButtonStyle">
    <enum>Qt::ToolButtonIconOnly</enum>
@@ -83,7 +60,32 @@ font: 80pt 'Mistral'}
 QGroupBox::title{
 	font = 50pt &quot;Magneto&quot;;
 	padding: -25 0px 0 0px
-}</string>
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
     </property>
     <property name="title">
      <string>Profiles</string>
@@ -536,7 +538,32 @@ background-color: black;
 border: 5px solid;
 height: 100px;
 width: 70px; 
-margin: 0px 0px;}</string>
+margin: 0px 0px;}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
     </property>
     <property name="title">
      <string>Range: #</string>
@@ -670,7 +697,7 @@ QSlider::groove:horizontal {
 }
 
 QLabel{
-font: 40pt 'Magneto'}
+font: 40pt &quot;QuickType II Mono&quot;}
 QCheckBox::indicator {
      width: 60px;
      height: 60px;
@@ -694,26 +721,65 @@ margin: 0px 0px;}</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>130</y>
+       <y>137</y>
        <width>1301</width>
        <height>391</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="TripBoxGrid" columnminimumwidth="205,205,205,205,205,205">
+     <layout class="QGridLayout" name="TripBoxGrid">
       <property name="sizeConstraint">
        <enum>QLayout::SetFixedSize</enum>
       </property>
-      <item row="6" column="1">
-       <widget class="QLabel" name="Trip_4_1">
+      <item row="1" column="4">
+       <widget class="QLabel" name="Trip_2_3_prefix">
         <property name="text">
-         <string>4_1</string>
+         <string>2_3</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QLabel" name="Trip_1_2">
+      <item row="5" column="1">
+       <widget class="QLabel" name="Trip_3_1">
         <property name="text">
-         <string>1_2</string>
+         <string>3_1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="Trip_3_1_prefix">
+        <property name="text">
+         <string>3_1</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="Trip_1_1">
+        <property name="font">
+         <font>
+          <family>QuickType II Mono</family>
+          <pointsize>40</pointsize>
+          <weight>50</weight>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>1_1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="Trip_2_2_prefix">
+        <property name="text">
+         <string>2_2</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -721,6 +787,46 @@ margin: 0px 0px;}</string>
        <widget class="QLabel" name="Trip_4_2_prefix">
         <property name="text">
          <string>4_2</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="Trip_4_1_prefix">
+        <property name="text">
+         <string>4_1</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="Trip_5_1_prefix">
+        <property name="text">
+         <string>5_1</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLabel" name="Trip_3_2_prefix">
+        <property name="text">
+         <string>3_2</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QLabel" name="Trip_5_2_prefix">
+        <property name="text">
+         <string>5_2</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -737,30 +843,86 @@ margin: 0px 0px;}</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="Trip_3_1_prefix">
+      <item row="0" column="2">
+       <widget class="QLabel" name="Trip_1_2_prefix">
         <property name="text">
-         <string>3_1</string>
+         <string>1_2</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QLabel" name="Trip_2_3_prefix">
+      <item row="1" column="0">
+       <widget class="QLabel" name="Trip_2_1_prefix">
+        <property name="text">
+         <string>2_1</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLabel" name="Trip_4_1">
+        <property name="text">
+         <string>4_1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="Trip_1_2">
+        <property name="text">
+         <string>1_2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QLabel" name="Trip_3_2">
+        <property name="text">
+         <string>3_2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="Trip_2_2">
+        <property name="text">
+         <string>2_2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="3">
+       <widget class="QLabel" name="Trip_4_2">
+        <property name="text">
+         <string>4_2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="5">
+       <widget class="QLabel" name="Trip_4_3">
+        <property name="text">
+         <string>4_3</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QLabel" name="Trip_2_3">
         <property name="text">
          <string>2_3</string>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="Trip_1_3">
+        <property name="text">
+         <string>1_3</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QLabel" name="Trip_3_1">
+      <item row="5" column="5">
+       <widget class="QLabel" name="Trip_3_3">
         <property name="text">
-         <string>3_1</string>
+         <string>3_3</string>
         </property>
        </widget>
       </item>
@@ -791,29 +953,34 @@ margin: 0px 0px;}</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="Trip_1_1">
-        <property name="font">
-         <font>
-          <family>Magneto</family>
-          <pointsize>40</pointsize>
-          <weight>50</weight>
-          <italic>false</italic>
-          <bold>false</bold>
-         </font>
-        </property>
+      <item row="7" column="5">
+       <widget class="QLabel" name="Trip_5_3">
         <property name="text">
-         <string>1_1</string>
+         <string>5_3</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="Trip_2_2_prefix">
+      <item row="7" column="3">
+       <widget class="QLabel" name="Trip_5_2">
         <property name="text">
-         <string>2_2</string>
+         <string>5_2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="4">
+       <widget class="QLabel" name="Trip_5_3_prefix">
+        <property name="text">
+         <string>5_3</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLabel" name="Trip_5_1">
+        <property name="text">
+         <string>5_1</string>
         </property>
        </widget>
       </item>
@@ -821,7 +988,7 @@ margin: 0px 0px;}</string>
        <widget class="QLabel" name="Trip_1_1_prefix">
         <property name="font">
          <font>
-          <family>Magneto</family>
+          <family>QuickType II Mono</family>
           <pointsize>40</pointsize>
           <weight>50</weight>
           <italic>false</italic>
@@ -833,95 +1000,6 @@ margin: 0px 0px;}</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="Trip_1_2_prefix">
-        <property name="text">
-         <string>1_2</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="Trip_4_1_prefix">
-        <property name="text">
-         <string>4_1</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="Trip_2_1_prefix">
-        <property name="text">
-         <string>2_1</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLabel" name="Trip_3_2_prefix">
-        <property name="text">
-         <string>3_2</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="Trip_2_2">
-        <property name="text">
-         <string>2_2</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="3">
-       <widget class="QLabel" name="Trip_4_2">
-        <property name="text">
-         <string>4_2</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="3">
-       <widget class="QLabel" name="Trip_3_2">
-        <property name="text">
-         <string>3_2</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="5">
-       <widget class="QLabel" name="Trip_1_3">
-        <property name="text">
-         <string>1_3</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
-       <widget class="QLabel" name="Trip_2_3">
-        <property name="text">
-         <string>2_3</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="5">
-       <widget class="QLabel" name="Trip_3_3">
-        <property name="text">
-         <string>3_3</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="5">
-       <widget class="QLabel" name="Trip_4_3">
-        <property name="text">
-         <string>4_3</string>
         </property>
        </widget>
       </item>
@@ -1021,7 +1099,7 @@ QPushButton::pressed {
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="Trip_Selector_3">
+    <widget class="QPushButton" name="Reverse">
      <property name="geometry">
       <rect>
        <x>990</x>
@@ -1056,7 +1134,7 @@ QPushButton::pressed {
 }</string>
      </property>
      <property name="text">
-      <string>3</string>
+      <string>D</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -1080,7 +1158,6 @@ QPushButton::pressed {
      <property name="font">
       <font>
        <family>Magneto</family>
-       <pointsize>-1</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -1456,8 +1533,7 @@ QSlider::groove:horizontal {
     <property name="styleSheet">
      <string notr="true"> QProgressBar::chunk {
      background-color: black;
-     width: 44px;
-     margin:2px;
+margin: 0px;
  }
 QProgressBar {
     border-style: solid;
@@ -1473,7 +1549,7 @@ border-radius: 10px
      <number>89</number>
     </property>
     <property name="value">
-     <number>89</number>
+     <number>78</number>
     </property>
     <property name="textVisible">
      <bool>false</bool>
@@ -1520,10 +1596,7 @@ border-radius: 10px
     </property>
     <property name="styleSheet">
      <string notr="true"> QProgressBar::chunk {
-     background-color: black;
-     width: 37px;
-     margin:2px;
- }
+     background-color: black;}
 QProgressBar {
     border-style: solid;
 	border-color: gray;
@@ -1532,10 +1605,10 @@ border-radius: 10px
 }</string>
     </property>
     <property name="maximum">
-     <number>110</number>
+     <number>120</number>
     </property>
     <property name="value">
-     <number>110</number>
+     <number>90</number>
     </property>
     <property name="textVisible">
      <bool>false</bool>
@@ -1583,8 +1656,7 @@ border-radius: 10px
     <property name="styleSheet">
      <string notr="true"> QProgressBar::chunk {
      background-color: black;
-     width: 56px;
-     margin:2px;
+
  }
 QProgressBar {
     border-style: solid;
@@ -1597,7 +1669,7 @@ border-radius: 10px
      <number>100</number>
     </property>
     <property name="value">
-     <number>100</number>
+     <number>50</number>
     </property>
     <property name="textVisible">
      <bool>false</bool>
@@ -1636,9 +1708,9 @@ border-radius: 10px
    <widget class="QLabel" name="Time">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>650</x>
       <y>0</y>
-      <width>541</width>
+      <width>591</width>
       <height>131</height>
      </rect>
     </property>
@@ -1662,7 +1734,7 @@ border-radius: 10px
      <string>12:34:56</string>
     </property>
     <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QPushButton" name="LockButton">
@@ -1709,7 +1781,7 @@ QPushButton::pressed {
      </size>
     </property>
     <property name="checkable">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="CheckEngineButton">
@@ -1768,7 +1840,6 @@ QPushButton::pressed {
     <property name="font">
      <font>
       <family>Magneto</family>
-      <pointsize>-1</pointsize>
       <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
@@ -1802,13 +1873,101 @@ QPushButton::pressed {
      </size>
     </property>
    </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>1032</x>
+      <y>375</y>
+      <width>20</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>5</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="Line" name="line_4">
+    <property name="geometry">
+     <rect>
+      <x>1032</x>
+      <y>319</y>
+      <width>20</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>5</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="Line" name="line_2">
+    <property name="geometry">
+     <rect>
+      <x>1032</x>
+      <y>536</y>
+      <width>20</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>5</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="Line" name="line_3">
+    <property name="geometry">
+     <rect>
+      <x>1032</x>
+      <y>479</y>
+      <width>20</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>5</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1876</width>
+     <width>1872</width>
      <height>21</height>
     </rect>
    </property>

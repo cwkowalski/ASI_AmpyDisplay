@@ -3,8 +3,8 @@ from xml.etree import ElementTree as et
 from numpy import array
 from scipy import interpolate as interp
 import csv
-import minimalmodbus
-import serial
+#import minimalmodbus
+#import serial
 
 # =======================================================
 # ASI Object Dictionary filepath to build dictionary definitions
