@@ -19,6 +19,8 @@ import simple_pid as pid
 import sqlite3
 import argparse
 from number_pad import numberPopup
+from options_dialog import optionsDialog
+from ampy_options import Ui_OptDialog
 
 # Process = psutil.Process(getpid()) # To get memory
 
@@ -197,13 +199,16 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.iter_attribute_slicer_threshold = self.mean_length + 500  # 500 = 8 seconds; re-slice for new means each 8 sec.
         self.iter_interp_threshold = int(self.mean_length / self.iter_threshold)  # Equivalent time vs. mean_length
         self.trip_selector = 1
-        self.trip_selected = True
+        #self.trip_selected = True
         self.gui_dict = {}
         # Set up the GUI
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowFlags(QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint))
+        self.statusBar().setVisible(False)
 
         # Connect buttons
+        self.ui.OptionsBtn.clicked.connect(self.optionspopup)
         self.ui.BatterySOCReset.clicked.connect(self.socreset)
         self.ui.Reverse.toggled.connect(lambda: self.signal_reverse(self.ui.Reverse.isChecked()))
         #self.ui.Reverse.setStyleSheet()
@@ -220,10 +225,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         except AttributeError:
             pass
         self.ui.LockButton.clicked.connect(lambda: self.signal_antitheft(True))
-        self.ui.RangeBtn.toggled.connect(lambda: self.trip_range_enable(
-            self.ui.RangeBtn.isChecked(), self.ui.RangeSlider.value()))
-        self.ui.RangeSlider.valueChanged.connect(lambda: self.trip_range_enable(
-            self.trip_range_enabled, self.ui.RangeSlider.value()))
+        #self.ui.RangeBtn.toggled.connect(lambda: self.trip_range_enable(
+        #    self.ui.RangeBtn.isChecked(), self.ui.RangeSlider.value()))
+        #self.ui.RangeSlider.valueChanged.connect(lambda: self.trip_range_enable(
+        #    self.trip_range_enabled, self.ui.RangeSlider.value()))
         self.ui.AssistSlider.valueChanged.connect(self.signal_assist_level)
         self.ui.AssistSlider.setMaximum(9)
         # self.ui.AssistSlider.setTickInterval(1)
@@ -258,6 +263,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #self.ui.SpeedGauge.set_enable_big_scaled_grid(False)
         self.ui.SpeedGauge.set_enable_value_text(False)
         self.ui.SpeedGauge.set_gauge_color_inner_radius_factor(950)
+        self.ui.SpeedGauge.set_scale_polygon_colors([[0.00, QtCore.Qt.red], [0.25, QtCore.Qt.yellow], [1,
+                                                     QtCore.Qt.green]])
         self.ui.SpeedGauge.set_enable_filled_Polygon(False)
         self.ui.SpeedGauge.set_enable_barGraph(True)
         #self.ui.SpeedGauge.set_enable_ScaleText(False)
@@ -266,6 +273,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.SpeedGauge.set_start_scale_angle(150)
         self.ui.SpeedGauge.set_scala_main_count(8)
         self.ui.SpeedGauge.initial_scale_fontsize = 30
+        self.ui.PowerGauge.set_scale_polygon_colors([[0.00, QtCore.Qt.red], [0.15, QtCore.Qt.yellow], [1,
+                                                     QtCore.Qt.green]])
         self.ui.PowerGauge.set_enable_value_text(False)
         self.ui.PowerGauge.set_gauge_color_inner_radius_factor(950)
         self.ui.PowerGauge.set_enable_filled_Polygon(False)
@@ -417,8 +426,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.gui_dict['MotorTemperatureLabel'] = '{:.0f}'.format(
             self.floop['Motor_Temperature']) + '\xB0' + 'C'  # 'T<sub>M</sub>:' +
         self.gui_dict['MotorTemperatureBar'] = int(self.floop['Motor_Temperature'])
-        self.gui_dict['BatteryVoltageLabel'] = '{:.1f}'.format(self.floop['Battery_Voltage']) + '<sub>V</sub>  ' \
-                                               + '<sub>' + '{:.1f}'.format(self.flt_batt_volts_drop) + '</sub>'
+        self.gui_dict['BatteryVoltageLabel'] = '{:.1f}'.format(self.floop['Battery_Voltage']) + '<sub>V</sub>'
+        self.gui_dict['BatteryVoltageDropLabel'] = '{:.1f}'.format(self.flt_batt_volts_drop)
         self.gui_dict['BatteryVoltageBar'] = int(self.floop['Battery_Voltage'])
         # self.gui_dict['BatteryVoltageDropLabel'] = '| ' + self.batt_vdrop
         self.gui_dict['BatterySOCLabel'] = 'SOC: ' + '{:.1f}'.format(self.flt_soc)
@@ -429,40 +438,51 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.gui_dict['SpeedGauge'] = self.floop['Vehicle_Speed']
         self.gui_dict['PowerGauge'] = self.floop['Battery_Current'] * self.floop['Battery_Voltage']
 
-        # if self.trip_selector == 1:, populate for first schema:
-        self.gui_dict['Trip_1_1'] = '{:.2f}'.format(self.flt_wh)
-        self.gui_dict['Trip_1_2'] = '{:.2f}'.format(self.flt_whmi_avg)
-        self.gui_dict['Trip_1_3'] = '{:.1f}'.format(self.flt_ah)
-        self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.get_battwh())
-        # For remaining wh, consider using socmap_soc *0.03 = ah_rem/cell and simps over volts
-        self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_inst)
-        self.gui_dict['Trip_2_3'] = '{:.1f}'.format(self.battah - self.flt_ah)
-        self.gui_dict['Trip_3_1'] = '{:.0f}'.format(self.flt_whregen)
-        self.gui_dict['Trip_3_2'] = '{:.0f}'.format(self.flt_dist)
-        self.gui_dict['Trip_3_3'] = '{:.1f}'.format(self.flt_ahregen)
-        self.gui_dict['Trip_4_1'] = '{:.0f}'.format(self.flt_motor_temp_max)  # Intensive if long
-        self.gui_dict['Trip_4_2'] = self.strfdelta(datetime.timedelta(seconds = (self.time2 - self.start_time)), '{hours}:{minutes}:{seconds}')
-        self.gui_dict['Trip_4_3'] = '{:.0f}'.format(max(self.list_batt_amps))
-        moving_indexes = [i for i in range(self.iter_attribute_slicer) if self.list_speed[i] > 0]
-        # Get indexes where speed > 0, then average speed for those indexes
-        self.gui_dict['Trip_5_1'] = '{:.0f}'.format(mean([self.list_speed[i] for i in [i for i in
-                                        range(self.iter_attribute_slicer) if self.list_speed[i] > 0]]))
-        # Get indexes where speed > 0, then sum flooptime for those indexes, convert to timedelta, then format
-        self.gui_dict['Trip_5_2'] = self.strfdelta(datetime.timedelta(seconds = sum([self.list_floop_interval[i]
-                                        for i in [i for i in range(self.iter_attribute_slicer)
-                                        if self.list_speed[i] > 0]])), '{hours}:{minutes}:{seconds}')
-        self.gui_dict['Trip_5_3'] = '{:.0f}'.format(self.flt_batt_volts_min)
-        # avg movspd*     |Move-time  | Vmin
+        if self.trip_selector == 1: # populate for first schema:
+            self.gui_dict['Trip_1_1'] = '{:.2f}'.format(self.flt_wh)
+            self.gui_dict['Trip_1_2'] = '{:.2f}'.format(self.flt_whmi_avg)
+            self.gui_dict['Trip_1_3'] = '{:.1f}'.format(self.flt_ah)
+            self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.get_battwh())
+            # For remaining wh, consider using socmap_soc *0.03 = ah_rem/cell and simps over volts
+            self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_inst)
+            self.gui_dict['Trip_2_3'] = '{:.1f}'.format(self.battah - self.flt_ah)
+            self.gui_dict['Trip_3_1'] = '{:.0f}'.format(self.flt_whregen)
+            self.gui_dict['Trip_3_2'] = '{:.0f}'.format(self.flt_dist)
+            self.gui_dict['Trip_3_3'] = '{:.1f}'.format(self.flt_ahregen)
+        if self.trip_selector == 2:
+            # Get indexes where speed > 0
+            moving_indexes = [i for i in range(self.iter_attribute_slicer) if self.list_speed[i] > 0]
+            moving_speed_list = [self.list_speed[i] for i in moving_indexes]
+            # Fill dict
+            self.gui_dict['Trip_1_1'] = '{:.1f}'.format(self.flt_whmi_avg / self.get_battwh())
+            self.gui_dict['Trip_1_2'] = self.strfdelta(datetime.timedelta(seconds = (self.time2 - self.start_time)), '{hours}:{minutes}')
+            self.gui_dict['Trip_1_3'] = '{:.0f}'.format(max(self.list_batt_amps))
+            self.gui_dict['Trip_2_1'] = '{:.1f}'.format(self.flt_whmi_inst / self.get_battwh())
+            # Get indexes where speed > 0, then sum flooptime for those indexes, convert to timedelta, then format
+            self.gui_dict['Trip_2_3'] = '{:.1f}'.format(self.flt_batt_volts_min)
+            self.gui_dict['Trip_3_1'] = '{:.0f}'.format(self.flt_motor_temp_max)  # Intensive if long
+            if len(moving_indexes) > 0:
+                self.gui_dict['Trip_2_2'] = self.strfdelta(datetime.timedelta(seconds = sum([self.list_floop_interval[i]
+                                            for i in moving_indexes])), '{hours}:{minutes}')
+                self.gui_dict['Trip_3_2'] = '{:.0f}'.format(mean(moving_speed_list))
+                self.gui_dict['Trip_3_3'] = '{:.0f}'.format(max(moving_speed_list))
+            else:
+                self.gui_dict['Trip_2_2'], self.gui_dict['Trip_3_2'], self.gui_dict['Trip_3_3'] = str(0), str(0), str(0)
+
+            ## New trip 2
+            # Range-rem avg   | Trip Time    | Amp-max                # Tmax to MotTempLabel
+            # Range-rem inst  | Move-time    | Vmin
+            # Tmax            | Avg movspd*  | Spd-max
+
+            # avg movspd*     |Move-time  | Vmin
         ###### New Trip Pane:
         # Trip_Selector_1...4 sets self.tripselector
         # Trip_col#_row# for trip labels, 3col 4row
         # When preparing GUI, check self.tripselector to determine strings.
         #### New trip 1??
-        # Watt hours used |Wh/mi_T    | Amp-hours used
-        # Wh remaining    |Wh/mi_I    | Amp-hours remaining
-        # Regen wh gained |Range-rem  | Amp-hours regen
-        # Dist            |Trip Time  | Amp-max                # Tmax to MotTempLabel
-        # avg movspd*     |Move-time  | Vmin
+        # Watt hours used |Wh/mi_avg  | Amp-hours used
+        # Wh remaining    |Wh/mi_Inst | Amp-hours remaining
+        # Regen wh gained |dist-travel| Amp-hours regen
 
         #### Trip 1
         # Watt hours used |Wh/mi_T    | Amp-hours used
@@ -486,41 +506,42 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.CheckEngineButton.show()
         else:
             self.ui.CheckEngineButton.hide()
-        if self.trip_selected:  # Ready for new Trip windows.
-            if self.trip_selector == 1:  # Update unit labels for changed trip display.
-                self.ui.Trip_1_1_prefix.setText('Wh<sub>use</sub>: ')
-                self.ui.Trip_1_2_prefix.setText('Wh/mi<sub>Trip</sub>:')
-                self.ui.Trip_1_3_prefix.setText('Ah<sub>use</sub>: ')
-                self.ui.Trip_2_1_prefix.setText('Wh<sub>rem</sub>: ')
-                self.ui.Trip_2_2_prefix.setText('Wh/mi<sub>Inst</sub>:')
-                self.ui.Trip_2_3_prefix.setText('Ah<sub>rem</sub>: ')
-                self.ui.Trip_3_1_prefix.setText('Wh<sub>reg</sub>: ')
-                self.ui.Trip_3_2_prefix.setText('Miles: ')
-                self.ui.Trip_3_3_prefix.setText('Ah<sub>regen</sub>: ')
-                self.ui.Trip_4_1_prefix.setText('T<sub>max</sub>: ')
-                self.ui.Trip_4_2_prefix.setText('Time<sub>tot</sub>: ')
-                self.ui.Trip_4_3_prefix.setText('A<sub>max</sub>: ')
-                self.ui.Trip_5_1_prefix.setText('Mph<sub>mov</sub>:')
-                self.ui.Trip_5_2_prefix.setText('Time<sub>mov</sub>:')
-                self.ui.Trip_5_3_prefix.setText('V<sub>min</sub>: ')
-                self.trip_selected = False
-            elif self.trip_selector == 2:
-                self.trip_selected = False
-                pass
-            elif self.trip_selector == 3:
-                self.trip_selected = False
-                pass
-            elif self.trip_selector == 4:
-                self.trip_selected = False
-                pass
+        #if self.trip_selected:  # Ready for new Trip windows.
+        if self.trip_selector == 1:  # Update unit labels for changed trip display.
+            self.ui.Trip_1_1_prefix.setText('Wh<sub>use</sub>: ')
+            self.ui.Trip_1_2_prefix.setText('Wh/mi<sub>Trip</sub>:')
+            self.ui.Trip_1_3_prefix.setText('Ah<sub>use</sub>: ')
+            self.ui.Trip_2_1_prefix.setText('Wh<sub>rem</sub>: ')
+            self.ui.Trip_2_2_prefix.setText('Wh/mi<sub>Inst</sub>:')
+            self.ui.Trip_2_3_prefix.setText('Ah<sub>rem</sub>: ')
+            self.ui.Trip_3_1_prefix.setText('Wh<sub>reg</sub>: ')
+            self.ui.Trip_3_2_prefix.setText('Miles: ')
+            self.ui.Trip_3_3_prefix.setText('Ah<sub>regen</sub>: ')
+
+        ## New trip 2
+        # Range-rem avg   | Trip Time    | Amp-max                # Tmax to MotTempLabel
+        # Range-rem inst  | Move-time    | Vmin
+        # Tmax            | Avg movspd*  | Spd-max
+        elif self.trip_selector == 2:
+            self.ui.Trip_1_1_prefix.setText('Rng<sub>avg</sub>: ')
+            self.ui.Trip_1_2_prefix.setText('T<sub>trip</sub>: ')
+            self.ui.Trip_1_3_prefix.setText('A<sub>max</sub>: ')
+            self.ui.Trip_2_1_prefix.setText('Rng<sub>inst</sub>: ')
+            self.ui.Trip_2_2_prefix.setText('T<sub>mov</sub>:')
+            self.ui.Trip_2_3_prefix.setText('V<sub>min</sub>: ')
+            self.ui.Trip_3_1_prefix.setText('T<sub>max</sub>: ')
+            #self.ui.Trip_3_2_prefix.setText('Miles: ')
+            self.ui.Trip_3_2_prefix.setText('Mph<sub>mov</sub>:')
+            self.ui.Trip_3_3_prefix.setText('Mph<sub>max</sub>: ')
+        elif self.trip_selector == 3:
+            pass
 
         self.ui.MotorTemperatureLabel.setText(self.gui_dict['MotorTemperatureLabel'])
         self.ui.MotorTemperatureBar.setValue(self.gui_dict['MotorTemperatureBar'])
         self.ui.BatteryVoltageLabel.setText(self.gui_dict['BatteryVoltageLabel'])
         self.ui.BatteryVoltageBar.setValue(self.gui_dict['BatteryVoltageBar'])
-        # self.ui.BatteryVoltageDropLabel.setText(self.gui_dict['BatteryVoltageDropLabel'])  # Label written as formatted str.
+        self.ui.BatteryVoltageDropLabel.setText(self.gui_dict['BatteryVoltageDropLabel'])  # Label written as formatted str.
         self.ui.BatterySOCLabel.setText(self.gui_dict['BatterySOCLabel'])
-        # self.ui.MotorTemperatureBar.setValue(self.gui_dict['BatterySOCBar'])
         self.ui.BatterySOCBar.setValue(self.gui_dict['BatterySOCBar'])
         self.ui.SpeedGauge.update_value(self.gui_dict['SpeedGauge'])
         self.ui.SpeedGaugeLabel.setText(self.gui_dict['SpeedGaugeLabel'])
@@ -536,12 +557,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.Trip_3_1.setText(self.gui_dict['Trip_3_1'])
         self.ui.Trip_3_2.setText(self.gui_dict['Trip_3_2'])
         self.ui.Trip_3_3.setText(self.gui_dict['Trip_3_3'])
-        self.ui.Trip_4_1.setText(self.gui_dict['Trip_4_1'])
-        self.ui.Trip_4_2.setText(self.gui_dict['Trip_4_2'])
-        self.ui.Trip_4_3.setText(self.gui_dict['Trip_4_3'])
-        self.ui.Trip_5_1.setText(self.gui_dict['Trip_5_1'])
-        self.ui.Trip_5_2.setText(self.gui_dict['Trip_5_2'])
-        self.ui.Trip_5_3.setText(self.gui_dict['Trip_5_3'])
+        #if self.trip_selector == 2:
+        #    self.ui.Trip_4_1.setText(self.gui_dict['Trip_4_1'])
+        #    self.ui.Trip_4_2.setText(self.gui_dict['Trip_4_2'])
+        #    self.ui.Trip_4_3.setText(self.gui_dict['Trip_4_3'])
+        #    self.ui.Trip_5_1.setText(self.gui_dict['Trip_5_1'])
+        #    self.ui.Trip_5_2.setText(self.gui_dict['Trip_5_2'])
+        #    self.ui.Trip_5_3.setText(self.gui_dict['Trip_5_3'])
         # print('Gui updated!')
     def trip_range_enable(self, bool, range):
         # todo: check that slider dynamically updates self.flt_range_limit
@@ -592,8 +614,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def signal_assist_level(self):
         level = self.ui.AssistSlider.value()
         # print('Assist State is now ', level)
-        title = 'Assist: ' + str(level)
-        self.ui.AssistBox.setTitle(title)  # Probably best to leave command-related gui updates in their callers,
+        # title = 'Assist: ' + str(level)
+        self.ui.AssistSliderLabel.setText('Assist: ' + str(level))  # Probably best to leave command-related gui updates in their callers,
         # as this way the elements are only updated when needed instead of repeatedly repainted.
         self.workmsg.emit(-level)  # Positive integers in worker reserved for trip limiter %'s
         # self.ui.SpeedGauge.update_value(level)  # Test couple assist level to speedo
@@ -624,17 +646,21 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.pinpopup = numberPopup(self.ui, self.lockpin, self.signal_antitheft)
         # self.pinpopup.setParent(self.ui.centralwidget)
         self.pinpopup.setStyleSheet('QPushButton {border-style: inset;border-color: dark grey;'
-        'border-width: 6px;border-radius:30px;font: 80pt "Magneto";padding: 0px 0px 0px 0px;} '
+        'border-width: 3px;border-radius:10px;font: 40pt "Magneto";padding: 0px 0px 0px 0px;} '
                                     'QPushButton::pressed{border-style: outset;}'
-                                    'QLineEdit{font: 80pt "Magneto";}')
-        self.pinpopup.move(self.ui.centralwidget.rect().center() -
-                           QtCore.QPoint(self.pinpopup.width()/2, self.pinpopup.height()/2))
+                                    'QLineEdit{font: 40pt "Magneto";}')
+        # todo: Can't center without hardcoding, need another strategy for universal layout compatibility.
+        self.pinpopup.move(self.ui.centralwidget.rect().center() + QtCore.QPoint(self.pinpopup.width()/5, 37))
         self.pinpopup.show()
+
+    def optionspopup(self):
+        self.optpopup = optionsDialog(self.ui)
+        self.optpopup.show()
     def tripselect(self, button_bool, command):
         print('Trip Selector ' + str(command) + ' is: ' + str(button_bool))
         if button_bool == True:
             self.trip_selector = command
-            self.trip_selected = True
+            #self.trip_selected = True
     def socreset(self):
         self.flt_ah = self.battah * (
                     1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts) / 21)))  # battah * SOC used coefficient

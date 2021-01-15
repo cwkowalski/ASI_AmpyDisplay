@@ -13,7 +13,7 @@ class numberPopup(QWidget):
         self.args = args
         self.constantText = constantText
         self.setObjectName("Form")
-        self.resize(1100, 900)
+        self.resize(800, 480)
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.verticalLayout.setObjectName("verticalLayout")
         self.lineEdit = QtWidgets.QLineEdit(self)

@@ -18,7 +18,7 @@ Obdic = xml.iterfind('Parameters/ParameterDescription')
 # IO class
 class BACModbus():
     def __init__(self):
-        self.port = "COM4"
+        self.port = "/dev/ttyUSB0"
         self.address = 1
         self.method = 'rtu'
         self.baudrate = 115200

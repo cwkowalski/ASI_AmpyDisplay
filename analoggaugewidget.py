@@ -669,7 +669,7 @@ class AnalogGaugeWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         # Koordinatenursprung in die Mitte der Flaeche legen
         painter.translate(self.width() / 2, self.height() / 2)
-        painter.setPen(QPen(Qt.black, 7, Qt.SolidLine))
+        painter.setPen(QPen(Qt.black, 2, Qt.SolidLine))
         painter.setBrush(self.NeedleColor)
         painter.rotate(((self.value - self.value_offset - self.value_min) * self.scale_angle_size /
                         (self.value_max - self.value_min)) + 90 + self.scale_angle_start_value)

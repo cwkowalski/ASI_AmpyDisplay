@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="root">
+    <file>lock_icon.png</file>
+    <file>Settings-icon.png</file>
     <file>icon_charged.png</file>
     <file>reset.png</file>
     <file>L.png</file>
