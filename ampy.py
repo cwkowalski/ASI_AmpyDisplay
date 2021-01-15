@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ampy_800_480.ui'
+# Form implementation generated from reading ui file 'ampy_800_480_test.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.2
 #
@@ -344,7 +344,11 @@ class Ui_MainWindow(object):
 "    border-style:outset;\n"
 "\n"
 "}")
-        self.LockButton.setIconSize(QtCore.QSize(16, 16))
+        self.LockButton.setText("")
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/root/lock_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.LockButton.setIcon(icon)
+        self.LockButton.setIconSize(QtCore.QSize(28, 28))
         self.LockButton.setCheckable(False)
         self.LockButton.setObjectName("LockButton")
         self.CheckEngineButton = QtWidgets.QPushButton(self.centralwidget)
@@ -394,9 +398,9 @@ class Ui_MainWindow(object):
 "\n"
 "}")
         self.BatterySOCReset.setText("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/root/icon_charged.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.BatterySOCReset.setIcon(icon)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/root/icon_charged.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.BatterySOCReset.setIcon(icon1)
         self.BatterySOCReset.setIconSize(QtCore.QSize(18, 40))
         self.BatterySOCReset.setObjectName("BatterySOCReset")
         self.line = QtWidgets.QFrame(self.centralwidget)
@@ -413,16 +417,16 @@ class Ui_MainWindow(object):
         self.line_5.setLineWidth(3)
         self.line_5.setFrameShape(QtWidgets.QFrame.VLine)
         self.line_5.setObjectName("line_5")
-        self.Trip_Selector_Debug = QtWidgets.QPushButton(self.centralwidget)
-        self.Trip_Selector_Debug.setGeometry(QtCore.QRect(400, 33, 45, 40))
+        self.OptionsBtn = QtWidgets.QPushButton(self.centralwidget)
+        self.OptionsBtn.setGeometry(QtCore.QRect(400, 33, 45, 40))
         font = QtGui.QFont()
         font.setFamily("Impact")
         font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
-        self.Trip_Selector_Debug.setFont(font)
-        self.Trip_Selector_Debug.setStyleSheet("QPushButton { \n"
+        self.OptionsBtn.setFont(font)
+        self.OptionsBtn.setStyleSheet("QPushButton { \n"
 "    background: white;\n"
 "    font: 30px;\n"
 "    font-family: \"Impact\";\n"
@@ -436,10 +440,15 @@ class Ui_MainWindow(object):
 "    border-style:outset;\n"
 "\n"
 "}")
-        self.Trip_Selector_Debug.setCheckable(True)
-        self.Trip_Selector_Debug.setChecked(False)
-        self.Trip_Selector_Debug.setAutoExclusive(True)
-        self.Trip_Selector_Debug.setObjectName("Trip_Selector_Debug")
+        self.OptionsBtn.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/root/Settings-icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.OptionsBtn.setIcon(icon2)
+        self.OptionsBtn.setIconSize(QtCore.QSize(32, 32))
+        self.OptionsBtn.setCheckable(True)
+        self.OptionsBtn.setChecked(False)
+        self.OptionsBtn.setAutoExclusive(True)
+        self.OptionsBtn.setObjectName("OptionsBtn")
         self.Trip_Selector_1 = QtWidgets.QPushButton(self.centralwidget)
         self.Trip_Selector_1.setGeometry(QtCore.QRect(300, 75, 45, 40))
         font = QtGui.QFont()
@@ -518,9 +527,9 @@ class Ui_MainWindow(object):
 "\n"
 "}")
         self.TripReset.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/root/reset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.TripReset.setIcon(icon1)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(":/root/reset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.TripReset.setIcon(icon3)
         self.TripReset.setIconSize(QtCore.QSize(35, 35))
         self.TripReset.setObjectName("TripReset")
         self.Reverse = QtWidgets.QPushButton(self.centralwidget)
@@ -631,10 +640,10 @@ class Ui_MainWindow(object):
 "     height: 60px;\n"
 " }")
         self.ProfileRb2.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/root/radio_off.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon2.addPixmap(QtGui.QPixmap(":/root/radio_on.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
-        self.ProfileRb2.setIcon(icon2)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(":/root/radio_off.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap(":/root/radio_on.png"), QtGui.QIcon.Normal, QtGui.QIcon.On)
+        self.ProfileRb2.setIcon(icon4)
         self.ProfileRb2.setIconSize(QtCore.QSize(55, 55))
         self.ProfileRb2.setCheckable(True)
         self.ProfileRb2.setAutoExclusive(True)
@@ -680,7 +689,7 @@ class Ui_MainWindow(object):
 "     height: 60px;\n"
 " }")
         self.ProfileRb1.setText("")
-        self.ProfileRb1.setIcon(icon2)
+        self.ProfileRb1.setIcon(icon4)
         self.ProfileRb1.setIconSize(QtCore.QSize(55, 55))
         self.ProfileRb1.setCheckable(True)
         self.ProfileRb1.setAutoExclusive(True)
@@ -726,7 +735,7 @@ class Ui_MainWindow(object):
 "     height: 60px;\n"
 " }")
         self.ProfileRb3.setText("")
-        self.ProfileRb3.setIcon(icon2)
+        self.ProfileRb3.setIcon(icon4)
         self.ProfileRb3.setIconSize(QtCore.QSize(55, 55))
         self.ProfileRb3.setCheckable(True)
         self.ProfileRb3.setAutoExclusive(True)
@@ -849,7 +858,7 @@ class Ui_MainWindow(object):
         self.BatterySOCReset.raise_()
         self.line.raise_()
         self.line_5.raise_()
-        self.Trip_Selector_Debug.raise_()
+        self.OptionsBtn.raise_()
         self.Trip_Selector_1.raise_()
         self.Trip_Selector_2.raise_()
         self.TripReset.raise_()
@@ -902,16 +911,14 @@ class Ui_MainWindow(object):
         self.MotorTemperatureLabel.setText(_translate("MainWindow", "T"))
         self.BatterySOCLabel.setText(_translate("MainWindow", "SOC:"))
         self.Time.setText(_translate("MainWindow", "12:34:56"))
-        self.LockButton.setText(_translate("MainWindow", "<"))
         self.CheckEngineButton.setText(_translate("MainWindow", "W"))
-        self.Trip_Selector_Debug.setText(_translate("MainWindow", "g"))
         self.Trip_Selector_1.setText(_translate("MainWindow", "1"))
         self.Trip_Selector_2.setText(_translate("MainWindow", "2"))
         self.Reverse.setText(_translate("MainWindow", "D"))
         self.Trip_Selector_3.setText(_translate("MainWindow", "3"))
         self.BatteryVoltageDropLabel.setText(_translate("MainWindow", "-17.1"))
         self.Profile1Label.setText(_translate("MainWindow", "Plaid"))
-        self.Profile2Label.setText(_translate("MainWindow", "Zen"))
+        self.Profile2Label.setText(_translate("MainWindow", "Std"))
         self.Profile3Label.setText(_translate("MainWindow", "Eco"))
         self.AssistSliderLabel.setText(_translate("MainWindow", "Assist:"))
 from analoggaugewidget import AnalogGaugeWidget
