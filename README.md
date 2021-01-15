@@ -3,14 +3,14 @@ This project aims to improve the functionality of the incredibly high-performanc
 
 Discussion and suggestions here: https://endless-sphere.com/forums/viewtopic.php?f=2&t=108580
 
-Display example: https://i.imgur.com/vq930iW.png
+Display example with all widgets: https://i.imgur.com/vq930iW.png
 
 Users can easily construct or theme the existing .ui file using Qt Designer standalone gui application, and pyuic5 command-line converter (e.g. >pyuic5 ampy.ui -o ampy.py) to draw from these existing widgets as desired for any type of display.
 
 State-of-charge map if not using Li-NCA or similar Lithium chemistry should be replaced. This map is used because it is far more accurate than the linear approximation performed by the controller itself. https://lygte-info.dk/ and https://automeris.io/WebPlotDigitizer/ can be used to generate profiles for specific cells, but cells within a chemistry should be suitable enough. 
 
 Vehicle-specific parameters needed for calculations include battery series groups, parallel cells per group, total Amp-hours, and wheel circumference in millimeters; these can be specified as command-line arguments e.g. python main.py -battseries 21 -battparallel 14 -battah 42.0 -wheel 1972.0
-An additional argument -speedparse/-sp reduces CPU use meaningfully (~9% total) by assuming V6.xxx parameter addresses. If you use a older V5.xxx or newer version you must include the AsiParameterDictionary.xml provided with your copy of ASI's BacDoor application and firmware to get the right addresses.
+An additional argument -speedparse/-sp reduces CPU use meaningfully (~9% total) by assuming V6.xxx parameter addresses. In the future this will be amended to use a var cache and get the best of both. If you use a older V5.xxx or newer than 6.015 version firmware you must include the AsiParameterDictionary.xml provided with your copy of ASI's BacDoor application and firmware to ensure the right addresses are called.
 
 Key display elements:
 1. Time of day
