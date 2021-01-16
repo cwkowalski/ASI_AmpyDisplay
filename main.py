@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from sys import exit
 #from os import getpid
 import time
@@ -206,7 +206,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setWindowFlags(QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint))
         self.statusBar().setVisible(False)
-
+        QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.BlankCursor))
+        #QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         # Connect buttons
         self.ui.OptionsBtn.clicked.connect(self.optionspopup)
         self.ui.BatterySOCReset.clicked.connect(self.socreset)
@@ -757,6 +758,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         payload = (self.iter_attribute_slicer, self.floop['Battery_Current'], self.floop['Battery_Voltage'],
                    self.floop['Motor_Current'], self.floop['Motor_Temperature'], self.floop['Vehicle_Speed'],
                    self.floop['Motor_RPM'], self.list_floop_interval[-1:][0])
+        print('sql_tripstat_upload payload: ', payload)
         self.sql.execute('replace into tripstat values (?,?,?,?,?,?,?,?)', payload)
     def SQL_lifestat_upload(self):
         # On SOC reset, take Ah and compare to last row to determine if you have charged or discharged.
