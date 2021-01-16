@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 from sys import exit
-#from os import getpid
+import os
 import time
 import datetime
 import BACModbus
@@ -158,7 +158,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             float(0), float(0), float(0), float(0), float(0), float(0), float(0)
 
         # Setup SQL databases and populate lifestats attributes;
-        self.sql_conn = sqlite3.connect(r'ampy.db')
+        self.sql_conn = sqlite3.connect(os.path.abspath(os.path.join(os.getcwd() + 'ampy.db')))
         self.sql = self.sql_conn.cursor()
         self.SQL_init()  # Updates ID's to latest in table, creates tables if not exists.
         self.workmsg.emit(self.profile)  # Assist emitted later
