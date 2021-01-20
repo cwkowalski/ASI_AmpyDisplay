@@ -10,7 +10,7 @@ import csv
 # ASI Object Dictionary filepath to build dictionary definitions
 # =======================================================
 filename = 'ASIObjectDictionary.xml'
-filepath = os.path.abspath(os.path.dirname(__file__)) #Checks local directory
+filepath = os.path.abspath(os.path.dirname(__file__)) + '/' #Checks local directory
 xml = et.parse(filepath + filename)
 Obdic = xml.iterfind('Parameters/ParameterDescription')
 
@@ -38,7 +38,7 @@ class BACModbus():
         self.socmap_volts, self.socmap_soc, self.socmap_ah, self.socmap_wh_volts, self.socmap_wh_wh = \
             [],[],[],[],[]
 
-        with open(filepath + 'socmap_ahv.csv'), mode='r') as file:
+        with open(filepath + 'socmap_ahv.csv', mode='r') as file:
             reader = csv.reader(file, delimiter=',')
             for row in reader:  # If using own socmap, identify columns appropriately.
                 self.socmap_ah.append(float(row[0]))
@@ -49,7 +49,7 @@ class BACModbus():
         self.socmap_ah = array(self.socmap_ah)
         file.close()
 
-        with open(filepath + 'WhVmap.csv'), mode='r') as file:
+        with open(filepath + 'WhVmap.csv', mode='r') as file:
             reader = csv.reader(file, delimiter=',')
             for row in reader:  # If using own socmap, identify columns appropriately.
                 self.socmap_wh_wh.append(float(row[0]))

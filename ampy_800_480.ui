@@ -14,22 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMainWindow{
-	background: solid white; }
-
-QGroupBox{
-	background: solid white;
-	border: 5px solid black;
-	border-radius: 10px;
-	margin-top: 50px;
-}
-QGroupBox::title {
-    subcontrol-origin: margin;
-	subcontrol-position: top left;
-	left: 25px;
-	padding: -40 0 0 0
-}
-</string>
+   <string notr="true"/>
   </property>
   <property name="toolButtonStyle">
    <enum>Qt::ToolButtonIconOnly</enum>
@@ -38,6 +23,11 @@ QGroupBox::title {
    <enum>QTabWidget::Rounded</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QWidget{
+	background: solid white; }
+</string>
+   </property>
    <widget class="AnalogGaugeWidget" name="SpeedGauge" native="true">
     <property name="geometry">
      <rect>
@@ -85,8 +75,21 @@ QGroupBox::title {
      </property>
      <property name="font">
       <font>
-       <pointsize>80</pointsize>
+       <family>Luxi Mono</family>
+       <pointsize>70</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLabel{
+	font: 70pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
+}
+
+</string>
      </property>
      <property name="text">
       <string>66</string>
@@ -106,17 +109,22 @@ QGroupBox::title {
      </property>
      <property name="font">
       <font>
-       <family>Magneto</family>
-       <pointsize>15</pointsize>
-       <weight>50</weight>
-       <italic>false</italic>
-       <bold>false</bold>
+       <family>Luxi Mono</family>
+       <pointsize>16</pointsize>
+       <weight>75</weight>
+       <italic>true</italic>
+       <bold>true</bold>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">QLabel{
-	font: 15pt &quot;Magneto&quot;;
-}</string>
+	font: 16pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	font-style: oblique;
+	color: black
+}
+
+</string>
      </property>
      <property name="text">
       <string>mph</string>
@@ -170,8 +178,21 @@ QGroupBox::title {
      </property>
      <property name="font">
       <font>
-       <pointsize>55</pointsize>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLabel{
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
+}
+
+</string>
      </property>
      <property name="text">
       <string>24.00</string>
@@ -191,17 +212,22 @@ QGroupBox::title {
      </property>
      <property name="font">
       <font>
-       <family>Magneto</family>
-       <pointsize>15</pointsize>
-       <weight>50</weight>
-       <italic>false</italic>
-       <bold>false</bold>
+       <family>Luxi Mono</family>
+       <pointsize>16</pointsize>
+       <weight>75</weight>
+       <italic>true</italic>
+       <bold>true</bold>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">QLabel{
-	font: 15pt &quot;Magneto&quot;;
-}</string>
+	font: 16pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	font-style: oblique;
+	color: black
+}
+
+</string>
      </property>
      <property name="text">
       <string>kW</string>
@@ -224,18 +250,23 @@ QGroupBox::title {
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">QGroupBox::title{
-	font = 50pt &quot;Magneto&quot;;
-	padding: -25 0px 0 0px
-}
-
+     <string notr="true">QGroupBox{
+	background: solid white;
+	border: 5px solid black;
+	border-radius: 10px;
+	margin-top: 50px;}
+QGroupBox::title {
+    subcontrol-origin: margin;
+	subcontrol-position: top left;
+	left: 25px;
+	padding: -25 0px 0 0px;}
 QLabel{
-font: 18pt &quot;Courier Std&quot;;}
+	font: 18pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black}
 QCheckBox::indicator {
      width: 60px;
-     height: 60px;
- }
-
+     height: 60px; }
 QSlider::groove:horizontal {
 border: 1px solid;
 height: 30px; 
@@ -245,7 +276,18 @@ background-color: black;
 border: 5px solid;
 height: 100px;
 width: 70px; 
-margin: 0px 0px;}</string>
+margin: 0px 0px;}
+QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;}
+QPushButton::pressed {
+	border-style:outset;}</string>
     </property>
     <property name="title">
      <string/>
@@ -256,7 +298,7 @@ margin: 0px 0px;}</string>
        <x>9</x>
        <y>55</y>
        <width>561</width>
-       <height>171</height>
+       <height>106</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="TripBoxGrid">
@@ -273,11 +315,11 @@ margin: 0px 0px;}</string>
         </property>
         <property name="font">
          <font>
-          <family>Courier Std</family>
+          <family>Luxi Mono</family>
           <pointsize>18</pointsize>
-          <weight>50</weight>
+          <weight>75</weight>
           <italic>false</italic>
-          <bold>false</bold>
+          <bold>true</bold>
          </font>
         </property>
         <property name="text">
@@ -467,11 +509,11 @@ margin: 0px 0px;}</string>
         </property>
         <property name="font">
          <font>
-          <family>Courier Std</family>
+          <family>Luxi Mono</family>
           <pointsize>18</pointsize>
-          <weight>50</weight>
+          <weight>75</weight>
           <italic>false</italic>
-          <bold>false</bold>
+          <bold>true</bold>
          </font>
         </property>
         <property name="text">
@@ -484,6 +526,457 @@ margin: 0px 0px;}</string>
       </item>
      </layout>
     </widget>
+    <widget class="QPushButton" name="CheckEngineButton">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/Warning_icon.png</normaloff>:/root/Warning_icon.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>45</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="BatterySOCReset">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/icon_charged.png</normaloff>:/root/icon_charged.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>55</width>
+       <height>55</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="OptionsBtn">
+     <property name="geometry">
+      <rect>
+       <x>430</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/Settings-icon.png</normaloff>:/root/Settings-icon.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>55</width>
+       <height>55</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Trip_Selector_1">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Trip_Selector_2">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>2</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="TripReset">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/reset.png</normaloff>:/root/reset.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="LockButton">
+     <property name="geometry">
+      <rect>
+       <x>500</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/lock_icon.png</normaloff>:/root/lock_icon.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>55</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Trip_Selector_3">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>3</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Reverse">
+     <property name="geometry">
+      <rect>
+       <x>220</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>D</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <zorder>gridLayoutWidget_5</zorder>
+    <zorder>BatterySOCReset</zorder>
+    <zorder>OptionsBtn</zorder>
+    <zorder>Trip_Selector_1</zorder>
+    <zorder>Trip_Selector_2</zorder>
+    <zorder>TripReset</zorder>
+    <zorder>LockButton</zorder>
+    <zorder>Trip_Selector_3</zorder>
+    <zorder>Reverse</zorder>
+    <zorder>CheckEngineButton</zorder>
    </widget>
    <widget class="QProgressBar" name="BatteryVoltageBar">
     <property name="geometry">
@@ -531,17 +1024,21 @@ border-radius: 6px
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
+      <family>Luxi Mono</family>
       <pointsize>25</pointsize>
-      <weight>50</weight>
+      <weight>75</weight>
       <italic>false</italic>
-      <bold>false</bold>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 25pt &quot;Magneto&quot;;
-}</string>
+	font: 25pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
      <string>79.123</string>
@@ -551,7 +1048,7 @@ border-radius: 6px
     <property name="geometry">
      <rect>
       <x>311</x>
-      <y>150</y>
+      <y>145</y>
       <width>180</width>
       <height>23</height>
      </rect>
@@ -583,27 +1080,34 @@ border-radius: 6px
     <property name="geometry">
      <rect>
       <x>318</x>
-      <y>115</y>
+      <y>110</y>
       <width>175</width>
       <height>40</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
+      <family>Luxi Mono</family>
       <pointsize>25</pointsize>
-      <weight>50</weight>
+      <weight>75</weight>
       <italic>false</italic>
-      <bold>false</bold>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 25pt &quot;Magneto&quot;;
-}</string>
+	font: 25pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
-     <string>T</string>
+     <string>XX°C</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QProgressBar" name="BatterySOCBar">
@@ -642,53 +1146,62 @@ border-radius: 6px
     <property name="geometry">
      <rect>
       <x>273</x>
-      <y>230</y>
+      <y>234</y>
       <width>260</width>
-      <height>40</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
+      <family>Luxi Mono</family>
       <pointsize>25</pointsize>
-      <weight>50</weight>
+      <weight>75</weight>
       <italic>false</italic>
-      <bold>false</bold>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 25pt &quot;Magneto&quot;;
-}</string>
+	font: 25pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
-     <string>SOC:</string>
+     <string>xx.x% SOC</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QLabel" name="Time">
     <property name="geometry">
      <rect>
       <x>273</x>
-      <y>-10</y>
+      <y>-5</y>
       <width>250</width>
-      <height>55</height>
+      <height>46</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
-      <pointsize>30</pointsize>
-      <weight>50</weight>
+      <family>Luxi Mono</family>
+      <pointsize>36</pointsize>
+      <weight>75</weight>
       <italic>false</italic>
-      <bold>false</bold>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 30pt &quot;Magneto&quot;;
+	font: 36pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
 }
 
-# &quot;Harlow Solid Italic&quot;</string>
+</string>
     </property>
     <property name="text">
      <string>12:34:56</string>
@@ -697,153 +1210,17 @@ border-radius: 6px
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="LockButton">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>33</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>tt-icon-font</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 35px;
-    font-family: &quot;tt-icon-font&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius: 15px
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string>&lt;</string>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>16</width>
-      <height>16</height>
-     </size>
-    </property>
-    <property name="checkable">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="CheckEngineButton">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>75</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>tt-icon-font</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 40px;
-    font-family: &quot;tt-icon-font&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius: 15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string>W</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="BatterySOCReset">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>33</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Magneto</family>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius: 15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="icon">
-     <iconset resource="ampy.qrc">
-      <normaloff>:/root/icon_charged.png</normaloff>:/root/icon_charged.png</iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>18</width>
-      <height>40</height>
-     </size>
-    </property>
-   </widget>
-   <widget class="Line" name="line">
+   <widget class="Line" name="MotorTemperatureLine">
     <property name="geometry">
      <rect>
       <x>433</x>
-      <y>170</y>
+      <y>165</y>
       <width>20</width>
       <height>8</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">QObject{color:black}</string>
     </property>
     <property name="frameShadow">
      <enum>QFrame::Plain</enum>
@@ -853,264 +1230,6 @@ QPushButton::pressed {
     </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="Line" name="line_5">
-    <property name="geometry">
-     <rect>
-      <x>431</x>
-      <y>225</y>
-      <width>20</width>
-      <height>8</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true"/>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Plain</enum>
-    </property>
-    <property name="lineWidth">
-     <number>3</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Trip_Selector_Debug">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>33</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Impact</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 30px;
-    font-family: &quot;Impact&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius:15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string>g</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>false</bool>
-    </property>
-    <property name="autoExclusive">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Trip_Selector_1">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>75</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Impact</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 30px;
-    font-family: &quot;Impact&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius:15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string>1</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-    <property name="autoExclusive">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Trip_Selector_2">
-    <property name="geometry">
-     <rect>
-      <x>350</x>
-      <y>75</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Impact</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 30px;
-    font-family: &quot;Impact&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius:15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string>2</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>false</bool>
-    </property>
-    <property name="autoExclusive">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="TripReset">
-    <property name="geometry">
-     <rect>
-      <x>350</x>
-      <y>33</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Impact</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 30px;
-    font-family: &quot;Impact&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius:15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="icon">
-     <iconset resource="ampy.qrc">
-      <normaloff>:/root/reset.png</normaloff>:/root/reset.png</iconset>
-    </property>
-    <property name="iconSize">
-     <size>
-      <width>35</width>
-      <height>35</height>
-     </size>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Reverse">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>75</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Impact</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 30px;
-    font-family: &quot;Impact&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius:15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string>D</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>false</bool>
-    </property>
-    <property name="autoExclusive">
-     <bool>false</bool>
     </property>
    </widget>
    <widget class="QSlider" name="AssistSlider">
@@ -1396,53 +1515,6 @@ QCheckBox::indicator {
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="Trip_Selector_3">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>75</y>
-      <width>45</width>
-      <height>40</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Impact</family>
-      <pointsize>-1</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton { 
-	background: white;
-	font: 30px;
-    font-family: &quot;Impact&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius:15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-    </property>
-    <property name="text">
-     <string>3</string>
-    </property>
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>false</bool>
-    </property>
-    <property name="autoExclusive">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QLabel" name="BatteryVoltageDropLabel">
     <property name="geometry">
      <rect>
@@ -1454,23 +1526,27 @@ QPushButton::pressed {
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
+      <family>Luxi Mono</family>
       <pointsize>16</pointsize>
-      <weight>50</weight>
+      <weight>75</weight>
       <italic>false</italic>
-      <bold>false</bold>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 16pt &quot;Magneto&quot;;
-}</string>
+	font: 16pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
      <string>-17.1</string>
     </property>
    </widget>
-   <widget class="Line" name="line_6">
+   <widget class="Line" name="BatterySOCLine">
     <property name="geometry">
      <rect>
       <x>390</x>
@@ -1480,7 +1556,7 @@ QPushButton::pressed {
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">QObject{color:black}</string>
     </property>
     <property name="frameShadow">
      <enum>QFrame::Plain</enum>
@@ -1495,25 +1571,30 @@ QPushButton::pressed {
    <widget class="QLabel" name="Profile1Label">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>6</x>
       <y>385</y>
-      <width>62</width>
+      <width>66</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
-      <pointsize>15</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
+      <family>Luxi Mono</family>
+      <pointsize>16</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 15pt &quot;Magneto&quot;;
-}</string>
+	font: 16pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	font-style: oblique;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
      <string>Plaid</string>
@@ -1533,20 +1614,25 @@ QPushButton::pressed {
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
-      <pointsize>15</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
+      <family>Luxi Mono</family>
+      <pointsize>16</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 15pt &quot;Magneto&quot;;
-}</string>
+	font: 16pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	font-style: oblique;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
-     <string>Zen</string>
+     <string>Mad</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -1563,17 +1649,22 @@ QPushButton::pressed {
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
-      <pointsize>15</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
+      <family>Luxi Mono</family>
+      <pointsize>16</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 15pt &quot;Magneto&quot;;
-}</string>
+	font: 16pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	font-style: oblique;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
      <string>Eco</string>
@@ -1593,17 +1684,22 @@ QPushButton::pressed {
     </property>
     <property name="font">
      <font>
-      <family>Magneto</family>
-      <pointsize>24</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
+      <family>Luxi Mono</family>
+      <pointsize>25</pointsize>
+      <weight>75</weight>
+      <italic>true</italic>
+      <bold>true</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-	font: 24pt &quot;Magneto&quot;;
-}</string>
+	font: 25pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	font-style: oblique;
+	color: black
+}
+
+</string>
     </property>
     <property name="text">
      <string>Assist:</string>
@@ -1612,35 +1708,116 @@ QPushButton::pressed {
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
    </widget>
+   <widget class="QProgressBar" name="WhmiBar">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>90</y>
+      <width>180</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"> QProgressBar::chunk {
+     background-color: black;}
+QProgressBar {
+    border-style: solid;
+	border-color: gray;
+	border-width: 3px;
+border-radius: 6px
+}</string>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="value">
+     <number>50</number>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="WhmiLabel">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>50</y>
+      <width>175</width>
+      <height>40</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Luxi Mono</family>
+      <pointsize>25</pointsize>
+      <weight>75</weight>
+      <italic>false</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+	font: 25pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black
+}
+
+</string>
+    </property>
+    <property name="text">
+     <string>12.3&lt;sub&gt;Wh/mi&lt;/sub&gt;</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="Line" name="BatteryVoltageLine">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>225</y>
+      <width>20</width>
+      <height>8</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QObject{color:black}</string>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>3</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <zorder>BatteryVoltageLine</zorder>
+   <zorder>MotorTemperatureLine</zorder>
+   <zorder>BatterySOCLine</zorder>
+   <zorder>BatterySOCLabel</zorder>
+   <zorder>BatteryVoltageDropLabel</zorder>
+   <zorder>BatteryVoltageLabel</zorder>
+   <zorder>WhmiLabel</zorder>
+   <zorder>MotorTemperatureLabel</zorder>
    <zorder>SpeedGauge</zorder>
    <zorder>PowerGauge</zorder>
    <zorder>TripBox</zorder>
    <zorder>BatteryVoltageBar</zorder>
-   <zorder>BatteryVoltageLabel</zorder>
    <zorder>MotorTemperatureBar</zorder>
-   <zorder>MotorTemperatureLabel</zorder>
    <zorder>BatterySOCBar</zorder>
-   <zorder>BatterySOCLabel</zorder>
    <zorder>Time</zorder>
-   <zorder>LockButton</zorder>
-   <zorder>BatterySOCReset</zorder>
-   <zorder>line</zorder>
-   <zorder>line_5</zorder>
-   <zorder>Trip_Selector_Debug</zorder>
-   <zorder>Trip_Selector_1</zorder>
-   <zorder>Trip_Selector_2</zorder>
-   <zorder>TripReset</zorder>
-   <zorder>Reverse</zorder>
    <zorder>AssistSlider</zorder>
    <zorder>gridLayoutWidget</zorder>
-   <zorder>Trip_Selector_3</zorder>
-   <zorder>CheckEngineButton</zorder>
-   <zorder>BatteryVoltageDropLabel</zorder>
-   <zorder>line_6</zorder>
    <zorder>Profile1Label</zorder>
    <zorder>Profile2Label</zorder>
    <zorder>Profile3Label</zorder>
    <zorder>AssistSliderLabel</zorder>
+   <zorder>WhmiBar</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -43,35 +43,6 @@ from ampy_options import Ui_OptDialog
 # HW Configuration Vector: Bit12, PFS Pullup; Bit13, Cruise Pullup, Bit15, Headlight Pullup
 
 # KNOWN ISSUES / TO IMPLEMENT
-# In order to accurately integrate distance, will have to use RPM instead of speed. Thus, need to program wheel diam.
-# BAC original programmed wheel diameter:367mm?! this was tune with gps!?
-# Meaured circumference: 75.875" or 1927.225mm
-# Actual diameter: 613.454770401mm
-# Consider making a setup.csv for wheel diameter, battwh, battah, etc
-
-# Can fit at least 5, perhaps 6 rows in Trip window with current Magneto profile.
-
-# Keeps crashing with too many gui updates, failing paint events. Perhaps, need to move the floop slot to
-# a separate class/thread and then send processed data to the GUI class.
-
-# Condense class attributes into a single dict;
-# one for trip lists, one for instance calcs from floop
-
-# Missing function to store/update trip list data via .csv, reset trip data
-# Maybe refactor GUI attributes so all trip_ are avg'd values, others are lists sliced for the avgs?
-
-# Range Update 'Range:' box text with predicted range from trip meter,
-# set 'range' slider to perhaps even 4x more that (80wh/mi -> 20wh/mi?) with increment btns, enable/disable btns
-
-# Generate 'lifetime' trip statistics for .csv, e.g. total miles, total ah, total cycles, original vs. current Rbattery.
-
-# Set screen full refresh (solid black to white) during mid-iterator while the device is saving .csv!
-# This may avoid write corruption, and will be useful signal that it's writing.
-
-# Would be cool to wire in one of the spare BMS temperature sensors (ask them on alibaba for model?)
-# in order to measure battery temperature at its center. Would help judge when max power is too much...
-# For now, VDrop Motor Temperature progressbars.
-# Idea; >2 progressbars with different time averages to illustrate trend of temp? Maybe resource intensive...
 
 # SOC currently mapped straight to Battery Voltage.
 # Instead, setup wh to increment by interpolating N elements of list, and map SOC from Wh.
@@ -158,12 +129,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             float(0), float(0), float(0), float(0), float(0), float(0), float(0)
 
         # Setup SQL databases and populate lifestats attributes;
-        self.sql_conn = sqlite3.connect(os.path.abspath(os.path.dirname(__file__)) + 'ampy.db')
+        self.sql_conn = sqlite3.connect(os.path.abspath(os.path.dirname(__file__)) + '/' + 'ampy.db')
         self.sql = self.sql_conn.cursor()
         self.SQL_init()  # Updates ID's to latest in table, creates tables if not exists.
         self.workmsg.emit(self.profile)  # Assist emitted later
 
-        # PID:
+        # Range limiter PID:
         self.pid_kp = 0.09375
         self.pid_ki = 0.032
         self.pid_kd = 0.008
@@ -175,18 +146,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Kt = 2*dead time
         ## Kt = 0.032
         # Kd = 0.5*dead time
-        # Positive motoring torque ramp = 100ms (6.25 cycles)
-
-        # self.inst_whmi = float(0)          # Generate from interp(v*a, interp_interval) each prepare_gui
-        # self.trip_whmi = float(0)          # Generate from wh used, distance each prepare_gui
-        # self.dist = []
-        # self.trip_dist = float(1)          # Generate from interp(pop(self.dist), self.interp_interval) each prepare_gui
-        # self.trip_wh = float(0)            # += from positive interp(pop(batt_volts)*pop(batt_amps), interp_interval)
-        # self.trip_ah = float(0)            # += from positive interp(pop(batt_amps), interp_interval
-        # self.trip_whregen = float(0)       # First subdivide the volt*amps X interval array into pos/neg segments
-        # before interp, to accurately catch regen current (60 cycles = 1 sec
-        # self.trip_ahregen = float(0)
-        # self.trip_floop_interval = []      # Pop and sum values into self.interp_interval each prepare_gui
 
         # Iterators and thresholds for averaging, interpolation, etc
         self.mean_length = 18750  # Average for trip_ floats over last 5 minutes (300s / 16ms)
@@ -194,7 +153,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.exceptions = 0
         self.first_floop = True
         self.iter = 0
-        self.iter_threshold = 19  # Must be odd number for accurate/low-resource Simpsons integration
+        self.iter_threshold = 3  # Must be odd number for accurate/low-resource Simpsons integration
+        self.iter_sql = 0
+        self.iter_sql_threshold = 20 # ~3 hz
         self.iter_attribute_slicer = 0
         self.iter_attribute_slicer_threshold = self.mean_length + 500  # 500 = 8 seconds; re-slice for new means each 8 sec.
         self.iter_interp_threshold = int(self.mean_length / self.iter_threshold)  # Equivalent time vs. mean_length
@@ -209,6 +170,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.BlankCursor))
         #QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         # Connect buttons
+
         self.ui.OptionsBtn.clicked.connect(self.optionspopup)
         self.ui.BatterySOCReset.clicked.connect(self.socreset)
         self.ui.Reverse.toggled.connect(lambda: self.signal_reverse(self.ui.Reverse.isChecked()))
@@ -333,15 +295,18 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             if self.first_floop:  # Needed so socreset(), SQL has data for first init
                 # Also will compensate for any self-discharge, charge since last start.
                 self.first_floop = False
-                self.floop_process()
+                self.floop_process()  # of last -self.iter in lists from floop_to_list()
                 self.socreset()
             else:
                 self.floop_process()
-                self.SQL_update_setup()
-                self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
                 self.prepare_gui()
                 self.update_gui()
                 self.iter = 0
+        if self.iter_sql >= self.iter_sql_threshold:
+            self.SQL_update_setup()
+            self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
+            self.iter_sql = 0
+
         ##################
         # Message indices:
         # [0] = 258 = Faults
@@ -444,8 +409,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.gui_dict['Trip_1_2'] = '{:.2f}'.format(self.flt_whmi_avg)
             self.gui_dict['Trip_1_3'] = '{:.1f}'.format(self.flt_ah)
             self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.get_battwh())
-            # For remaining wh, consider using socmap_soc *0.03 = ah_rem/cell and simps over volts
-            self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_inst)
+            #self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_inst)
+            self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_avg / self.get_battwh())
             self.gui_dict['Trip_2_3'] = '{:.1f}'.format(self.battah - self.flt_ah)
             self.gui_dict['Trip_3_1'] = '{:.0f}'.format(self.flt_whregen)
             self.gui_dict['Trip_3_2'] = '{:.0f}'.format(self.flt_dist)
@@ -482,7 +447,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # When preparing GUI, check self.tripselector to determine strings.
         #### New trip 1??
         # Watt hours used |Wh/mi_avg  | Amp-hours used
-        # Wh remaining    |Wh/mi_Inst | Amp-hours remaining
+        # Wh remaining    |Range-rem  | Amp-hours remaining
         # Regen wh gained |dist-travel| Amp-hours regen
 
         #### Trip 1
@@ -513,7 +478,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.Trip_1_2_prefix.setText('Wh/mi<sub>Trip</sub>:')
             self.ui.Trip_1_3_prefix.setText('Ah<sub>use</sub>: ')
             self.ui.Trip_2_1_prefix.setText('Wh<sub>rem</sub>: ')
-            self.ui.Trip_2_2_prefix.setText('Wh/mi<sub>Inst</sub>:')
+            self.ui.Trip_2_2_prefix.setText('Range:')
             self.ui.Trip_2_3_prefix.setText('Ah<sub>rem</sub>: ')
             self.ui.Trip_3_1_prefix.setText('Wh<sub>reg</sub>: ')
             self.ui.Trip_3_2_prefix.setText('Miles: ')
@@ -651,12 +616,127 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                                     'QPushButton::pressed{border-style: outset;}'
                                     'QLineEdit{font: 40pt "Magneto";}')
         # todo: Can't center without hardcoding, need another strategy for universal layout compatibility.
-        self.pinpopup.move(self.ui.centralwidget.rect().center() + QtCore.QPoint(self.pinpopup.width()/5, 37))
+        # let window manager handle it
+        #self.pinpopup.move(self.ui.centralwidget.rect().center() + QtCore.QPoint(self.pinpopup.width()/5, 37))
         self.pinpopup.show()
 
     def optionspopup(self):
         self.optpopup = optionsDialog(self.ui)
         self.optpopup.show()
+
+    @QtCore.pyqtSlot(int)
+    def displayInvertOption(self, bool):
+        if bool:
+            # apply shiteload of stylesheets
+            self.ui.centralwidget.setStyleSheet("QWidget{background: solid black; }")
+            self.ui.SpeedGaugeLabel.setStyleSheet("QLabel{font: 70pt \"Luxi Mono\"; font-weight: bold; color: white)")
+            self.ui.SpeedGaugeLabelUnits.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: white)")
+            self.ui.PowerGaugeLabel.setStyleSheet("QLabel{font: 48pt \"Luxi Mono\"; font-weight: bold; color: white)")
+            self.ui.PowerGaugeLabelUnits.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: white)")
+            self.ui.TripBox.setStyleSheet("QGroupBox{background: solid black; border: 5px solid white;\n"
+            "    border-radius: 10px; margin-top: 50px;}\n"
+            "QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; left: 25px;\n"
+            "    padding: -25 0px 0 0px;}"
+            "QLabel{font: 18pt \"Luxi Mono\"; font-weight: bold; color: white}\n"
+            "QCheckBox::indicator {width: 60px; height: 60px;}"
+            "QPushButton{background: black; font: 48pt \"Luxi Mono\"; font-weight: bold; color: white;\n"
+            "border-style: inset; border-color: light grey; border-width: 4px; border-radius 20px;}\n"
+            "QPushButton::pressed{border-style: outset}")
+            self.ui.BatteryVoltageBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.BatteryVoltageLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: white}")
+            self.ui.BatteryVoltageDropLabel.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: white}")
+            self.ui.BatteryVoltageLine.setStyleSheet("QObject{color:white}")
+            self.ui.BatterySOCBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.BatterySOCLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: white}")
+            self.ui.BatterySOCLine.setStyleSheet("QObject{color:white}")
+            self.ui.MotorTemperatureBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.MotorTemperatureLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: white}")
+            self.ui.MotorTemperatureLine.setStyleSheet("QObject{color:white}")
+            self.ui.WhmiBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.WhmiLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold; color: white}")
+            self.ui.Time.setStyleSheet("QLabel{font: 36pt \"Luxi Mono\";font-weight: bold; color: white}")
+            self.ui.AssistSliderLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold; color: white}")
+            self.ui.AssistSlider.setStyleSheet("QSlider {border-style: none; border-color: gray; border-width: 4px;\n"
+            "border-radius: 18px; height: 80px}\n"
+            "QSlider::handle:horizontal {background-color: white; border: 5px solid; border-radius: 12px;\n"
+            "width: 30px; margin: 0px 0px;}\n"
+            "QSlider::groove:horizontal {border: 4px solid gray; border-radius: 18px; height: 28px}")
+            self.ui.Profile1Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: white}")
+            self.ui.Profile2Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: white}")
+            self.ui.Profile3Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: white}")
+            self.ui.ProfileRb1.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: black;\n"
+            "selectionbackgroundcolor: light grey; font: 50px;}\n"
+            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
+            self.ui.ProfileRb2.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: black;\n"
+            "selectionbackgroundcolor: light grey; font: 50px;}\n"
+            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
+            self.ui.ProfileRb3.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: black;\n"
+            "selectionbackgroundcolor: light grey; font: 50px;}\n"
+            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
+        else:
+            self.ui.centralwidget.setStyleSheet("QWidget{background: solid white; }")
+            self.ui.SpeedGaugeLabel.setStyleSheet("QLabel{font: 70pt \"Luxi Mono\"; font-weight: bold; color: black)")
+            self.ui.SpeedGaugeLabelUnits.setStyleSheet(
+                "QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: black)")
+            self.ui.PowerGaugeLabel.setStyleSheet("QLabel{font: 48pt \"Luxi Mono\"; font-weight: bold; color: black)")
+            self.ui.PowerGaugeLabelUnits.setStyleSheet(
+                "QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: black)")
+            self.ui.TripBox.setStyleSheet("QGroupBox{background: solid white; border: 5px solid black;\n"
+            "    border-radius: 10px; margin-top: 50px;}\n"
+            "QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; left: 25px;\n"
+            "    padding: -25 0px 0 0px;}"
+            "QLabel{font: 18pt \"Luxi Mono\"; font-weight: bold; color: black}\n"
+            "QCheckBox::indicator {width: 60px; height: 60px;}"
+            "QPushButton{background: black; font: 48pt \"Luxi Mono\"; font-weight: bold; color: black;\n"
+            "border-style: inset; border-color: dark grey; border-width: 4px; border-radius 20px;}\n"
+            "QPushButton::pressed{border-style: outset}")
+            self.ui.BatteryVoltageBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.BatteryVoltageLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: black}")
+            self.ui.BatteryVoltageDropLabel.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: black}")
+            self.ui.BatteryVoltageLine.setStyleSheet("QObject{color:black}")
+            self.ui.BatterySOCBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.BatterySOCLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: black}")
+            self.ui.BatterySOCLine.setStyleSheet("QObject{color:black}")
+            self.ui.MotorTemperatureBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.MotorTemperatureLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
+            "color: black}")
+            self.ui.MotorTemperatureLine.setStyleSheet("QObject{color:black}")
+            self.ui.WhmiBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.WhmiLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold; color: black}")
+            self.ui.Time.setStyleSheet("QLabel{font: 36pt \"Luxi Mono\";font-weight: bold; color: black}")
+            self.ui.AssistSliderLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold; color: black}")
+            self.ui.AssistSlider.setStyleSheet("QSlider {border-style: none; border-color: gray; border-width: 4px;\n"
+            "border-radius: 18px; height: 80px}\n"
+            "QSlider::handle:horizontal {background-color: black; border: 5px solid; border-radius: 12px;\n"
+            "width: 30px; margin: 0px 0px;}\n"
+            "QSlider::groove:horizontal {border: 4px solid gray; border-radius: 18px; height: 28px}")
+            self.ui.Profile1Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: black}")
+            self.ui.Profile2Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: black}")
+            self.ui.Profile3Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: black}")
+            self.ui.ProfileRb1.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: white;\n"
+            "selectionbackgroundcolor: light grey; font: 50px;}\n"
+            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
+            self.ui.ProfileRb2.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: white;\n"
+            "selectionbackgroundcolor: light grey; font: 50px;}\n"
+            "QRadioButton::indicator{border : 5px solid black; width : 25px; height : 50px; border radius : 1px}")
+            self.ui.ProfileRb3.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: white;\n"
+            "selectionbackgroundcolor: light grey; font: 50px;}\n"
+            "QRadioButton::indicator{border : 5px solid black; width : 25px; height : 50px; border radius : 1px}")
     def tripselect(self, button_bool, command):
         print('Trip Selector ' + str(command) + ' is: ' + str(button_bool))
         if button_bool == True:
@@ -671,6 +751,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def gettime(self):  # Helper function for iterators, time comparison attributes in receive_floop
         self.iter_attribute_slicer += 1
         self.iter += 1
+        self.iter_sql += 1
         self.time2 = self.ms()
         self.list_floop_interval.append(self.time2 - self.time1)
         self.time1 = self.ms()

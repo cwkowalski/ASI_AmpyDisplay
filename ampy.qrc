@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="root">
+    <file>invert-icon.png</file>
+    <file>Warning_icon.png</file>
     <file>lock_icon.png</file>
     <file>Settings-icon.png</file>
     <file>icon_charged.png</file>
