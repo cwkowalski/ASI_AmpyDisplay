@@ -15,6 +15,7 @@ from numpy import mean, isnan, array, prod, argmin, abs
 #import logging
 # import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
+import RPi.GPIO as GPIO
 # import psutil # Only needed for debugging/logging memory
 import sqlite3
 import argparse
@@ -147,6 +148,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Kt = 2*dead time
         ## Kt = 0.032
         # Kd = 0.5*dead time
+
+        #RPi GPIO Brightness for Makerplane 5" display (pin18)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(18, GPIO.OUT)
+        self.pwm = GPIO.PWM(18, 100)
+        self.pwm.start(0)
 
         # Iterators and thresholds for averaging, interpolation, etc
         self.mean_length = 18750  # Average for trip_ floats over last 5 minutes (300s / 16ms)
@@ -627,12 +634,17 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def optionspopup(self):
         self.optpopup = optionsDialog(self.displayinvert_bool)
         self.optpopup.displayinvertmsg.connect(window.displayinverter)
+        self.optpopup.displaybacklightcmd.connect(window.displaybacklight)
         self.optpopup.showMaximized()
         self.optpopup.show()
 
     @QtCore.pyqtSlot(int)
     def powerlimitcmd(self, val):
         self.powercmd.emit(val)
+    @QtCore.pyqtSlot(int)
+    def displaybacklight(self, val):
+        self.pwm.ChangeDutyCycle(val)
+
     @QtCore.pyqtSlot(int)
     def displayinverter(self, bool):
         self.displayinvert_bool = bool

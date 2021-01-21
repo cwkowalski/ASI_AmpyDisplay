@@ -3,6 +3,7 @@ from ampy_options import Ui_OptDialog
 
 class optionsDialog(QtWidgets.QWidget):
     displayinvertmsg = QtCore.pyqtSignal(int)
+    displaybacklightcmd = QtCore.pyqtSignal(int)
     def __init__(self, displayinvert_bool, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.displayinvert_bool = displayinvert_bool
@@ -17,9 +18,13 @@ class optionsDialog(QtWidgets.QWidget):
         self.ui.ExitBtn.clicked.connect(lambda: self.hide())
         self.ui.DisplayInvertBtn.toggled.connect(lambda: self.displayInvert(self.ui.DisplayInvertBtn.isChecked()))
         self.ui.DisplayInvertBtn.setChecked(self.displayinvert_bool)
+        self.ui.DisplaySlider.valueChanged.connect(self.displayBacklight)
     def displayInvert(self, bool):
         self.displayinvertmsg.emit(bool)
-
+    def displayBacklight(self):
+        level = self.ui.DisplaySlider.value()
+        self.ui.BacklightLabel.setText('Backlight: ' + str(level))
+        self.displaybacklightcmd.emit(level)
 
 
 
