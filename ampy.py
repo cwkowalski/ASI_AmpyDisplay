@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
         MainWindow.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setStyleSheet("QWidget{\n"
+        self.centralwidget.setStyleSheet("QWidget#centralwidget{\n"
 "    background: solid white; }\n"
 "")
         self.centralwidget.setObjectName("centralwidget")
@@ -288,22 +288,6 @@ class Ui_MainWindow(object):
         self.CheckEngineButton.setCheckable(True)
         self.CheckEngineButton.setChecked(False)
         self.CheckEngineButton.setObjectName("CheckEngineButton")
-        self.BatterySOCReset = QtWidgets.QPushButton(self.TripBox)
-        self.BatterySOCReset.setGeometry(QtCore.QRect(290, 160, 65, 65))
-        font = QtGui.QFont()
-        font.setFamily("Luxi Mono")
-        font.setPointSize(48)
-        font.setBold(True)
-        font.setItalic(False)
-        font.setWeight(75)
-        self.BatterySOCReset.setFont(font)
-        self.BatterySOCReset.setStyleSheet("")
-        self.BatterySOCReset.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/root/icon_charged.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.BatterySOCReset.setIcon(icon1)
-        self.BatterySOCReset.setIconSize(QtCore.QSize(55, 55))
-        self.BatterySOCReset.setObjectName("BatterySOCReset")
         self.OptionsBtn = QtWidgets.QPushButton(self.TripBox)
         self.OptionsBtn.setGeometry(QtCore.QRect(430, 160, 65, 65))
         font = QtGui.QFont()
@@ -329,9 +313,9 @@ class Ui_MainWindow(object):
 "\n"
 "}")
         self.OptionsBtn.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/root/Settings-icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.OptionsBtn.setIcon(icon2)
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap(":/root/Settings-icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.OptionsBtn.setIcon(icon1)
         self.OptionsBtn.setIconSize(QtCore.QSize(55, 55))
         self.OptionsBtn.setCheckable(True)
         self.OptionsBtn.setChecked(False)
@@ -418,9 +402,9 @@ class Ui_MainWindow(object):
 "\n"
 "}")
         self.TripReset.setText("")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/root/reset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.TripReset.setIcon(icon3)
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/root/reset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.TripReset.setIcon(icon2)
         self.TripReset.setIconSize(QtCore.QSize(50, 50))
         self.TripReset.setObjectName("TripReset")
         self.LockButton = QtWidgets.QPushButton(self.TripBox)
@@ -448,9 +432,9 @@ class Ui_MainWindow(object):
 "\n"
 "}")
         self.LockButton.setText("")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/root/lock_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.LockButton.setIcon(icon4)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap(":/root/lock_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.LockButton.setIcon(icon3)
         self.LockButton.setIconSize(QtCore.QSize(55, 50))
         self.LockButton.setCheckable(False)
         self.LockButton.setObjectName("LockButton")
@@ -510,8 +494,37 @@ class Ui_MainWindow(object):
         self.Reverse.setChecked(False)
         self.Reverse.setAutoExclusive(False)
         self.Reverse.setObjectName("Reverse")
+        self.BatterySOCReset = QtWidgets.QPushButton(self.TripBox)
+        self.BatterySOCReset.setGeometry(QtCore.QRect(290, 160, 65, 65))
+        font = QtGui.QFont()
+        font.setFamily("Luxi Mono")
+        font.setPointSize(48)
+        font.setBold(True)
+        font.setItalic(False)
+        font.setWeight(75)
+        self.BatterySOCReset.setFont(font)
+        self.BatterySOCReset.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 48pt \"Luxi Mono\";\n"
+"    font-weight: bold;\n"
+"    color: black;\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 4px;\n"
+"    border-radius:20px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        self.BatterySOCReset.setText("")
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap(":/root/icon_charged.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.BatterySOCReset.setIcon(icon4)
+        self.BatterySOCReset.setIconSize(QtCore.QSize(50, 50))
+        self.BatterySOCReset.setObjectName("BatterySOCReset")
         self.gridLayoutWidget_5.raise_()
-        self.BatterySOCReset.raise_()
         self.OptionsBtn.raise_()
         self.Trip_Selector_1.raise_()
         self.Trip_Selector_2.raise_()
@@ -520,6 +533,7 @@ class Ui_MainWindow(object):
         self.Trip_Selector_3.raise_()
         self.Reverse.raise_()
         self.CheckEngineButton.raise_()
+        self.BatterySOCReset.raise_()
         self.BatteryVoltageBar = QtWidgets.QProgressBar(self.centralwidget)
         self.BatteryVoltageBar.setGeometry(QtCore.QRect(296, 205, 210, 23))
         self.BatteryVoltageBar.setStyleSheet(" QProgressBar::chunk {\n"
@@ -620,7 +634,7 @@ class Ui_MainWindow(object):
         self.BatterySOCLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.BatterySOCLabel.setObjectName("BatterySOCLabel")
         self.Time = QtWidgets.QLabel(self.centralwidget)
-        self.Time.setGeometry(QtCore.QRect(273, -5, 250, 46))
+        self.Time.setGeometry(QtCore.QRect(273, 0, 250, 46))
         font = QtGui.QFont()
         font.setFamily("Luxi Mono")
         font.setPointSize(36)
@@ -927,10 +941,11 @@ class Ui_MainWindow(object):
         self.AssistSliderLabel.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.AssistSliderLabel.setObjectName("AssistSliderLabel")
         self.WhmiBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.WhmiBar.setGeometry(QtCore.QRect(310, 90, 180, 23))
+        self.WhmiBar.setGeometry(QtCore.QRect(295, 90, 210, 23))
         self.WhmiBar.setStyleSheet(" QProgressBar::chunk {\n"
 "     background-color: black;}\n"
 "QProgressBar {\n"
+"    background-color: white;\n"
 "    border-style: solid;\n"
 "    border-color: gray;\n"
 "    border-width: 3px;\n"
@@ -942,7 +957,7 @@ class Ui_MainWindow(object):
         self.WhmiBar.setOrientation(QtCore.Qt.Horizontal)
         self.WhmiBar.setObjectName("WhmiBar")
         self.WhmiLabel = QtWidgets.QLabel(self.centralwidget)
-        self.WhmiLabel.setGeometry(QtCore.QRect(310, 50, 175, 40))
+        self.WhmiLabel.setGeometry(QtCore.QRect(295, 50, 210, 40))
         font = QtGui.QFont()
         font.setFamily("Luxi Mono")
         font.setPointSize(25)

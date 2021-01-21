@@ -24,7 +24,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">QWidget{
+    <string notr="true">QWidget#centralwidget{
 	background: solid white; }
 </string>
    </property>
@@ -581,41 +581,6 @@ QPushButton::pressed {
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QPushButton" name="BatterySOCReset">
-     <property name="geometry">
-      <rect>
-       <x>290</x>
-       <y>160</y>
-       <width>65</width>
-       <height>65</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Luxi Mono</family>
-       <pointsize>48</pointsize>
-       <weight>75</weight>
-       <italic>false</italic>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="ampy.qrc">
-       <normaloff>:/root/icon_charged.png</normaloff>:/root/icon_charged.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>55</width>
-       <height>55</height>
-      </size>
-     </property>
-    </widget>
     <widget class="QPushButton" name="OptionsBtn">
      <property name="geometry">
       <rect>
@@ -967,8 +932,56 @@ QPushButton::pressed {
       <bool>false</bool>
      </property>
     </widget>
+    <widget class="QPushButton" name="BatterySOCReset">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>160</y>
+       <width>65</width>
+       <height>65</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>48</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 48pt &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	color: black;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 4px;
+	border-radius:20px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/icon_charged.png</normaloff>:/root/icon_charged.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+    </widget>
     <zorder>gridLayoutWidget_5</zorder>
-    <zorder>BatterySOCReset</zorder>
     <zorder>OptionsBtn</zorder>
     <zorder>Trip_Selector_1</zorder>
     <zorder>Trip_Selector_2</zorder>
@@ -977,6 +990,7 @@ QPushButton::pressed {
     <zorder>Trip_Selector_3</zorder>
     <zorder>Reverse</zorder>
     <zorder>CheckEngineButton</zorder>
+    <zorder>BatterySOCReset</zorder>
    </widget>
    <widget class="QProgressBar" name="BatteryVoltageBar">
     <property name="geometry">
@@ -1123,7 +1137,7 @@ border-radius: 6px
      <string notr="true"> QProgressBar::chunk {
      background-color: black;}
 QProgressBar {
-    border-style: solid;
+	border-style: solid;
 	border-color: gray;
 	border-width: 3px;
 border-radius: 6px
@@ -1180,7 +1194,7 @@ border-radius: 6px
     <property name="geometry">
      <rect>
       <x>273</x>
-      <y>-5</y>
+      <y>0</y>
       <width>250</width>
       <height>46</height>
      </rect>
@@ -1711,9 +1725,9 @@ QCheckBox::indicator {
    <widget class="QProgressBar" name="WhmiBar">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>295</x>
       <y>90</y>
-      <width>180</width>
+      <width>210</width>
       <height>23</height>
      </rect>
     </property>
@@ -1721,7 +1735,8 @@ QCheckBox::indicator {
      <string notr="true"> QProgressBar::chunk {
      background-color: black;}
 QProgressBar {
-    border-style: solid;
+    background-color: white;
+	border-style: solid;
 	border-color: gray;
 	border-width: 3px;
 border-radius: 6px
@@ -1743,9 +1758,9 @@ border-radius: 6px
    <widget class="QLabel" name="WhmiLabel">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>295</x>
       <y>50</y>
-      <width>175</width>
+      <width>210</width>
       <height>40</height>
      </rect>
     </property>

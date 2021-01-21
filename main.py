@@ -92,6 +92,7 @@ BAC = BACModbus.BACModbus()
 
 class AmpyDisplay(QtWidgets.QMainWindow):
     workmsg = QtCore.pyqtSignal(int)
+    powercmd = QtCore.pyqtSignal(int)
     def __init__(self, bs, bp, ba, whl, sp, lockpin, *args, **kwargs,):
         self.battseries = bs
         self.battparallel = bp
@@ -160,6 +161,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.iter_attribute_slicer_threshold = self.mean_length + 500  # 500 = 8 seconds; re-slice for new means each 8 sec.
         self.iter_interp_threshold = int(self.mean_length / self.iter_threshold)  # Equivalent time vs. mean_length
         self.trip_selector = 1
+        self.displayinvert_bool = False
         #self.trip_selected = True
         self.gui_dict = {}
         # Set up the GUI
@@ -170,7 +172,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.BlankCursor))
         #QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         # Connect buttons
-
         self.ui.OptionsBtn.clicked.connect(self.optionspopup)
         self.ui.BatterySOCReset.clicked.connect(self.socreset)
         self.ui.Reverse.toggled.connect(lambda: self.signal_reverse(self.ui.Reverse.isChecked()))
@@ -375,7 +376,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_whmi.append(self.divzero(self.flt_wh, self.flt_dist))
         self.flt_whmi_avg = mean(self.list_whmi[-self.iter_interp_threshold:])  # 18750 / 19 self.iter =
         # self.flt_whmi_inst = self.divzero((wattsec/3600), distance)  # Too erratic esp. at low speed
-        self.flt_whmi_inst = mean(self.list_whmi[-3:])  # Approximately 1-sec rolling mean
+        self.flt_whmi_inst = mean(self.list_whmi[-3:])
         self.flt_range = self.divzero((self.get_battwh()), self.flt_whmi_inst)  # Wh for range to account for eff.
         self.flt_batt_volts = mean(self.list_batt_volts)
         self.flt_batt_volts_max = max(self.list_batt_volts)
@@ -385,9 +386,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.flt_motor_amps = mean(self.list_motor_amps[-self.mean_length:])
         self.flt_motor_temp_max = max(self.list_motor_temp)
     def prepare_gui(self):  # Prepare gui elements to avoid EOL errors during gui update
-        # todo: fix label spacing. Consider making prefixes suffixes, and in either case
-        #  separate each third of Trip Layout into lined panes. Fill labels with displayed text and place by hand.
-        #  Simply not possible to place uniformly in a grid layout.
         self.gui_dict['Time'] = time.strftime('%I:%M:%S', time.localtime())
         self.gui_dict['MotorTemperatureLabel'] = '{:.0f}'.format(
             self.floop['Motor_Temperature']) + '\xB0' + 'C'  # 'T<sub>M</sub>:' +
@@ -403,6 +401,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                                                             self.floop['Battery_Voltage']) / 1000)
         self.gui_dict['SpeedGauge'] = self.floop['Vehicle_Speed']
         self.gui_dict['PowerGauge'] = self.floop['Battery_Current'] * self.floop['Battery_Voltage']
+        self.gui_dict['WhmiLabel'] = '{:.1f}'.format(self.flt_whmi_inst) + '<sub>Wh/mi</sub>'
 
         if self.trip_selector == 1: # populate for first schema:
             self.gui_dict['Trip_1_1'] = '{:.2f}'.format(self.flt_wh)
@@ -474,34 +473,37 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.CheckEngineButton.hide()
         #if self.trip_selected:  # Ready for new Trip windows.
         if self.trip_selector == 1:  # Update unit labels for changed trip display.
-            self.ui.Trip_1_1_prefix.setText('Wh<sub>use</sub>: ')
+            self.ui.Trip_1_1_prefix.setText('Wh<sub>use</sub>:')
             self.ui.Trip_1_2_prefix.setText('Wh/mi<sub>Trip</sub>:')
-            self.ui.Trip_1_3_prefix.setText('Ah<sub>use</sub>: ')
-            self.ui.Trip_2_1_prefix.setText('Wh<sub>rem</sub>: ')
+            self.ui.Trip_1_3_prefix.setText('Ah<sub>use</sub>:')
+            self.ui.Trip_2_1_prefix.setText('Wh<sub>rem</sub>:')
             self.ui.Trip_2_2_prefix.setText('Range:')
-            self.ui.Trip_2_3_prefix.setText('Ah<sub>rem</sub>: ')
-            self.ui.Trip_3_1_prefix.setText('Wh<sub>reg</sub>: ')
-            self.ui.Trip_3_2_prefix.setText('Miles: ')
-            self.ui.Trip_3_3_prefix.setText('Ah<sub>regen</sub>: ')
+            self.ui.Trip_2_3_prefix.setText('Ah<sub>rem</sub>:')
+            self.ui.Trip_3_1_prefix.setText('Wh<sub>reg</sub>:')
+            self.ui.Trip_3_2_prefix.setText('Miles:')
+            self.ui.Trip_3_3_prefix.setText('Ah<sub>regen</sub>:')
 
         ## New trip 2
         # Range-rem avg   | Trip Time    | Amp-max                # Tmax to MotTempLabel
         # Range-rem inst  | Move-time    | Vmin
         # Tmax            | Avg movspd*  | Spd-max
         elif self.trip_selector == 2:
-            self.ui.Trip_1_1_prefix.setText('Rng<sub>avg</sub>: ')
-            self.ui.Trip_1_2_prefix.setText('T<sub>trip</sub>: ')
-            self.ui.Trip_1_3_prefix.setText('A<sub>max</sub>: ')
-            self.ui.Trip_2_1_prefix.setText('Rng<sub>inst</sub>: ')
+            self.ui.Trip_1_1_prefix.setText('Rng<sub>avg</sub>:')
+            self.ui.Trip_1_2_prefix.setText('T<sub>trip</sub>:')
+            self.ui.Trip_1_3_prefix.setText('A<sub>max</sub>:')
+            self.ui.Trip_2_1_prefix.setText('Rng<sub>inst</sub>:')
             self.ui.Trip_2_2_prefix.setText('T<sub>mov</sub>:')
-            self.ui.Trip_2_3_prefix.setText('V<sub>min</sub>: ')
-            self.ui.Trip_3_1_prefix.setText('T<sub>max</sub>: ')
+            self.ui.Trip_2_3_prefix.setText('V<sub>min</sub>:')
+            self.ui.Trip_3_1_prefix.setText('T<sub>max</sub>:')
             #self.ui.Trip_3_2_prefix.setText('Miles: ')
             self.ui.Trip_3_2_prefix.setText('Mph<sub>mov</sub>:')
-            self.ui.Trip_3_3_prefix.setText('Mph<sub>max</sub>: ')
+            self.ui.Trip_3_3_prefix.setText('Mph<sub>max</sub>:')
         elif self.trip_selector == 3:
-            pass
+            # Pass until decided what to fill here. Redirect to 1 to prevent breaking updates.
+            self.trip_selector = 1
 
+        self.ui.WhmiBar.setValue(int(self.flt_whmi_inst)) # Breaking dict rules but-- performance trumps them.
+        self.ui.WhmiLabel.setText(self.gui_dict['WhmiLabel'])
         self.ui.MotorTemperatureLabel.setText(self.gui_dict['MotorTemperatureLabel'])
         self.ui.MotorTemperatureBar.setValue(self.gui_dict['MotorTemperatureBar'])
         self.ui.BatteryVoltageLabel.setText(self.gui_dict['BatteryVoltageLabel'])
@@ -612,28 +614,44 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.pinpopup = numberPopup(self.ui, self.lockpin, self.signal_antitheft)
         # self.pinpopup.setParent(self.ui.centralwidget)
         self.pinpopup.setStyleSheet('QPushButton {border-style: inset;border-color: dark grey;'
-        'border-width: 3px;border-radius:10px;font: 40pt "Magneto";padding: 0px 0px 0px 0px;} '
+        'border-width: 3px;border-radius:10px;font: 40pt "Luxi Mono";font-weight: bold;padding: 0px 0px 0px 0px;} '
                                     'QPushButton::pressed{border-style: outset;}'
-                                    'QLineEdit{font: 40pt "Magneto";}')
+                                    'QLineEdit{font: 40pt "Luxi Mono";font-weight: bold;}')
         # todo: Can't center without hardcoding, need another strategy for universal layout compatibility.
         # let window manager handle it
         #self.pinpopup.move(self.ui.centralwidget.rect().center() + QtCore.QPoint(self.pinpopup.width()/5, 37))
+        self.pinpopup.move(QtCore.QPoint(0, 0))
+        self.pinpopup.showMaximized()
         self.pinpopup.show()
 
     def optionspopup(self):
-        self.optpopup = optionsDialog(self.ui)
+        self.optpopup = optionsDialog(self.displayinvert_bool)
+        self.optpopup.displayinvertmsg.connect(window.displayinverter)
+        self.optpopup.showMaximized()
         self.optpopup.show()
 
     @QtCore.pyqtSlot(int)
-    def displayInvertOption(self, bool):
+    def powerlimitcmd(self, val):
+        self.powercmd.emit(val)
+    @QtCore.pyqtSlot(int)
+    def displayinverter(self, bool):
+        self.displayinvert_bool = bool
         if bool:
             # apply shiteload of stylesheets
-            self.ui.centralwidget.setStyleSheet("QWidget{background: solid black; }")
-            self.ui.SpeedGaugeLabel.setStyleSheet("QLabel{font: 70pt \"Luxi Mono\"; font-weight: bold; color: white)")
-            self.ui.SpeedGaugeLabelUnits.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: white)")
-            self.ui.PowerGaugeLabel.setStyleSheet("QLabel{font: 48pt \"Luxi Mono\"; font-weight: bold; color: white)")
-            self.ui.PowerGaugeLabelUnits.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: white)")
-            self.ui.TripBox.setStyleSheet("QGroupBox{background: solid black; border: 5px solid white;\n"
+            self.ui.centralwidget.setStyleSheet("QWidget#centralwidget{background: solid black; }")
+            self.ui.SpeedGauge.set_NeedleColor(255, 255, 255, 255)
+            self.ui.SpeedGauge.set_ScaleValueColor(255, 255, 255, 255)
+            self.ui.SpeedGauge.set_DisplayValueColor(255, 255, 255, 255)
+            self.ui.SpeedGauge.black = QtGui.QColor(255, 255, 255, 255)
+            self.ui.PowerGauge.set_NeedleColor(255, 255, 255, 255)
+            self.ui.PowerGauge.set_ScaleValueColor(255, 255, 255, 255)
+            self.ui.PowerGauge.set_DisplayValueColor(255, 255, 255, 255)
+            self.ui.PowerGauge.black = QtGui.QColor(255, 255, 255, 255)
+            self.ui.SpeedGaugeLabel.setStyleSheet("QLabel{font: 70pt \"Luxi Mono\"; font-weight: bold; color: white}")
+            self.ui.SpeedGaugeLabelUnits.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: white}")
+            self.ui.PowerGaugeLabel.setStyleSheet("QLabel{font: 48pt \"Luxi Mono\"; font-weight: bold; color: white}")
+            self.ui.PowerGaugeLabelUnits.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: white}")
+            self.ui.TripBox.setStyleSheet("QGroupBox{background: solid black; border: 5px solid gray;\n"
             "    border-radius: 10px; margin-top: 50px;}\n"
             "QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; left: 25px;\n"
             "    padding: -25 0px 0 0px;}"
@@ -666,36 +684,38 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.AssistSliderLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold; color: white}")
             self.ui.AssistSlider.setStyleSheet("QSlider {border-style: none; border-color: gray; border-width: 4px;\n"
             "border-radius: 18px; height: 80px}\n"
-            "QSlider::handle:horizontal {background-color: white; border: 5px solid; border-radius: 12px;\n"
+            "QSlider::handle:horizontal{background-color: white; border: 5px solid; border-radius: 12px;\n"
             "width: 30px; margin: 0px 0px;}\n"
-            "QSlider::groove:horizontal {border: 4px solid gray; border-radius: 18px; height: 28px}")
+            "QSlider::groove:horizontal{border: 4px solid gray; border-radius: 18px; height: 28px}")
             self.ui.Profile1Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: white}")
             self.ui.Profile2Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: white}")
             self.ui.Profile3Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: white}")
-            self.ui.ProfileRb1.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: black;\n"
-            "selectionbackgroundcolor: light grey; font: 50px;}\n"
-            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
-            self.ui.ProfileRb2.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: black;\n"
-            "selectionbackgroundcolor: light grey; font: 50px;}\n"
-            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
-            self.ui.ProfileRb3.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: black;\n"
-            "selectionbackgroundcolor: light grey; font: 50px;}\n"
-            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
+            self.ui.ProfileRb1.setStyleSheet("QPushButton{border: none; background: transparent;}")
+            self.ui.ProfileRb2.setStyleSheet("QPushButton{border: none; background: transparent;}")
+            self.ui.ProfileRb3.setStyleSheet("QPushButton{border: none; background: transparent;}")
         else:
-            self.ui.centralwidget.setStyleSheet("QWidget{background: solid white; }")
-            self.ui.SpeedGaugeLabel.setStyleSheet("QLabel{font: 70pt \"Luxi Mono\"; font-weight: bold; color: black)")
+            self.ui.centralwidget.setStyleSheet("QWidget#centralwidget{background: solid white; }")
+            self.ui.SpeedGaugeLabel.setStyleSheet("QLabel{font: 70pt \"Luxi Mono\"; font-weight: bold; color: black}")
             self.ui.SpeedGaugeLabelUnits.setStyleSheet(
-                "QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: black)")
-            self.ui.PowerGaugeLabel.setStyleSheet("QLabel{font: 48pt \"Luxi Mono\"; font-weight: bold; color: black)")
+                "QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: black}")
+            self.ui.PowerGaugeLabel.setStyleSheet("QLabel{font: 48pt \"Luxi Mono\"; font-weight: bold; color: black}")
             self.ui.PowerGaugeLabelUnits.setStyleSheet(
-                "QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: black)")
+                "QLabel{font: 16pt \"Luxi Mono\"; font-weight: bold; color: black}")
+            self.ui.SpeedGauge.set_NeedleColor(50, 50, 50, 255)
+            self.ui.SpeedGauge.set_ScaleValueColor(50, 50, 50, 255)
+            self.ui.SpeedGauge.set_DisplayValueColor(50, 50, 50, 255)
+            self.ui.SpeedGauge.black = QtGui.QColor(0, 0, 0, 255)
+            self.ui.PowerGauge.set_NeedleColor(50, 50, 50, 255)
+            self.ui.PowerGauge.set_ScaleValueColor(50, 50, 50, 255)
+            self.ui.PowerGauge.set_DisplayValueColor(50, 50, 50, 255)
+            self.ui.SpeedGauge.black = QtGui.QColor(0, 0, 0, 255)
             self.ui.TripBox.setStyleSheet("QGroupBox{background: solid white; border: 5px solid black;\n"
             "    border-radius: 10px; margin-top: 50px;}\n"
-            "QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; left: 25px;\n"
+            "QGroupBox::title{subcontrol-origin: margin; subcontrol-position: top left; left: 25px;\n"
             "    padding: -25 0px 0 0px;}"
             "QLabel{font: 18pt \"Luxi Mono\"; font-weight: bold; color: black}\n"
             "QCheckBox::indicator {width: 60px; height: 60px;}"
-            "QPushButton{background: black; font: 48pt \"Luxi Mono\"; font-weight: bold; color: black;\n"
+            "QPushButton{background: transparent; font: 48pt \"Luxi Mono\"; font-weight: bold; color: black;\n"
             "border-style: inset; border-color: dark grey; border-width: 4px; border-radius 20px;}\n"
             "QPushButton::pressed{border-style: outset}")
             self.ui.BatteryVoltageBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
@@ -728,15 +748,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.Profile1Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: black}")
             self.ui.Profile2Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: black}")
             self.ui.Profile3Label.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold; color: black}")
-            self.ui.ProfileRb1.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: white;\n"
-            "selectionbackgroundcolor: light grey; font: 50px;}\n"
-            "QRadioButton::indicator{border : 5px solid white; width : 25px; height : 50px; border radius : 1px}")
-            self.ui.ProfileRb2.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: white;\n"
-            "selectionbackgroundcolor: light grey; font: 50px;}\n"
-            "QRadioButton::indicator{border : 5px solid black; width : 25px; height : 50px; border radius : 1px}")
-            self.ui.ProfileRb3.setStyleSheet("QRadioButton {border: 20; padding: 10px; background: white;\n"
-            "selectionbackgroundcolor: light grey; font: 50px;}\n"
-            "QRadioButton::indicator{border : 5px solid black; width : 25px; height : 50px; border radius : 1px}")
+            self.ui.ProfileRb1.setStyleSheet("QPushButton{border: none; background: transparent;}")
+            self.ui.ProfileRb2.setStyleSheet("QPushButton{border: none; background: transparent;}")
+            self.ui.ProfileRb3.setStyleSheet("QPushButton{border: none; background: transparent;}")
     def tripselect(self, button_bool, command):
         print('Trip Selector ' + str(command) + ' is: ' + str(button_bool))
         if button_bool == True:
@@ -839,7 +853,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         payload = (self.iter_attribute_slicer, self.floop['Battery_Current'], self.floop['Battery_Voltage'],
                    self.floop['Motor_Current'], self.floop['Motor_Temperature'], self.floop['Vehicle_Speed'],
                    self.floop['Motor_RPM'], self.list_floop_interval[-1:][0])
-        print('sql_tripstat_upload payload: ', payload)
+        #print('sql_tripstat_upload payload: ', payload)
         self.sql.execute('replace into tripstat values (?,?,?,?,?,?,?,?)', payload)
     def SQL_lifestat_upload(self):
         # On SOC reset, take Ah and compare to last row to determine if you have charged or discharged.
@@ -903,6 +917,7 @@ class QThreader(QtCore.QThread):
         QtCore.QThread.__init__(self, parent)
         # self.msg.connect(callback)
         self.workercmd = 0
+        self.powercmd = None
         self.newcmd = False
         self.running = True
         self.client = modbus_rtu.RtuMaster(serial.Serial(port=BAC.port, baudrate=BAC.baudrate, bytesize=BAC.bytesize,
@@ -920,12 +935,16 @@ class QThreader(QtCore.QThread):
         self.workercmd = command
         # thread1.running = True
         # thread1.start()
-
+    @QtCore.pyqtSlot(int)
+    def powercommand(self, val):
+        self.workercmd = -20
+        self.powercommand = val
     def run(self):  # Executed via .start() method on instance, NOT .run()! Method name MUST be run. Probably.
         while self.running:
             # print('worker: ', self.workercmd)
             # time.sleep(.2)
             # Workmsg: 0 = floop, -1 to -9 = assist, -11 to -13 = profile, -14 = faultreset, >0 = Range limiter batt amps
+            # todo: convert each 'if' into a function, use dict to lookup function.
             if self.workercmd == 0:  # If..elif faster than dict comprehension when first element(s) usually taken
                 # output = self.client.read_holding_registers(BAC.ObdicAddress['Faults'], count=9, unit=self.unit)
                 self.msg.emit(self.reads('Faults', 9))
@@ -976,20 +995,31 @@ class QThreader(QtCore.QThread):
                 #modbit(n, p, b):  # mod byte at bit p in n to b
                 #    mask = 1 << p
                 #    return (n & ~mask) | ((b << p) & mask)
-                modbyte = (self.read('Features3') & ~(1 << 3)) | ((1 << 3)) & (1 << 3)
+                bits = self.read('Features3')
+                modbyte = (bits & ~(1 << 3)) | ((1 << 3)) & (1 << 3)
+                print('Antitheft disable. bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
                 self.write('Features3', modbyte)  # 8 = 4th binary bit
                 self.workercmd = 0
             elif self.workercmd == -17:  # Antitheft enable
-                modbyte = (self.read('Features3') & ~(1 << 3)) | ((0 << 3)) & (1 << 3)
+                bits = self.read('Features3')
+                modbyte = (bits & ~(1 << 3)) | ((0 << 3)) & (1 << 3)
+                print('Antitheft enable. bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
                 self.write('Features3', modbyte)
                 self.workercmd = 0
             elif self.workercmd == -18:  # Reverse (cruise input) enable
-                modbyte = (self.read('Features3') & ~(1 << 4)) | ((0 << 4)) & (1 << 4)
+                bits = self.read('Features3')
+                modbyte = (bits & ~(1 << 4)) | ((0 << 4)) & (1 << 4)
+                print('Reverse enable. bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
                 self.write('Features3', modbyte)  # 16 = 5th binary bit
                 self.workercmd = 0
             elif self.workercmd == -19:  # Reverse (cruise input) disable
-                modbyte = (self.read('Features3') & ~(0 << 4)) | ((1 << 4)) & (1 << 4)
+                bits = self.read('Features3')
+                modbyte = (bits & ~(0 << 4)) | ((1 << 4)) & (1 << 4)
+                print('Reverse disable. bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
                 self.write('Features3', modbyte)
+                self.workercmd = 0
+            elif self.workercmd == -20:
+                self.write_scaled('Remote_Maximum_Battery_Current_Limit', self.powercommand)
                 self.workercmd = 0
 
     def read(self, address):
@@ -1017,7 +1047,6 @@ class QThreader(QtCore.QThread):
     def write_scaled(self, address, value):  # Helper function
         write = int(value * BAC.ObdicScale[BAC.ObdicAddress[address]])
         self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, BAC.ObdicAddress[address], output_value=[write])
-
 
 if __name__ == '__main__':
     # Logging for debugging Modbus
@@ -1047,7 +1076,7 @@ if __name__ == '__main__':
 
     thread1.msg.connect(window.receive_floop)
     window.workmsg.connect(thread1.workercommand)
-
+    window.powercmd.connect(thread1.powercommand)
     # window.show()
     # window.socreset()  # Was not starting before first floop when put into gui class __init__...
     thread1.start()
