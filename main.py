@@ -644,7 +644,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(int)
     def displaybacklight(self, val):
         self.pwm.ChangeDutyCycle(val)
-
     @QtCore.pyqtSlot(int)
     def displayinverter(self, bool):
         self.displayinvert_bool = bool
