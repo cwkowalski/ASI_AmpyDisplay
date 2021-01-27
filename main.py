@@ -15,6 +15,7 @@ from numpy import mean, isnan, array, prod, argmin, abs
 #import logging
 # import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
+#DisableForDesktopDebug
 import RPi.GPIO as GPIO
 # import psutil # Only needed for debugging/logging memory
 import sqlite3
@@ -150,6 +151,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Kd = 0.5*dead time
 
         #RPi GPIO Brightness for Makerplane 5" display (pin18)
+        #DisableForDesktopDebug
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(18, GPIO.OUT)
         self.pwm = GPIO.PWM(18, 100)
@@ -624,9 +626,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         'border-width: 3px;border-radius:10px;font: 40pt "Luxi Mono";font-weight: bold;padding: 0px 0px 0px 0px;} '
                                     'QPushButton::pressed{border-style: outset;}'
                                     'QLineEdit{font: 40pt "Luxi Mono";font-weight: bold;}')
-        # todo: Can't center without hardcoding, need another strategy for universal layout compatibility.
-        # let window manager handle it
         #self.pinpopup.move(self.ui.centralwidget.rect().center() + QtCore.QPoint(self.pinpopup.width()/5, 37))
+        # For some reason 'numberPopup' doesn't center like other custom .ui widgets. Below fix only valid for 800x480
         self.pinpopup.move(QtCore.QPoint(0, 0))
         self.pinpopup.showMaximized()
         self.pinpopup.show()
@@ -671,8 +672,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             "QPushButton{background: black; font: 48pt \"Luxi Mono\"; font-weight: bold; color: white;\n"
             "border-style: inset; border-color: light grey; border-width: 4px; border-radius 20px;}\n"
             "QPushButton::pressed{border-style: outset}")
-            self.ui.BatteryVoltageBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
-            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.BatteryVoltageBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: white; border-width: 3px; border-radius: 6px}")
             self.ui.BatteryVoltageLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
             "color: white}")
             self.ui.BatteryVoltageDropLabel.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold;\n"

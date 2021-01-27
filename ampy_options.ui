@@ -59,7 +59,7 @@ border: none}</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
+      <y>-317</y>
       <width>781</width>
       <height>1440</height>
      </rect>
@@ -702,24 +702,12 @@ QSlider::groove:horizontal {
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">QLabel{font: 18pt 'Luxi Mono'}
+</string>
      </property>
      <property name="title">
       <string>Diagnostics</string>
      </property>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>62</y>
-        <width>589</width>
-        <height>45</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Hall sensor position, Ebike Flags, Input Voltages</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="DiagnosticsUpdateBtn">
       <property name="geometry">
        <rect>
@@ -757,6 +745,17 @@ QSlider::groove:horizontal {
       <property name="autoExclusive">
        <bool>false</bool>
       </property>
+     </widget>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>60</y>
+        <width>750</width>
+        <height>340</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout"/>
      </widget>
     </widget>
     <widget class="QSlider" name="PID_Kp_Slider">
