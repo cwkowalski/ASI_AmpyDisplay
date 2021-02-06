@@ -16,19 +16,32 @@ from numpy import mean, isnan, array, prod, argmin, abs
 # import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
 #DisableForDesktopDebug
-import RPi.GPIO as GPIO
+import platform
+if platform.system() == 'Linux':
+    import RPi.GPIO as GPIO
 # import psutil # Only needed for debugging/logging memory
 import sqlite3
 import argparse
 from number_pad import numberPopup
 from options_dialog import optionsDialog
+from bms_dialog import bmsDialog
 from ampy_options import Ui_OptDialog
+# todo: try using restricted imports and recheck strace to minimize deps, include .pyc; e.g.
+#  QtWidgets.QMainWindow .QApplication .QMessageBox
+#  	.ui; QSlider...
+#  from scipy.integrate import simps...
+
+
+
 
 # Process = psutil.Process(getpid()) # To get memory
 
-# todo: consider serial control of walk mode for 'zero RR' riding assist. ~50W?
+# todo: consider serial control of walk mode for 'zero RR' riding assist.
+#   RR Could be derived from trip simulator experimental RR. "Coast Mode", "Normal",
+#   and "DinoGuzzlr" for "engine-braking"
 #  Verify 'Regeneration_battery_current_limit' parameter behavior. Currently controller reports
 #  calculated battery current braking limit parameter = system voltage *  Rated motor power (Race mode PAS power)
+#  is this the only difference between rated/remote power registers?
 #  1. Does assist level affect regeneration current?
 #  2. Does PAS power actually control regen current with Throttle bypass assist level = 1?
 #  3. Does Race mode PAS power actually scale regen current with Alternate speed/power limit disabled?
@@ -40,31 +53,6 @@ from ampy_options import Ui_OptDialog
 # Human Power Assist Standard: If enabled: https://support.accelerated-systems.com/KB/?p=2175
 # Full Pedelec Assistance Speed: Point at which foldback on Max Pedelec Assistance Gain terminates.
 # Pedelec gain = 0 when speed = Vehicle_Maximum_Speed (for assistance only, addr 1920)
-# re
-# PFS/Cruise/Headlight input setting via Modbus, for Antitheft without GPIO!
-# HW Configuration Vector: Bit12, PFS Pullup; Bit13, Cruise Pullup, Bit15, Headlight Pullup
-
-# KNOWN ISSUES / TO IMPLEMENT
-
-# SOC currently mapped straight to Battery Voltage.
-# Instead, setup wh to increment by interpolating N elements of list, and map SOC from Wh.
-# Watt-hours still off by ~1.3% when incrementing every floop;
-# Time: 599.8939490318298, SOC: 24.638614508283645, Wh: 14.259588060093241, Battvolt: 73.32322134387351, MotAmps: 1.1686784448684748, Dist: 0.0, Itercount: 36685, Faults: ['Motor_Hall_Sensor_Fault']
-# Consider using sum(self.create_a_new_floop_interval_list[self.short_iterator:]) and means to avoid
-# the rounding errors of floats on very small values.
-# Longer check:F
-
-
-# Time: 0.015978574752807617, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.5065789770374, Battvolt: 74.81587986111111, MotAmps: 0.5220652777777778, Dist: 1.0, Itercount: 1457531, Faults: []
-# Time: 0.015969038009643555, Memory: 197459968, SOC: 32.23330976354521, Wh: 302.5068175465986, Battvolt: 74.81587986111111, MotAmps: 0.5220701388888889, Dist: 1.0, Itercount: 1457532, Faults: []
-# Time: 0.016027450561523438, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.50707255366723, Battvolt: 74.81587951388889, MotAmps: 0.5220729166666667, Dist: 1.0, Itercount: 1457533, Faults: []
-# Time: 0.01602458953857422, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.50730670202756, Battvolt: 74.81587951388889, MotAmps: 0.522075, Dist: 1.0, Itercount: 1457534, Faults: []
-# Time: 0.016001462936401367, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.5075145335286, Battvolt: 74.81587951388889, MotAmps: 0.5220770833333334, Dist: 1.0, Itercount: 1457535, Faults: []
-# Time: 0.015944480895996094, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.507731979501, Battvolt: 74.81587951388889, MotAmps: 0.5220798611111112, Dist: 1.0, Itercount: 1457536, Faults: []
-# Time: 0.016041040420532227, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.507987202793, Battvolt: 74.81587951388889, MotAmps: 0.522084375, Dist: 1.0, Itercount: 1457537, Faults: []
-# Time: 0.015958309173583984, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.5082411097776, Battvolt: 74.81587951388889, MotAmps: 0.5220885416666666, Dist: 1.0, Itercount: 1457538, Faults: []
-# Time: 0.016000986099243164, Memory: 197459968, SOC: 32.23330976354521, Wh: 302.5084956957796, Battvolt: 74.81587951388889, MotAmps: 0.5220930555555555, Dist: 1.0, Itercount: 1457539, Faults: []
-# Time: 0.016033172607421875, Memory: 197459968, SOC: 32.14144076550766, Wh: 302.50876641214126, Battvolt: 74.81587916666666, MotAmps: 0.5220944444444444, Dist: 1.0, Itercount: 1457540, Faults: []
 
 # SOC rundown test, while polling;
 # 12:25 AM
@@ -77,15 +65,9 @@ from ampy_options import Ui_OptDialog
 # ~5.14285714 watts idle controller power not detected by shunt-- factor into mileage?
 
 # Self. vars used only for labels should be updated as formatted string, instead of np_float64's.
+# ~18750 elements for last 5 minutes of data
 
-# use resource = list[-N:] to slice last N elements of list (~18750 elements for last 5 minutes of data)
-BAC = BACModbus.BACModbus()
-
-
-# trip = BACModbus.trip()  # Class instantiate
-# trip.read()  # Class method
-
-# Redirect print to file  # Not recommended
+# Redirect stdout print to file for logs  # Not recommended
 # orig_stdout = sys.stdout
 # f = open('out.txt', 'w')
 # sys.stdout = f
@@ -126,7 +108,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
 
         # For lifestats:
         self.lifestat_iter_ID = 0
-        # Todo: update on SQL_init_setup to display lifestats; update lifestats, from trip on socreset.
+        # Todo: update profilestate in sql init setup
         self.lifestat_ah_used, self.lifestat_ah_charged, self.lifestat_ahregen, self.lifestat_wh, self.lifestat_whregen, \
         self.lifestat_dist, self.lifestat_Rbatt = \
             float(0), float(0), float(0), float(0), float(0), float(0), float(0)
@@ -151,11 +133,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Kd = 0.5*dead time
 
         #RPi GPIO Brightness for Makerplane 5" display (pin18)
-        #DisableForDesktopDebug
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(18, GPIO.OUT)
-        self.pwm = GPIO.PWM(18, 100)
-        self.pwm.start(0)
+        if platform.system() == 'Linux':
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(18, GPIO.OUT)
+            self.pwm = GPIO.PWM(18, 100)
+            self.pwm.start(0)
 
         # Iterators and thresholds for averaging, interpolation, etc
         self.mean_length = 18750  # Average for trip_ floats over last 5 minutes (300s / 16ms)
@@ -178,7 +160,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setWindowFlags(QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint))
         self.statusBar().setVisible(False)
-        QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.BlankCursor))
+        if platform.system() == 'Linux':
+            QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.BlankCursor))
         #QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         # Connect buttons
         self.ui.OptionsBtn.clicked.connect(self.optionspopup)
@@ -639,6 +622,22 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.optpopup.showMaximized()
         self.optpopup.show()
 
+    def bmspopup(self):
+        self.bmspopup = bmsDialog()
+        self.bmspopup.bmspoll.connect(BMSSerialThread.bmspoller)
+        self.bmspopup.bmscut.connect(window.bmscutoff)
+
+
+    @QtCore.pyqtSlot(int)
+    def bmscutoff(self, val):
+        volt = val / 1000
+        # todo: send volt to bms Qthreader
+
+    @QtCore.pyqtSlot(int)
+    def bmsbalance(self, val):
+        volt = val / 1000
+        # todo: send volt to bms Qthreader
+
     @QtCore.pyqtSlot(int)
     def powerlimitcmd(self, val):
         self.powercmd.emit(val)
@@ -673,24 +672,24 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             "border-style: inset; border-color: light grey; border-width: 4px; border-radius 20px;}\n"
             "QPushButton::pressed{border-style: outset}")
             self.ui.BatteryVoltageBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
-            "QProgressBar {border-style: solid; border-color: white; border-width: 3px; border-radius: 6px}")
+            "QProgressBar {border-style: solid; border-color: gray; background-color: gray; border-width: 3px; border-radius: 6px}")
             self.ui.BatteryVoltageLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
             "color: white}")
             self.ui.BatteryVoltageDropLabel.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold;\n"
             "color: white}")
             self.ui.BatteryVoltageLine.setStyleSheet("QObject{color:white}")
-            self.ui.BatterySOCBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
-            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.BatterySOCBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; background-color: gray; border-width: 3px; border-radius: 6px}")
             self.ui.BatterySOCLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
             "color: white}")
             self.ui.BatterySOCLine.setStyleSheet("QObject{color:white}")
-            self.ui.MotorTemperatureBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
-            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.MotorTemperatureBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; background-color: gray; border-width: 3px; border-radius: 6px}")
             self.ui.MotorTemperatureLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
             "color: white}")
             self.ui.MotorTemperatureLine.setStyleSheet("QObject{color:white}")
-            self.ui.WhmiBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
-            "QProgressBar {border-style: solid; border-color: gray; border-width: 3px; border-radius: 6px}")
+            self.ui.WhmiBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
+            "QProgressBar {border-style: solid; border-color: gray; background-color: gray; border-width: 3px; border-radius: 6px}")
             self.ui.WhmiLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold; color: white}")
             self.ui.Time.setStyleSheet("QLabel{font: 36pt \"Luxi Mono\";font-weight: bold; color: white}")
             self.ui.AssistSliderLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold; color: white}")
@@ -921,8 +920,21 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         return fmt.format(**d)
 
 
-class QThreader(QtCore.QThread):
-    msg = QtCore.pyqtSignal(object)
+class BMSSerialThread(QtCore.QThread):
+    bms_msg = QtCore.pyqtSignal(object)
+    def __init__(self, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        # todo: setup serial connection/protocol.
+
+    @QtCore.pyqtSlot(int)
+    def bmspoller(self, bool):
+        if bool == 1:
+            self.workercmd.emit(-69) #todo: pick val
+        elif bool == 0:
+            self.workercmd.emit(-69)
+
+class BACSerialThread(QtCore.QThread):
+    bac_msg = QtCore.pyqtSignal(object)
 
     # cmd = QtCore.pyqtSignal(object)
     def __init__(self, parent=None):
@@ -959,11 +971,11 @@ class QThreader(QtCore.QThread):
             # todo: convert each 'if' into a function, use dict to lookup function.
             if self.workercmd == 0:  # If..elif faster than dict comprehension when first element(s) usually taken
                 # output = self.client.read_holding_registers(BAC.ObdicAddress['Faults'], count=9, unit=self.unit)
-                self.msg.emit(self.reads('Faults', 9))
+                self.bac_msg.emit(self.reads('Faults', 9))
             elif self.workercmd > 0:
                 print('Rangelimiter received val: ', self.workercmd)
                 # self.write('Remote_Maximum_Battery_Current_Limit', self.workercmd)  # Enable to limit
-                self.msg.emit(self.reads('Faults', 9))
+                self.bac_msg.emit(self.reads('Faults', 9))
             elif self.workercmd == -11:
                 # Possibly scale up Maximum braking torque/Maximum braking current parameters
                 # which are a % of rated motor current, for consistent regen braking across profiles.
@@ -1066,6 +1078,7 @@ if __name__ == '__main__':
     #logging.basicConfig(level='INFO')
 
     # Cmdline **kwargs for key vehicle stats  # Final release; my defaults --> required= True
+    BAC = BACModbus.BACModbus()
     parser = argparse.ArgumentParser(description='Vehicle Settings')
     parser.add_argument('-battseries', '-bs', action='store', required=True, type=int, dest='bs',
                         help='Number of series battery groups')
@@ -1084,9 +1097,9 @@ if __name__ == '__main__':
     # print('args inside of main:', args.bs, args.bp, args.ba, args.whl, args.sp)
     app = QtWidgets.QApplication([])
     window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin)
-    thread1 = QThreader()
+    thread1 = BACSerialThread()
 
-    thread1.msg.connect(window.receive_floop)
+    thread1.bac_msg.connect(window.receive_floop)
     window.workmsg.connect(thread1.workercommand)
     window.powercmd.connect(thread1.powercommand)
     # window.show()

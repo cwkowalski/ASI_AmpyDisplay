@@ -775,7 +775,7 @@ QPushButton::pressed {
      </property>
      <property name="icon">
       <iconset resource="ampy.qrc">
-       <normaloff>:/root/reset.png</normaloff>:/root/reset.png</iconset>
+       <normaloff>:/root/bms-icon.png</normaloff>:/root/bms-icon.png</iconset>
      </property>
      <property name="iconSize">
       <size>

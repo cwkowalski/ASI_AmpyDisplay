@@ -403,7 +403,7 @@ class Ui_MainWindow(object):
 "}")
         self.TripReset.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/root/reset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(":/root/bms-icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.TripReset.setIcon(icon2)
         self.TripReset.setIconSize(QtCore.QSize(50, 50))
         self.TripReset.setObjectName("TripReset")

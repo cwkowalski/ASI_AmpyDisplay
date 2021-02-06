@@ -22,7 +22,7 @@ class optionsDialog(QtWidgets.QWidget):
     def displayInvert(self, bool):
         self.displayinvertmsg.emit(bool)
     def displayBacklight(self):
-        level = self.ui.DisplaySlider.value()
+        level = 100 - self.ui.DisplaySlider.value()
         self.ui.BacklightLabel.setText('Backlight: ' + str(level))
         self.displaybacklightcmd.emit(level)
 

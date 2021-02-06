@@ -1,4 +1,5 @@
 import os
+import platform
 from xml.etree import ElementTree as et
 from numpy import array
 from scipy import interpolate as interp
@@ -18,7 +19,10 @@ Obdic = xml.iterfind('Parameters/ParameterDescription')
 # IO class
 class BACModbus():
     def __init__(self):
-        self.port = "/dev/ttyUSB0"
+        if platform.system() == 'Linux':
+            self.port = "/dev/ttyUSB0"
+        elif platform.system() == 'Windows':
+            self.port = "COM4"
         self.address = 1
         self.method = 'rtu'
         self.baudrate = 115200

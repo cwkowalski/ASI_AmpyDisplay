@@ -59,7 +59,7 @@ border: none}</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>-317</y>
+      <y>0</y>
       <width>781</width>
       <height>1440</height>
      </rect>
@@ -87,18 +87,19 @@ border: none}</string>
      </property>
      <property name="font">
       <font>
-       <family>Impact</family>
+       <family>Luxi Mono</family>
        <pointsize>-1</pointsize>
-       <weight>50</weight>
+       <weight>75</weight>
        <italic>false</italic>
-       <bold>false</bold>
+       <bold>true</bold>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">QPushButton { 
 	background: white;
 	font: 30px;
-    font-family: &quot;Impact&quot;;
+    font-family: &quot;Luxi Mono&quot;;
+	font-weight: bold;
 	border-style: inset;
     border-color: dark grey;
 	border-width: 3px;
@@ -836,18 +837,19 @@ QSlider::groove:horizontal {
      </property>
      <property name="font">
       <font>
-       <family>Impact</family>
+       <family>Luxi Mono</family>
        <pointsize>-1</pointsize>
-       <weight>50</weight>
+       <weight>75</weight>
        <italic>false</italic>
-       <bold>false</bold>
+       <bold>true</bold>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">QPushButton { 
 	background: white;
 	font: 30px;
-    font-family: &quot;Impact&quot;;
+    font-family: &quot;Luxi Mono&quot;;
+	font-weight: bold;
 	border-style: inset;
     border-color: dark grey;
 	border-width: 3px;
@@ -883,18 +885,19 @@ QPushButton::pressed {
      </property>
      <property name="font">
       <font>
-       <family>Impact</family>
+       <family>Luxi Mono</family>
        <pointsize>-1</pointsize>
-       <weight>50</weight>
+       <weight>75</weight>
        <italic>false</italic>
-       <bold>false</bold>
+       <bold>true</bold>
       </font>
      </property>
      <property name="styleSheet">
       <string notr="true">QPushButton { 
 	background: white;
 	font: 30px;
-    font-family: &quot;Impact&quot;;
+    font-family: &quot;Luxi Mono&quot;;
+	font-weight: bold;
 	border-style: inset;
     border-color: dark grey;
 	border-width: 3px;
@@ -955,6 +958,55 @@ QPushButton::pressed {
      </property>
      <property name="autoExclusive">
       <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="TripReset">
+     <property name="geometry">
+      <rect>
+       <x>207</x>
+       <y>10</y>
+       <width>230</width>
+       <height>55</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 30px;
+    font-family: &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 3px;
+	border-radius:15px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>TripReset</string>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/reset.png</normaloff>:/root/reset.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
      </property>
     </widget>
    </widget>

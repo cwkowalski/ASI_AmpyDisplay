@@ -54,16 +54,17 @@ class Ui_OptDialog(object):
         self.ProgBtn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.ProgBtn.setGeometry(QtCore.QRect(448, 10, 100, 55))
         font = QtGui.QFont()
-        font.setFamily("Impact")
+        font.setFamily("Luxi Mono")
         font.setPointSize(-1)
-        font.setBold(False)
+        font.setBold(True)
         font.setItalic(False)
-        font.setWeight(50)
+        font.setWeight(75)
         self.ProgBtn.setFont(font)
         self.ProgBtn.setStyleSheet("QPushButton { \n"
 "    background: white;\n"
 "    font: 30px;\n"
-"    font-family: \"Impact\";\n"
+"    font-family: \"Luxi Mono\";\n"
+"    font-weight: bold;\n"
 "    border-style: inset;\n"
 "    border-color: dark grey;\n"
 "    border-width: 3px;\n"
@@ -350,11 +351,9 @@ class Ui_OptDialog(object):
         font = QtGui.QFont()
         font.setPointSize(40)
         self.groupBox.setFont(font)
-        self.groupBox.setStyleSheet("")
+        self.groupBox.setStyleSheet("QLabel{font: 18pt \'Luxi Mono\'}\n"
+"")
         self.groupBox.setObjectName("groupBox")
-        self.label = QtWidgets.QLabel(self.groupBox)
-        self.label.setGeometry(QtCore.QRect(10, 62, 589, 45))
-        self.label.setObjectName("label")
         self.DiagnosticsUpdateBtn = QtWidgets.QPushButton(self.groupBox)
         self.DiagnosticsUpdateBtn.setGeometry(QtCore.QRect(190, -5, 65, 65))
         font = QtGui.QFont()
@@ -369,6 +368,12 @@ class Ui_OptDialog(object):
         self.DiagnosticsUpdateBtn.setCheckable(True)
         self.DiagnosticsUpdateBtn.setAutoExclusive(False)
         self.DiagnosticsUpdateBtn.setObjectName("DiagnosticsUpdateBtn")
+        self.gridLayoutWidget = QtWidgets.QWidget(self.groupBox)
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(11, 60, 750, 340))
+        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.setObjectName("gridLayout")
         self.PID_Kp_Slider = QtWidgets.QSlider(self.scrollAreaWidgetContents)
         self.PID_Kp_Slider.setGeometry(QtCore.QRect(510, 320, 250, 40))
         self.PID_Kp_Slider.setSizeIncrement(QtCore.QSize(0, 0))
@@ -406,16 +411,17 @@ class Ui_OptDialog(object):
         self.ExitBtn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.ExitBtn.setGeometry(QtCore.QRect(670, 10, 100, 55))
         font = QtGui.QFont()
-        font.setFamily("Impact")
+        font.setFamily("Luxi Mono")
         font.setPointSize(-1)
-        font.setBold(False)
+        font.setBold(True)
         font.setItalic(False)
-        font.setWeight(50)
+        font.setWeight(75)
         self.ExitBtn.setFont(font)
         self.ExitBtn.setStyleSheet("QPushButton { \n"
 "    background: white;\n"
 "    font: 30px;\n"
-"    font-family: \"Impact\";\n"
+"    font-family: \"Luxi Mono\";\n"
+"    font-weight: bold;\n"
 "    border-style: inset;\n"
 "    border-color: dark grey;\n"
 "    border-width: 3px;\n"
@@ -433,16 +439,17 @@ class Ui_OptDialog(object):
         self.ThemeBtn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.ThemeBtn.setGeometry(QtCore.QRect(558, 10, 100, 55))
         font = QtGui.QFont()
-        font.setFamily("Impact")
+        font.setFamily("Luxi Mono")
         font.setPointSize(-1)
-        font.setBold(False)
+        font.setBold(True)
         font.setItalic(False)
-        font.setWeight(50)
+        font.setWeight(75)
         self.ThemeBtn.setFont(font)
         self.ThemeBtn.setStyleSheet("QPushButton { \n"
 "    background: white;\n"
 "    font: 30px;\n"
-"    font-family: \"Impact\";\n"
+"    font-family: \"Luxi Mono\";\n"
+"    font-weight: bold;\n"
 "    border-style: inset;\n"
 "    border-color: dark grey;\n"
 "    border-width: 3px;\n"
@@ -471,6 +478,35 @@ class Ui_OptDialog(object):
         self.RangeBtn.setCheckable(True)
         self.RangeBtn.setAutoExclusive(False)
         self.RangeBtn.setObjectName("RangeBtn")
+        self.TripReset = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.TripReset.setGeometry(QtCore.QRect(207, 10, 230, 55))
+        font = QtGui.QFont()
+        font.setFamily("Luxi Mono")
+        font.setPointSize(-1)
+        font.setBold(True)
+        font.setItalic(False)
+        font.setWeight(75)
+        self.TripReset.setFont(font)
+        self.TripReset.setStyleSheet("QPushButton { \n"
+"    background: white;\n"
+"    font: 30px;\n"
+"    font-family: \"Luxi Mono\";\n"
+"    font-weight: bold;\n"
+"    border-style: inset;\n"
+"    border-color: dark grey;\n"
+"    border-width: 3px;\n"
+"    border-radius:15px;\n"
+"}\n"
+"\n"
+"QPushButton::pressed {\n"
+"    border-style:outset;\n"
+"\n"
+"}")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap(":/root/reset.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.TripReset.setIcon(icon2)
+        self.TripReset.setIconSize(QtCore.QSize(50, 50))
+        self.TripReset.setObjectName("TripReset")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
         self.retranslateUi(OptDialog)
@@ -487,7 +523,7 @@ class Ui_OptDialog(object):
         self.PID_Kp_Label.setText(_translate("OptDialog", "Kp"))
         self.PID_Ki_Label.setText(_translate("OptDialog", "Ki"))
         self.groupBox.setTitle(_translate("OptDialog", "Diagnostics"))
-        self.label.setText(_translate("OptDialog", "Hall sensor position, Ebike Flags, Input Voltages"))
         self.ExitBtn.setText(_translate("OptDialog", "Back"))
         self.ThemeBtn.setText(_translate("OptDialog", "Theme"))
+        self.TripReset.setText(_translate("OptDialog", "TripReset"))
 import ampy_rc
