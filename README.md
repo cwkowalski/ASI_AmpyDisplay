@@ -4,7 +4,8 @@ This project aims to improve the functionality of the incredibly high-performanc
 Discussion and suggestions here: https://endless-sphere.com/forums/viewtopic.php?f=2&t=108580
 
 Display example with descriptions (800x480): https://i.imgur.com/HzOMMDx.jpg
-older 1872x1404 example: https://i.imgur.com/vq930iW.png
+
+1872x1404 example: https://i.imgur.com/vq930iW.png
 
 State-of-charge map if not using Li-NCA or similar Lithium chemistry should be replaced. This map is used because it is far more accurate than the linear approximation performed by the controller itself. https://lygte-info.dk/ and https://automeris.io/WebPlotDigitizer/ can be used to generate profiles for specific cells, but cells within a chemistry should be suitable enough. 
 
