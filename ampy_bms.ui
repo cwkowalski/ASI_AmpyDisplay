@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>802</width>
+    <width>800</width>
     <height>480</height>
    </rect>
   </property>
@@ -33,9 +33,9 @@ QGroupBox::title {
   <widget class="QPushButton" name="ExitBtn">
    <property name="geometry">
     <rect>
-     <x>715</x>
+     <x>695</x>
      <y>10</y>
-     <width>80</width>
+     <width>100</width>
      <height>55</height>
     </rect>
    </property>
@@ -131,11 +131,8 @@ QSlider::groove:horizontal {
    <property name="maximum">
     <number>4200</number>
    </property>
-   <property name="singleStep">
-    <number>10</number>
-   </property>
    <property name="pageStep">
-    <number>50</number>
+    <number>20</number>
    </property>
    <property name="value">
     <number>3700</number>
@@ -204,7 +201,7 @@ QSlider::groove:horizontal {
 }</string>
    </property>
    <property name="text">
-    <string>3.59~3.61&lt;sub&gt;v&lt;/sub&gt;</string>
+    <string>Range: 3.59~3.61&lt;sub&gt;v&lt;/sub&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="VDiffLabel">
@@ -222,7 +219,7 @@ QSlider::groove:horizontal {
 }</string>
    </property>
    <property name="text">
-    <string>x.xxx&lt;sub&gt;v&lt;/sub&gt;</string>
+    <string>Diff: x.xxx&lt;sub&gt;v&lt;/sub&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="CurrentLabel">
@@ -244,6 +241,24 @@ QSlider::groove:horizontal {
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>173</x>
+     <y>100</y>
+     <width>340</width>
+     <height>37</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLabel{
+	font: 18pt &quot;Luxi Moni&quot;;
+}</string>
+   </property>
+   <property name="text">
+    <string>Slider: Single cut-off voltage</string>
    </property>
   </widget>
   <widget class="QSlider" name="BalanceLevelSlider">
@@ -298,13 +313,10 @@ QSlider::groove:horizontal {
     <number>3000</number>
    </property>
    <property name="maximum">
-    <number>4200</number>
-   </property>
-   <property name="singleStep">
-    <number>10</number>
+    <number>3000</number>
    </property>
    <property name="pageStep">
-    <number>100</number>
+    <number>20</number>
    </property>
    <property name="value">
     <number>3000</number>
@@ -340,11 +352,47 @@ QSlider::groove:horizontal {
     <string>xx.x&lt;sub&gt;V&lt;/sub&gt;</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>175</x>
+     <y>143</y>
+     <width>340</width>
+     <height>37</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLabel{
+	font: 18pt &quot;Luxi Moni&quot;;
+}</string>
+   </property>
+   <property name="text">
+    <string>Slider: Balanced turn-on voltage</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_10">
+   <property name="geometry">
+    <rect>
+     <x>8</x>
+     <y>166</y>
+     <width>786</width>
+     <height>37</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QLabel{
+	font: 12pt &quot;Luxi Moni&quot;;
+}</string>
+   </property>
+   <property name="text">
+    <string>Consider replacing TripReset or moving into ampy_options, to add BMS button to home</string>
+   </property>
+  </widget>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>170</y>
+     <y>171</y>
      <width>790</width>
      <height>304</height>
     </rect>
@@ -1575,10 +1623,10 @@ QProgressBar {
     </layout>
    </widget>
   </widget>
-  <widget class="QPushButton" name="ConfigBtn">
+  <widget class="QPushButton" name="ExitBtn_2">
    <property name="geometry">
     <rect>
-     <x>605</x>
+     <x>585</x>
      <y>10</y>
      <width>100</width>
      <height>55</height>
@@ -1625,9 +1673,9 @@ QPushButton::pressed {
   <widget class="QProgressBar" name="T1Bar">
    <property name="geometry">
     <rect>
-     <x>320</x>
+     <x>390</x>
      <y>5</y>
-     <width>200</width>
+     <width>185</width>
      <height>23</height>
     </rect>
    </property>
@@ -1673,12 +1721,12 @@ border-radius: 6px
     <string>%v°C </string>
    </property>
   </widget>
-  <widget class="QProgressBar" name="T2Bar">
+  <widget class="QProgressBar" name="T1Bar_2">
    <property name="geometry">
     <rect>
-     <x>320</x>
+     <x>390</x>
      <y>25</y>
-     <width>200</width>
+     <width>185</width>
      <height>23</height>
     </rect>
    </property>
@@ -1724,12 +1772,12 @@ border-radius: 6px
     <string>%v°C </string>
    </property>
   </widget>
-  <widget class="QProgressBar" name="T3Bar">
+  <widget class="QProgressBar" name="T1Bar_3">
    <property name="geometry">
     <rect>
-     <x>320</x>
+     <x>390</x>
      <y>45</y>
-     <width>200</width>
+     <width>185</width>
      <height>23</height>
     </rect>
    </property>
@@ -1775,12 +1823,12 @@ border-radius: 6px
     <string>%v°C </string>
    </property>
   </widget>
-  <widget class="QProgressBar" name="T4Bar">
+  <widget class="QProgressBar" name="T1Bar_4">
    <property name="geometry">
     <rect>
-     <x>320</x>
+     <x>390</x>
      <y>65</y>
-     <width>200</width>
+     <width>185</width>
      <height>23</height>
     </rect>
    </property>
@@ -1824,63 +1872,6 @@ border-radius: 6px
    </property>
    <property name="format">
     <string>%v°C </string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="SaveEepromBtn">
-   <property name="geometry">
-    <rect>
-     <x>535</x>
-     <y>10</y>
-     <width>57</width>
-     <height>55</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Impact</family>
-     <pointsize>-1</pointsize>
-     <weight>50</weight>
-     <italic>false</italic>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QPushButton { 
-	background: white;
-	font: 30px;
-    font-family: &quot;Impact&quot;;
-	border-style: inset;
-    border-color: dark grey;
-	border-width: 3px;
-	border-radius:15px;
-}
-
-QPushButton::pressed {
-	border-style:outset;
-
-}</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset resource="ampy.qrc">
-     <normaloff>:/root/save.png</normaloff>:/root/save.png</iconset>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>40</width>
-     <height>40</height>
-    </size>
-   </property>
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-   <property name="autoExclusive">
-    <bool>true</bool>
    </property>
   </widget>
  </widget>

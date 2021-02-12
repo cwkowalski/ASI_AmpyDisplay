@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_BMSDialog(object):
     def setupUi(self, BMSDialog):
         BMSDialog.setObjectName("BMSDialog")
-        BMSDialog.resize(802, 480)
+        BMSDialog.resize(800, 480)
         BMSDialog.setStyleSheet("QGroupBox{\n"
 "    background: solid white;\n"
 "    border: 5px solid black;\n"
@@ -30,7 +30,7 @@ class Ui_BMSDialog(object):
 "\n"
 "")
         self.ExitBtn = QtWidgets.QPushButton(BMSDialog)
-        self.ExitBtn.setGeometry(QtCore.QRect(715, 10, 80, 55))
+        self.ExitBtn.setGeometry(QtCore.QRect(695, 10, 100, 55))
         font = QtGui.QFont()
         font.setFamily("Impact")
         font.setPointSize(-1)
@@ -57,7 +57,7 @@ class Ui_BMSDialog(object):
         self.ExitBtn.setAutoExclusive(True)
         self.ExitBtn.setObjectName("ExitBtn")
         self.ChargeLevelSlider = QtWidgets.QSlider(BMSDialog)
-        self.ChargeLevelSlider.setGeometry(QtCore.QRect(147, 95, 650, 45))
+        self.ChargeLevelSlider.setGeometry(QtCore.QRect(147, 80, 650, 45))
         self.ChargeLevelSlider.setSizeIncrement(QtCore.QSize(0, 0))
         self.ChargeLevelSlider.setBaseSize(QtCore.QSize(0, 0))
         font = QtGui.QFont()
@@ -85,8 +85,7 @@ class Ui_BMSDialog(object):
 "    ")
         self.ChargeLevelSlider.setMinimum(3700)
         self.ChargeLevelSlider.setMaximum(4200)
-        self.ChargeLevelSlider.setSingleStep(10)
-        self.ChargeLevelSlider.setPageStep(50)
+        self.ChargeLevelSlider.setPageStep(20)
         self.ChargeLevelSlider.setProperty("value", 3700)
         self.ChargeLevelSlider.setOrientation(QtCore.Qt.Horizontal)
         self.ChargeLevelSlider.setInvertedAppearance(False)
@@ -94,7 +93,7 @@ class Ui_BMSDialog(object):
         self.ChargeLevelSlider.setTickInterval(1)
         self.ChargeLevelSlider.setObjectName("ChargeLevelSlider")
         self.ChargeLevelLabel = QtWidgets.QLabel(BMSDialog)
-        self.ChargeLevelLabel.setGeometry(QtCore.QRect(5, 80, 141, 65))
+        self.ChargeLevelLabel.setGeometry(QtCore.QRect(5, 65, 141, 65))
         self.ChargeLevelLabel.setStyleSheet("QLabel{\n"
 "    font: 36pt \"MS Shell Dlg\";\n"
 "}")
@@ -106,24 +105,36 @@ class Ui_BMSDialog(object):
 "}")
         self.PowerLabel.setObjectName("PowerLabel")
         self.VRangeLabel = QtWidgets.QLabel(BMSDialog)
-        self.VRangeLabel.setGeometry(QtCore.QRect(180, 10, 201, 37))
+        self.VRangeLabel.setGeometry(QtCore.QRect(190, 0, 201, 37))
         self.VRangeLabel.setStyleSheet("QLabel{\n"
 "    font: 18pt \"Luxi Moni\";\n"
 "}")
         self.VRangeLabel.setObjectName("VRangeLabel")
         self.VDiffLabel = QtWidgets.QLabel(BMSDialog)
-        self.VDiffLabel.setGeometry(QtCore.QRect(185, 55, 125, 37))
+        self.VDiffLabel.setGeometry(QtCore.QRect(189, 40, 125, 37))
         self.VDiffLabel.setStyleSheet("QLabel{\n"
 "    font: 18pt \"Luxi Moni\";\n"
 "}")
         self.VDiffLabel.setObjectName("VDiffLabel")
         self.CurrentLabel = QtWidgets.QLabel(BMSDialog)
-        self.CurrentLabel.setGeometry(QtCore.QRect(5, 45, 170, 45))
+        self.CurrentLabel.setGeometry(QtCore.QRect(5, 30, 170, 45))
         self.CurrentLabel.setStyleSheet("QLabel{\n"
 "    font: 30pt \"Luxi Mono\";\n"
 "}")
         self.CurrentLabel.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.CurrentLabel.setObjectName("CurrentLabel")
+        self.ChargeTimeLabel = QtWidgets.QLabel(BMSDialog)
+        self.ChargeTimeLabel.setGeometry(QtCore.QRect(410, 0, 201, 37))
+        self.ChargeTimeLabel.setStyleSheet("QLabel{\n"
+"    font: 18pt \"Luxi Moni\";\n"
+"}")
+        self.ChargeTimeLabel.setObjectName("ChargeTimeLabel")
+        self.label_7 = QtWidgets.QLabel(BMSDialog)
+        self.label_7.setGeometry(QtCore.QRect(173, 85, 340, 37))
+        self.label_7.setStyleSheet("QLabel{\n"
+"    font: 18pt \"Luxi Moni\";\n"
+"}")
+        self.label_7.setObjectName("label_7")
         self.BalanceLevelSlider = QtWidgets.QSlider(BMSDialog)
         self.BalanceLevelSlider.setGeometry(QtCore.QRect(145, 138, 650, 45))
         self.BalanceLevelSlider.setSizeIncrement(QtCore.QSize(0, 0))
@@ -152,9 +163,8 @@ class Ui_BMSDialog(object):
 "}\n"
 "    ")
         self.BalanceLevelSlider.setMinimum(3000)
-        self.BalanceLevelSlider.setMaximum(4200)
-        self.BalanceLevelSlider.setSingleStep(10)
-        self.BalanceLevelSlider.setPageStep(100)
+        self.BalanceLevelSlider.setMaximum(3000)
+        self.BalanceLevelSlider.setPageStep(20)
         self.BalanceLevelSlider.setProperty("value", 3000)
         self.BalanceLevelSlider.setOrientation(QtCore.Qt.Horizontal)
         self.BalanceLevelSlider.setInvertedAppearance(False)
@@ -167,8 +177,20 @@ class Ui_BMSDialog(object):
 "    font: 36pt \"MS Shell Dlg\";\n"
 "}")
         self.BalanceVLabel.setObjectName("BalanceVLabel")
+        self.label_8 = QtWidgets.QLabel(BMSDialog)
+        self.label_8.setGeometry(QtCore.QRect(175, 143, 340, 37))
+        self.label_8.setStyleSheet("QLabel{\n"
+"    font: 18pt \"Luxi Moni\";\n"
+"}")
+        self.label_8.setObjectName("label_8")
+        self.label_10 = QtWidgets.QLabel(BMSDialog)
+        self.label_10.setGeometry(QtCore.QRect(8, 166, 786, 37))
+        self.label_10.setStyleSheet("QLabel{\n"
+"    font: 12pt \"Luxi Moni\";\n"
+"}")
+        self.label_10.setObjectName("label_10")
         self.groupBox = QtWidgets.QGroupBox(BMSDialog)
-        self.groupBox.setGeometry(QtCore.QRect(5, 170, 790, 304))
+        self.groupBox.setGeometry(QtCore.QRect(5, 171, 790, 304))
         font = QtGui.QFont()
         font.setPointSize(40)
         self.groupBox.setFont(font)
@@ -735,16 +757,16 @@ class Ui_BMSDialog(object):
         self.C21Balance.setCheckable(True)
         self.C21Balance.setObjectName("C21Balance")
         self.gridLayout.addWidget(self.C21Balance, 6, 8, 1, 1)
-        self.ConfigBtn = QtWidgets.QPushButton(BMSDialog)
-        self.ConfigBtn.setGeometry(QtCore.QRect(605, 10, 100, 55))
+        self.ExitBtn_2 = QtWidgets.QPushButton(BMSDialog)
+        self.ExitBtn_2.setGeometry(QtCore.QRect(585, 10, 100, 55))
         font = QtGui.QFont()
         font.setFamily("Impact")
         font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
-        self.ConfigBtn.setFont(font)
-        self.ConfigBtn.setStyleSheet("QPushButton { \n"
+        self.ExitBtn_2.setFont(font)
+        self.ExitBtn_2.setStyleSheet("QPushButton { \n"
 "    background: white;\n"
 "    font: 30px;\n"
 "    font-family: \"Impact\";\n"
@@ -758,134 +780,10 @@ class Ui_BMSDialog(object):
 "    border-style:outset;\n"
 "\n"
 "}")
-        self.ConfigBtn.setCheckable(True)
-        self.ConfigBtn.setChecked(False)
-        self.ConfigBtn.setAutoExclusive(True)
-        self.ConfigBtn.setObjectName("ConfigBtn")
-        self.T1Bar = QtWidgets.QProgressBar(BMSDialog)
-        self.T1Bar.setGeometry(QtCore.QRect(320, 5, 200, 23))
-        font = QtGui.QFont()
-        font.setFamily("Luxi Mono")
-        font.setPointSize(10)
-        self.T1Bar.setFont(font)
-        self.T1Bar.setStyleSheet(" QProgressBar::chunk {\n"
-"     background-color: black;}\n"
-"QProgressBar {\n"
-"    background-color: white;\n"
-"    border-style: solid;\n"
-"    border-color: gray;\n"
-"    border-width: 3px;\n"
-"border-radius: 6px\n"
-"}")
-        self.T1Bar.setMaximum(100)
-        self.T1Bar.setProperty("value", 30)
-        self.T1Bar.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.T1Bar.setTextVisible(True)
-        self.T1Bar.setOrientation(QtCore.Qt.Horizontal)
-        self.T1Bar.setInvertedAppearance(False)
-        self.T1Bar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.T1Bar.setObjectName("T1Bar")
-        self.T2Bar = QtWidgets.QProgressBar(BMSDialog)
-        self.T2Bar.setGeometry(QtCore.QRect(320, 25, 200, 23))
-        font = QtGui.QFont()
-        font.setFamily("Luxi Mono")
-        font.setPointSize(10)
-        self.T2Bar.setFont(font)
-        self.T2Bar.setStyleSheet(" QProgressBar::chunk {\n"
-"     background-color: black;}\n"
-"QProgressBar {\n"
-"    background-color: white;\n"
-"    border-style: solid;\n"
-"    border-color: gray;\n"
-"    border-width: 3px;\n"
-"border-radius: 6px\n"
-"}")
-        self.T2Bar.setMaximum(100)
-        self.T2Bar.setProperty("value", 30)
-        self.T2Bar.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.T2Bar.setTextVisible(True)
-        self.T2Bar.setOrientation(QtCore.Qt.Horizontal)
-        self.T2Bar.setInvertedAppearance(False)
-        self.T2Bar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.T2Bar.setObjectName("T2Bar")
-        self.T3Bar = QtWidgets.QProgressBar(BMSDialog)
-        self.T3Bar.setGeometry(QtCore.QRect(320, 45, 200, 23))
-        font = QtGui.QFont()
-        font.setFamily("Luxi Mono")
-        font.setPointSize(10)
-        self.T3Bar.setFont(font)
-        self.T3Bar.setStyleSheet(" QProgressBar::chunk {\n"
-"     background-color: black;}\n"
-"QProgressBar {\n"
-"    background-color: white;\n"
-"    border-style: solid;\n"
-"    border-color: gray;\n"
-"    border-width: 3px;\n"
-"border-radius: 6px\n"
-"}")
-        self.T3Bar.setMaximum(100)
-        self.T3Bar.setProperty("value", 30)
-        self.T3Bar.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.T3Bar.setTextVisible(True)
-        self.T3Bar.setOrientation(QtCore.Qt.Horizontal)
-        self.T3Bar.setInvertedAppearance(False)
-        self.T3Bar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.T3Bar.setObjectName("T3Bar")
-        self.T4Bar = QtWidgets.QProgressBar(BMSDialog)
-        self.T4Bar.setGeometry(QtCore.QRect(320, 65, 200, 23))
-        font = QtGui.QFont()
-        font.setFamily("Luxi Mono")
-        font.setPointSize(10)
-        self.T4Bar.setFont(font)
-        self.T4Bar.setStyleSheet(" QProgressBar::chunk {\n"
-"     background-color: black;}\n"
-"QProgressBar {\n"
-"    background-color: white;\n"
-"    border-style: solid;\n"
-"    border-color: gray;\n"
-"    border-width: 3px;\n"
-"border-radius: 6px\n"
-"}")
-        self.T4Bar.setMaximum(100)
-        self.T4Bar.setProperty("value", 30)
-        self.T4Bar.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.T4Bar.setTextVisible(True)
-        self.T4Bar.setOrientation(QtCore.Qt.Horizontal)
-        self.T4Bar.setInvertedAppearance(False)
-        self.T4Bar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.T4Bar.setObjectName("T4Bar")
-        self.SaveEepromBtn = QtWidgets.QPushButton(BMSDialog)
-        self.SaveEepromBtn.setGeometry(QtCore.QRect(535, 10, 57, 55))
-        font = QtGui.QFont()
-        font.setFamily("Impact")
-        font.setPointSize(-1)
-        font.setBold(False)
-        font.setItalic(False)
-        font.setWeight(50)
-        self.SaveEepromBtn.setFont(font)
-        self.SaveEepromBtn.setStyleSheet("QPushButton { \n"
-"    background: white;\n"
-"    font: 30px;\n"
-"    font-family: \"Impact\";\n"
-"    border-style: inset;\n"
-"    border-color: dark grey;\n"
-"    border-width: 3px;\n"
-"    border-radius:15px;\n"
-"}\n"
-"\n"
-"QPushButton::pressed {\n"
-"    border-style:outset;\n"
-"\n"
-"}")
-        self.SaveEepromBtn.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/root/save.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.SaveEepromBtn.setIcon(icon1)
-        self.SaveEepromBtn.setIconSize(QtCore.QSize(40, 40))
-        self.SaveEepromBtn.setCheckable(True)
-        self.SaveEepromBtn.setChecked(False)
-        self.SaveEepromBtn.setAutoExclusive(True)
-        self.SaveEepromBtn.setObjectName("SaveEepromBtn")
+        self.ExitBtn_2.setCheckable(True)
+        self.ExitBtn_2.setChecked(False)
+        self.ExitBtn_2.setAutoExclusive(True)
+        self.ExitBtn_2.setObjectName("ExitBtn_2")
 
         self.retranslateUi(BMSDialog)
         QtCore.QMetaObject.connectSlotsByName(BMSDialog)
@@ -896,10 +794,14 @@ class Ui_BMSDialog(object):
         self.ExitBtn.setText(_translate("BMSDialog", "Back"))
         self.ChargeLevelLabel.setText(_translate("BMSDialog", "xx.x<sub>%</sub>"))
         self.PowerLabel.setText(_translate("BMSDialog", "xxxx.x<sub>w</sub>"))
-        self.VRangeLabel.setText(_translate("BMSDialog", "3.59~3.61<sub>v</sub>"))
-        self.VDiffLabel.setText(_translate("BMSDialog", "x.xxx<sub>v</sub>"))
-        self.CurrentLabel.setText(_translate("BMSDialog", "xx.xx<sub>A</sub>"))
+        self.VRangeLabel.setText(_translate("BMSDialog", "Range: 3.59~3.61<sub>v</sub>"))
+        self.VDiffLabel.setText(_translate("BMSDialog", "Diff: x.xxx<sub>v</sub>"))
+        self.CurrentLabel.setText(_translate("BMSDialog", "xx.x<sub>A</sub>"))
+        self.ChargeTimeLabel.setText(_translate("BMSDialog", "Rem: 72:59"))
+        self.label_7.setText(_translate("BMSDialog", "Slider: Single cut-off voltage"))
         self.BalanceVLabel.setText(_translate("BMSDialog", "xx.x<sub>V</sub>"))
+        self.label_8.setText(_translate("BMSDialog", "Slider: Balanced turn-on voltage"))
+        self.label_10.setText(_translate("BMSDialog", "Consider replacing TripReset or moving into ampy_options, to add BMS button to home"))
         self.C3Label.setText(_translate("BMSDialog", "03"))
         self.C3Bar.setFormat(_translate("BMSDialog", "%vmV"))
         self.C1Label.setText(_translate("BMSDialog", "01"))
@@ -942,9 +844,5 @@ class Ui_BMSDialog(object):
         self.C19Bar.setFormat(_translate("BMSDialog", "%vmV"))
         self.C20Bar.setFormat(_translate("BMSDialog", "%vmV"))
         self.C21Bar.setFormat(_translate("BMSDialog", "%vmV"))
-        self.ConfigBtn.setText(_translate("BMSDialog", "Config"))
-        self.T1Bar.setFormat(_translate("BMSDialog", "%v°C "))
-        self.T2Bar.setFormat(_translate("BMSDialog", "%v°C "))
-        self.T3Bar.setFormat(_translate("BMSDialog", "%v°C "))
-        self.T4Bar.setFormat(_translate("BMSDialog", "%v°C "))
+        self.ExitBtn_2.setText(_translate("BMSDialog", "Config"))
 import ampy_rc
