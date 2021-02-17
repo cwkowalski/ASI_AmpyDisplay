@@ -15,7 +15,7 @@ Display example with descriptions (800x480): https://i.imgur.com/HzOMMDx.jpg
 
   | Trip Pane #1 |Power Statistics| |
   |-------|-------|-------|
-  | Instantaneous Wh/mi (50ms default interval) | Average Wh/mi (default 1min interval) | Amp-hours used |
+  | Instantaneous Wh/mi (50ms default interval) | Average Wh/mi (1min default interval) | Amp-hours used |
   | Watt-hours remaining | Estimated range (With Avg Wh/mi's interval) | Amp-hours remaining |
   | Watt-hours regenerated | Miles traveled | Amp-hours regenerated | 
   
