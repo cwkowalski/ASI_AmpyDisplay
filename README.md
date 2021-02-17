@@ -21,10 +21,11 @@ Display example with descriptions (800x480): https://i.imgur.com/HzOMMDx.jpg
   
   | Trip Pane #2 |Trip Statistics| |
   |-------|-------|-------|  
-  | Estimated range average (1min) | Trip Time | Max battery amps |
-  | Estimated range instantaneous (50ms) | Moving Trip Time | Minimum battery voltage |
+  | Estimated range average (1min) | Trip Time | Max battery amps* |
+  | Estimated range instantaneous (50ms) | Moving Trip Time | Minimum battery voltage* |
   | Temperature max (motor) | Average moving speed | Max speed |
-  Max battery amps * Min battery voltage = Peak battery power.
+  
+  *Max battery amps X Min battery voltage = Peak battery power.
   
   | Trip Pane #3 |BMS Statistics| |
   |-------|-------|-------|
