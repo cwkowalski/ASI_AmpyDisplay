@@ -11,7 +11,7 @@ Detailed description of display elements:
 1. Time of day
 2. Battery SOC -- derived from Simpsons-integrated Ah, and reset with the battery charge button after charging from a cubic fit of a high-resolution voltage:state-of-charge array that can be swapped out for different chemistries. 
 4. Controller fault codes -- A warning button appears when fault is detected, replacing the Reverse button by default, that when pressed creates popup listing all controller and BMS fault codes with the option to clear them.
-5. Trip statistics -- Various combinations of the following parameters can be displayed in the Trip pane, the 800x480 ui is setup to display 
+5. Trip statistics -- Various trip statistics are displayed in the Trip pane. By default the three selectable panes display:
 
   | Trip Pane #1 |Power Statistics| |
   |-------|-------|-------|
@@ -19,11 +19,12 @@ Detailed description of display elements:
   | Watt-hours remaining | Estimated range (With Avg Wh/mi's interval) | Amp-hours remaining |
   | Watt-hours regenerated | Miles traveled | Amp-hours regenerated | 
   
-  | Trip Pane #2 |Trip Statistics| Max Amps * Min V = Peak Power|
+  | Trip Pane #2 |Trip Statistics| |
   |-------|-------|-------|  
   | Estimated range average (1min) | Trip Time | Max battery amps |
   | Estimated range instantaneous (50ms) | Moving Trip Time | Minimum battery voltage |
   | Temperature max (motor) | Average moving speed | Max speed |
+  Max battery amps * Min battery voltage = Peak battery power.
   
   | Trip Pane #3 |BMS Statistics| |
   |-------|-------|-------|
@@ -37,7 +38,7 @@ Detailed description of display elements:
 9. Profile selector-- Retune any number of controller variables, between three or more profiles. For example, to enable/disable field weakening or adjust phase current from a reasonable thermal limit for max power, down to the stator saturation limit for better efficiency, or yet lower for street-legal power levels. The parameter dictionary to setup profiles is derived from the ASIParameterDictionary.xml 
 10. Digital assist level selector -- If using torque sensor or PAS, allows you to control the digital assist level from the display. Power limits can be set for each of 9 levels, regardless of the system/throttle power set in each profile; the smallest of the two determines the torque/PAS limit while the profile limit determines the throttle limit.
 11. Antitheft lock -- Tap lock button to enable antitheft and display PIN input dialog to unlock. This requires an additional hardware connection to the 'Pedal-First-Sensor' and either a 3.3v to 5V level shifter or a transistor to supply PFS with 5V when enabled, unless you have the very latest 6.015+ firmware which enables setting pullup resistors for this and Cruise input via MODBUS serial I/O.
-12. ACID-compliant SQL logging of all stats. A rolling database is used for trip statistics that produce incremental counters, and incremental counters are either updated into a row of lifetime statistics for the current discharge cycle, then when a charge is detected a new is created. Thus depth of discharge, regen stats, distance, dates, and other information can be checked for every past discharge cycle while keeping the database very small even for tens of thousands of cycles. 
+12. ACID-compliant SQL logging of all stats. A rolling database of trip statistics used for averages is stored, of the length/duration specified by `self.iter_attribute_slicer_threshold` in main.py MainWindow class. Setting this parameter to a negative value will allow the database to grow indefinitely, logging numerous variables including battery voltage and current, motor current, motor temperature, speed, etc in 16ms intervals. Another 'lifetime statistics' database stores all incremental counters e.g. Wh, Ah, distance that are updated in a row for the current discharge cycle;  when a charge is detected a new row is created. Thus depth of discharge, regen stats, distance, dates, and loads of other information can be reviewed for every discharge cycle while keeping the database <20mb even for tens of thousands of cycles. 
 IN DEVELOPMENT:
 13. Extended options and diagnostics pane is not fully implemented with extra controller tuning options, and diagnostics for all sensor voltages and input state flags. Currently, only Makerplane backlight and dark/light themes are implemented.
 14. JBD BMS support is beta and this addition is not yet married to the SQL database, but a feature to save/restore any number of EEPROM profiles will be added. 
@@ -63,7 +64,7 @@ Vehicle-specific parameters are passed by command-line arguments (e.g. onboot st
 
 On Raspbian you should be able to get all dependencies via apt-get/pip. Then add a script to open main.py on startup e.g. add file containing the line `sudo -H python3 /path/to/project/main.py -bs <cell-series-number> -bp <cell-parallel-groups> -ba <pack amp-hours> -whl <wheel circumference in millimeters> -pin <integer> -bacport <controller-serial-port> -bmsport <BMS-serial-port>` in .X.d directory to run after starting Xorg. The flag args are described in the terminal if you try to run main.py without them. 
 
-However, I reccomend piCore OS for its supreme stability and spent a lot of time compiling a full piCore 12.x ARMv7L extension set to run this app on it, and included a stripped-down bespoke extension set with only the files required by this application. Until I take the time to prepare a setup script, if you're interested in using piCore but the setup is too complex for you, contact me and I can share a (very large) recent fully configured image. Just flash to sd, edit your vehicle and optionally wifi settings and you're set.
+However, I reccomend piCore OS for its supreme stability and spent a lot of time compiling a full piCore 12.x ARMv7L extension set to run this app on it, and included a stripped-down bespoke extension set with only the files required by this application. A complete list of dependencies for /mnt/mmcblk0p2/onboot.lst is included in this directory. Any questions about piCore can be answered by searching the forum (http://forum.tinycorelinux.net/index.php/). If you're interested in using piCore and using identical hardware, but the setup is too complex for you, contact me and I can temporarily share a (gigantic) fully configured image. Just flash to sd, edit your vehicle parameters in `.X.d/ampy` startup script, connect to your home wifi then run `filetool.sh -b` to save WPA keys locally for easy future updates via SSH, and you're set.
 
 If you are not running FW 6.016+ on your controller you must replace the ASIParameterDictionary.xml with your own. 6.013 is included. You may also optionally include your own state of charge:voltage map if you are running a chemistry besides Lithium-NCA (https://lygte-info.dk/ and https://automeris.io/WebPlotDigitizer/ can be used to generate profiles for specific cells, but cells within a chemistry should have essentially identical profiles). This map is used because it is far more accurate than the linear approximation used by the controller itself to monitor state-of-charge. 
 
