@@ -7,7 +7,7 @@ Display example with descriptions (800x480): https://i.imgur.com/HzOMMDx.jpg
 
 1872x1404 example: https://i.imgur.com/vq930iW.png
 
-## Description of display elements
+## Display Elements
 1. Time of day
 2. Battery SOC -- derived from Simpsons-integrated Ah, and reset with the battery charge button after charging from a cubic fit of a high-resolution voltage:state-of-charge array that can be swapped out for different chemistries. 
 4. Controller fault codes -- A warning button appears when fault is detected, replacing the Reverse button by default, that when pressed creates popup listing all controller and BMS fault codes with the option to clear them.
