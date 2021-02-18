@@ -287,7 +287,7 @@ class BMSSerialEmitter(QtCore.QThread):
                 msgPrint = self.print_from_process.recv()
                 print(msgPrint)
             except Exception as e:
-                print(e)
+                print('msgPrint exception!?: ', e)
 
 class BMSSerialProcess(Process):
     def __init__(self, bmsport, to_emitter: Pipe, to_stdout: Pipe, from_window: Queue):
@@ -297,7 +297,7 @@ class BMSSerialProcess(Process):
         ###### JBD Test Data #######
         ############################
         print('BMSSerialProc init begin.')
-
+        time.sleep(3)
         self.daemon = True
         self.data_to_emitter = to_emitter
         self.data_from_window = from_window
@@ -377,7 +377,7 @@ class BMSSerialProcess(Process):
         looptime = self.t1 - lastTime
         msg = (0, self.cellData, self.basicData, looptime, runtime)
         self.data_to_emitter.send(msg)
-
+        self.data_to_stdout.send(msg)
         #print(self.cellData, '\n', self.basicData, '\n', looptime, runtime)
     def eeprom_read(self):
         if self.j.s.isOpen():
