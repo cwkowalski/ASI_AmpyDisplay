@@ -43,7 +43,7 @@ class Ui_OptDialog(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 781, 1440))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -40, 781, 1440))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -81,7 +81,7 @@ class Ui_OptDialog(object):
         self.ProgBtn.setObjectName("ProgBtn")
         self.RangeSlider = QtWidgets.QSlider(self.scrollAreaWidgetContents)
         self.RangeSlider.setEnabled(True)
-        self.RangeSlider.setGeometry(QtCore.QRect(390, 209, 370, 45))
+        self.RangeSlider.setGeometry(QtCore.QRect(390, 210, 370, 45))
         self.RangeSlider.setSizeIncrement(QtCore.QSize(0, 0))
         self.RangeSlider.setBaseSize(QtCore.QSize(0, 0))
         font = QtGui.QFont()
@@ -132,7 +132,7 @@ class Ui_OptDialog(object):
         self.DisplayInvertBtn.setAutoExclusive(False)
         self.DisplayInvertBtn.setObjectName("DisplayInvertBtn")
         self.PID_Kd_Label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        self.PID_Kd_Label.setGeometry(QtCore.QRect(2, 280, 250, 40))
+        self.PID_Kd_Label.setGeometry(QtCore.QRect(2, 380, 250, 40))
         font = QtGui.QFont()
         font.setFamily("Magneto")
         font.setPointSize(30)
@@ -163,7 +163,7 @@ class Ui_OptDialog(object):
         self.PowerBtn.setAutoExclusive(False)
         self.PowerBtn.setObjectName("PowerBtn")
         self.PID_Kd_Slider = QtWidgets.QSlider(self.scrollAreaWidgetContents)
-        self.PID_Kd_Slider.setGeometry(QtCore.QRect(2, 320, 250, 40))
+        self.PID_Kd_Slider.setGeometry(QtCore.QRect(2, 420, 250, 40))
         self.PID_Kd_Slider.setSizeIncrement(QtCore.QSize(0, 0))
         self.PID_Kd_Slider.setBaseSize(QtCore.QSize(0, 0))
         font = QtGui.QFont()
@@ -197,7 +197,7 @@ class Ui_OptDialog(object):
         self.PID_Kd_Slider.setTickInterval(1)
         self.PID_Kd_Slider.setObjectName("PID_Kd_Slider")
         self.PID_Ki_Slider = QtWidgets.QSlider(self.scrollAreaWidgetContents)
-        self.PID_Ki_Slider.setGeometry(QtCore.QRect(255, 320, 250, 40))
+        self.PID_Ki_Slider.setGeometry(QtCore.QRect(255, 420, 250, 40))
         self.PID_Ki_Slider.setSizeIncrement(QtCore.QSize(0, 0))
         self.PID_Ki_Slider.setBaseSize(QtCore.QSize(0, 0))
         font = QtGui.QFont()
@@ -284,7 +284,7 @@ class Ui_OptDialog(object):
         self.PowerSlider.setTickInterval(1)
         self.PowerSlider.setObjectName("PowerSlider")
         self.PID_Kp_Label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        self.PID_Kp_Label.setGeometry(QtCore.QRect(510, 280, 250, 40))
+        self.PID_Kp_Label.setGeometry(QtCore.QRect(510, 380, 250, 40))
         font = QtGui.QFont()
         font.setFamily("Magneto")
         font.setPointSize(30)
@@ -333,7 +333,7 @@ class Ui_OptDialog(object):
         self.DisplaySlider.setTickInterval(1)
         self.DisplaySlider.setObjectName("DisplaySlider")
         self.PID_Ki_Label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        self.PID_Ki_Label.setGeometry(QtCore.QRect(255, 280, 250, 40))
+        self.PID_Ki_Label.setGeometry(QtCore.QRect(255, 380, 250, 40))
         font = QtGui.QFont()
         font.setFamily("Magneto")
         font.setPointSize(30)
@@ -347,7 +347,7 @@ class Ui_OptDialog(object):
         self.PID_Ki_Label.setAlignment(QtCore.Qt.AlignCenter)
         self.PID_Ki_Label.setObjectName("PID_Ki_Label")
         self.groupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
-        self.groupBox.setGeometry(QtCore.QRect(4, 370, 770, 406))
+        self.groupBox.setGeometry(QtCore.QRect(4, 470, 770, 406))
         font = QtGui.QFont()
         font.setPointSize(40)
         self.groupBox.setFont(font)
@@ -375,7 +375,7 @@ class Ui_OptDialog(object):
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
         self.PID_Kp_Slider = QtWidgets.QSlider(self.scrollAreaWidgetContents)
-        self.PID_Kp_Slider.setGeometry(QtCore.QRect(510, 320, 250, 40))
+        self.PID_Kp_Slider.setGeometry(QtCore.QRect(510, 420, 250, 40))
         self.PID_Kp_Slider.setSizeIncrement(QtCore.QSize(0, 0))
         self.PID_Kp_Slider.setBaseSize(QtCore.QSize(0, 0))
         font = QtGui.QFont()
@@ -507,6 +507,61 @@ class Ui_OptDialog(object):
         self.TripReset.setIcon(icon2)
         self.TripReset.setIconSize(QtCore.QSize(50, 50))
         self.TripReset.setObjectName("TripReset")
+        self.FluxLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.FluxLabel.setGeometry(QtCore.QRect(72, 270, 317, 65))
+        self.FluxLabel.setStyleSheet("QLabel{\n"
+"    font: 36pt \"MS Shell Dlg\";\n"
+"}")
+        self.FluxLabel.setObjectName("FluxLabel")
+        self.RangeBtn_2 = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.RangeBtn_2.setGeometry(QtCore.QRect(2, 270, 65, 65))
+        font = QtGui.QFont()
+        font.setFamily("Magneto")
+        font.setBold(False)
+        font.setItalic(False)
+        font.setWeight(50)
+        self.RangeBtn_2.setFont(font)
+        self.RangeBtn_2.setText("")
+        self.RangeBtn_2.setIcon(icon1)
+        self.RangeBtn_2.setIconSize(QtCore.QSize(50, 50))
+        self.RangeBtn_2.setCheckable(True)
+        self.RangeBtn_2.setAutoExclusive(False)
+        self.RangeBtn_2.setObjectName("RangeBtn_2")
+        self.FluxSlider = QtWidgets.QSlider(self.scrollAreaWidgetContents)
+        self.FluxSlider.setEnabled(True)
+        self.FluxSlider.setGeometry(QtCore.QRect(390, 280, 370, 45))
+        self.FluxSlider.setSizeIncrement(QtCore.QSize(0, 0))
+        self.FluxSlider.setBaseSize(QtCore.QSize(0, 0))
+        font = QtGui.QFont()
+        font.setPointSize(80)
+        self.FluxSlider.setFont(font)
+        self.FluxSlider.setStyleSheet("QSlider {\n"
+"    border-style: none;\n"
+"    border-color: gray;\n"
+"    border-width: 4px;\n"
+"    border-radius: 18px;\n"
+"    height: 40px\n"
+"}\n"
+"QSlider::handle:horizontal {\n"
+"background-color: black;\n"
+"border: 5px solid;\n"
+"border-radius: 12px;\n"
+"width: 30px; \n"
+"margin: 0px 0px;}\n"
+"\n"
+"QSlider::groove:horizontal {\n"
+"    border: 4px solid gray;\n"
+"    border-radius: 18px;\n"
+"    height: 28px\n"
+"}\n"
+"    ")
+        self.FluxSlider.setMaximum(4096)
+        self.FluxSlider.setPageStep(164)
+        self.FluxSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.FluxSlider.setInvertedAppearance(False)
+        self.FluxSlider.setTickPosition(QtWidgets.QSlider.TicksBothSides)
+        self.FluxSlider.setTickInterval(0)
+        self.FluxSlider.setObjectName("FluxSlider")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
         self.retranslateUi(OptDialog)
@@ -526,4 +581,5 @@ class Ui_OptDialog(object):
         self.ExitBtn.setText(_translate("OptDialog", "Back"))
         self.ThemeBtn.setText(_translate("OptDialog", "Theme"))
         self.TripReset.setText(_translate("OptDialog", "TripReset"))
+        self.FluxLabel.setText(_translate("OptDialog", "Flux: xx.x%"))
 import ampy_rc

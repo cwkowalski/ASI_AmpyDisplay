@@ -1,0 +1,2701 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>bmscfg</class>
+ <widget class="QWidget" name="bmscfg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QScrollArea" name="scrollArea">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>480</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QScrollBar{
+background: white;}
+QScrollBar{
+width: 25px;}
+
+QPushButton{
+background: transparent;
+border: none}
+
+QGroupBox{
+	background: solid white;
+	border: 5px solid black;
+	border-radius: 20px;
+	margin-top: 50px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+	subcontrol-position: top left;
+	left: 25px;
+	padding: 0 0px 0 0px;
+}
+</string>
+   </property>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOn</enum>
+   </property>
+   <property name="widgetResizable">
+    <bool>true</bool>
+   </property>
+   <widget class="QWidget" name="scrollAreaWidgetContents">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>-422</y>
+      <width>781</width>
+      <height>1440</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+      <horstretch>1</horstretch>
+      <verstretch>1</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>781</width>
+      <height>1440</height>
+     </size>
+    </property>
+    <widget class="QPushButton" name="ReadEepromBtn">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>0</y>
+       <width>109</width>
+       <height>55</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 30px;
+    font-family: &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 3px;
+	border-radius:15px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>Read</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="WriteEepromBtn">
+     <property name="geometry">
+      <rect>
+       <x>415</x>
+       <y>0</y>
+       <width>180</width>
+       <height>55</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 30px;
+    font-family: &quot;Luxi Mono&quot;;
+	font-weight: bold;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 3px;
+	border-radius:15px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>Write</string>
+     </property>
+     <property name="icon">
+      <iconset resource="ampy.qrc">
+       <normaloff>:/root/save.png</normaloff>:/root/save.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="ExitBtn">
+     <property name="geometry">
+      <rect>
+       <x>670</x>
+       <y>0</y>
+       <width>100</width>
+       <height>55</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Impact</family>
+       <pointsize>-1</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton { 
+	background: white;
+	font: 30px;
+    font-family: &quot;Impact&quot;;
+	border-style: inset;
+    border-color: dark grey;
+	border-width: 3px;
+	border-radius:15px;
+}
+
+QPushButton::pressed {
+	border-style:outset;
+
+}</string>
+     </property>
+     <property name="text">
+      <string>Back</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="AssistBox">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>885</y>
+       <width>765</width>
+       <height>554</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>24</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+       <kerning>false</kerning>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: 24 0px 0 0px
+}
+QLabel{
+	font: 14pt &quot;Luxi Mono&quot;;
+}
+
+QSlider::groove:horizontal {
+border: 1px solid;
+height: 30px; 
+margin: 0px;}
+QSlider::handle:horizontal {
+background-color: black;
+border: 5px solid;
+height: 50px;
+width: 70px; 
+margin: 0px 0px;}
+
+QDoubleSpinBox::up-button { 
+subcontrol-origin: margin;
+subcontrol-position: center left;
+width: 40px;
+height: 43px;}
+
+QDoubleSpinBox::down-button { 
+width: 40px;
+height: 43px;}
+
+QDoubleSpinBox{ font: 16pt &quot;Luxi Mono&quot;;}</string>
+     </property>
+     <property name="title">
+      <string>Protection Configuration</string>
+     </property>
+     <widget class="QWidget" name="gridLayoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>11</x>
+        <y>59</y>
+        <width>744</width>
+        <height>487</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="CUVPSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4.200000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QLabel" name="CUVPDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="4">
+        <widget class="QLabel" name="DSGUTDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4">
+        <widget class="QLabel" name="PUVPDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QLabel" name="PVOPDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="4">
+        <widget class="QLabel" name="CHGOCDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="4">
+        <widget class="QLabel" name="CHGOTDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="PUVPLabel">
+         <property name="text">
+          <string>PUVP&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="CHGOT">
+         <property name="text">
+          <string>CHGOT&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="CHGUT">
+         <property name="text">
+          <string>CHGUT&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="DSGOT">
+         <property name="text">
+          <string>DSGOT&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Rel&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QLabel" name="CHGUTReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLabel" name="CHGOTReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="2">
+        <widget class="QLabel" name="DSCHOCReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <widget class="QLabel" name="DSGUTReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QLabel" name="CHGOCReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="DSGUT">
+         <property name="text">
+          <string>DSGUT&lt;sub&gt;°C&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="4">
+        <widget class="QLabel" name="CHGUTDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="4">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QDoubleSpinBox" name="CHGOTSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QDoubleSpinBox" name="CHGUTSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QDoubleSpinBox" name="DSGOTSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="3">
+        <widget class="QDoubleSpinBox" name="DSCHOCReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>300.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="PUVPSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="POVPReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLabel" name="PUVPReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="CHGOCLabel">
+         <property name="text">
+          <string>CHGOC&lt;sub&gt;A&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="DSGOC">
+         <property name="text">
+          <string>DSCHOC&lt;sub&gt;A&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="4">
+        <widget class="QLabel" name="DSCHOCDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="POVPLabel">
+         <property name="text">
+          <string>POVP&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QLabel" name="COVPDelayLabel">
+         <property name="text">
+          <string>Delay&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <widget class="QDoubleSpinBox" name="DSCHOCSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>300.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QDoubleSpinBox" name="COVPSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4.200000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QDoubleSpinBox" name="CHGOCSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>300.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="POVPSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QDoubleSpinBox" name="DSGUTSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimum">
+          <double>-10.000000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>80.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="COVPReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="COVPLabel">
+         <property name="text">
+          <string>COVP&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="CUVPLabel">
+         <property name="text">
+          <string>CUVP&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="CUVPReleaseLabel">
+         <property name="text">
+          <string>Rel&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QDoubleSpinBox" name="COVPReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4.200000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QDoubleSpinBox" name="CUVPReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4.200000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QDoubleSpinBox" name="POVPReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QDoubleSpinBox" name="PUVPReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QDoubleSpinBox" name="CHGOTReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QDoubleSpinBox" name="CHGUTReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="3">
+        <widget class="QDoubleSpinBox" name="DSGOTReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="3">
+        <widget class="QDoubleSpinBox" name="DSGUTReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="3">
+        <widget class="QDoubleSpinBox" name="CHGOCReleaseSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>300.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="5">
+        <widget class="QDoubleSpinBox" name="DSGUTDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QDoubleSpinBox" name="COVPDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QDoubleSpinBox" name="CUVPDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="5">
+        <widget class="QDoubleSpinBox" name="POVPDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5">
+        <widget class="QDoubleSpinBox" name="PUVPDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="5">
+        <widget class="QDoubleSpinBox" name="CHGOTDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="5">
+        <widget class="QDoubleSpinBox" name="CHGUTDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="5">
+        <widget class="QDoubleSpinBox" name="DSGOTDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="5">
+        <widget class="QDoubleSpinBox" name="CHGOCDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="5">
+        <widget class="QDoubleSpinBox" name="DSCHOCDelaySpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>60.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="Functions">
+     <property name="geometry">
+      <rect>
+       <x>6</x>
+       <y>5</y>
+       <width>765</width>
+       <height>462</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>24</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+       <kerning>false</kerning>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: 24 0px 0 0px
+}
+QLabel{
+	font: 24pt &quot;Luxi Mono&quot;;
+}
+
+QSlider::groove:horizontal {
+border: 1px solid;
+height: 30px; 
+margin: 0px;}
+QSlider::handle:horizontal {
+background-color: black;
+border: 5px solid;
+height: 50px;
+width: 70px; 
+margin: 0px 0px;}
+
+QDoubleSpinBox::up-button { 
+subcontrol-origin: margin;
+subcontrol-position: center left;
+width: 40px;
+height: 43px;}
+
+QDoubleSpinBox::down-button { 
+width: 40px;
+height: 43px;}</string>
+     </property>
+     <property name="title">
+      <string>Functions</string>
+     </property>
+     <widget class="QWidget" name="gridLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>60</y>
+        <width>846</width>
+        <height>393</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="3">
+        <widget class="QPushButton" name="SCReleaseBtn">
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QLabel" name="SCReleaseLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>SC Release</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="NTC1Btn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="LEDEnableBtn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="BalanceEnableBtn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QPushButton" name="NTC3Btn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QLabel" name="NTC5Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC5</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="SwitchBtn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QLabel" name="ChargeBalanceLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Charge Balance</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="LEDEnableLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>LED Enable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QLabel" name="LEDNumberLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>LED Number</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QPushButton" name="LEDNumberBtn">
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="SwitchLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Switch</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QPushButton" name="ChargeBalanceBtn">
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QPushButton" name="NTC2Btn">
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QPushButton" name="NTC4Btn">
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QPushButton" name="NTC5Btn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QPushButton" name="NTC7Btn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLabel" name="NTC3Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC3</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="4">
+        <widget class="QLabel" name="NTC4Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC4</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QLabel" name="NTC7Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC7</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLabel" name="NTC1Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="3">
+        <widget class="QPushButton" name="NTC8Btn">
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4">
+        <widget class="QLabel" name="NTC2Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC2</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="4">
+        <widget class="QLabel" name="NTC6Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC6</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QPushButton" name="NTC6Btn">
+         <property name="sizeIncrement">
+          <size>
+           <width>10</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Magneto</family>
+           <pointsize>-1</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{
+font: 80pt 'Mistral'}
+QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: -25 0px 0 0px
+}
+
+
+QPushButton { 
+	background: white;
+	font: 80px &quot;Magneto&quot;;
+	border : none}
+
+QRadioButton {
+	border: 20;
+	padding: 10px;
+	background: white;
+	selectionbackgroundcolor: dark grey;
+	font: 50px;
+}
+
+QRadioButton::indicator{
+border : 5px solid black; 
+width : 25px;
+height : 50px; 
+border radius : 1px}
+
+QCheckBox::indicator {
+     width: 60px;
+     height: 60px;
+ }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="ampy.qrc">
+           <normaloff>:/root/radio_off.png</normaloff>
+           <normalon>:/root/radio_on.png</normalon>:/root/radio_off.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>45</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="4">
+        <widget class="QLabel" name="NTC8Label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>NTC8</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="BalanceEnableLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Balance Enable</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="AssistBox_3">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>440</y>
+       <width>768</width>
+       <height>468</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Luxi Mono</family>
+       <pointsize>24</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+       <kerning>false</kerning>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox::title{
+	font = 50pt &quot;Magneto&quot;;
+	padding: 24 0px 0 0px
+}
+QLabel{
+	font: 14pt &quot;Luxi Mono&quot;;
+}
+
+QSlider::groove:horizontal {
+border: 1px solid;
+height: 30px; 
+margin: 0px;}
+QSlider::handle:horizontal {
+background-color: black;
+border: 5px solid;
+height: 50px;
+width: 70px; 
+margin: 0px 0px;}
+
+QDoubleSpinBox::up-button { 
+subcontrol-origin: margin;
+subcontrol-position: center left;
+width: 40px;
+height: 43px;}
+
+QDoubleSpinBox::down-button { 
+width: 40px;
+height: 43px;}
+
+QDoubleSpinBox{ font: 16pt &quot;Luxi Mono&quot;;}</string>
+     </property>
+     <property name="title">
+      <string>Balance And Misc. Configuration</string>
+     </property>
+     <widget class="QWidget" name="gridLayoutWidget_4">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>55</y>
+        <width>752</width>
+        <height>408</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="6" column="0">
+        <widget class="QLabel" name="SelfDischargeLabel">
+         <property name="text">
+          <string>Self-Dschg Rate&lt;sub&gt;%&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QLabel" name="SOC0Label">
+         <property name="text">
+          <string>0% SOC&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLabel" name="SOC40Label">
+         <property name="text">
+          <string>40% SOC&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="ShuntSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="maximum">
+          <double>4.200000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.001000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="SOC100Label">
+         <property name="text">
+          <string>100% SOC&lt;sub&gt;mV&lt;/sub&gt; </string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="SOC60Label">
+         <property name="text">
+          <string>60% SOC&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="SOC20Label">
+         <property name="text">
+          <string>20% SOC&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QLabel" name="FETControlLabel">
+         <property name="text">
+          <string>FET Control&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QDoubleSpinBox" name="CycleCountSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>100000.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QDoubleSpinBox" name="CycleCapSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QDoubleSpinBox" name="SOC80Spin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QDoubleSpinBox" name="SOC40Spin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QDoubleSpinBox" name="SOC0Spin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <widget class="QLabel" name="CellCountLabel">
+         <property name="text">
+          <string>CellCnt &lt;sup&gt;CAUTION&lt;/sup&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="LEDTimerLabel">
+         <property name="text">
+          <string>LED timer&lt;sub&gt;S&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QDoubleSpinBox" name="SOC20Spin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QDoubleSpinBox" name="SOC60Spin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QDoubleSpinBox" name="SelfDschgSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="CycleCapLabel">
+         <property name="text">
+          <string>Cycle Ah</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLabel" name="SOC80Label">
+         <property name="text">
+          <string>80% SOC&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="SOC100Spin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QDoubleSpinBox" name="BalanceStartSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>4.200000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QDoubleSpinBox" name="LEDTimerSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="DesignCapSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>200.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="BalanceWindowLabel">
+         <property name="text">
+          <string>Balance Window&lt;sub&gt;mV&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="BalanceStartLabel">
+         <property name="text">
+          <string>Balance Start&lt;sub&gt;V&lt;/sub&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="ShuntLabel">
+         <property name="text">
+          <string>Shunt Ω</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="CycleCountLabel">
+         <property name="text">
+          <string>Cycle count</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QDoubleSpinBox" name="BalanceWindowSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="3">
+        <widget class="QDoubleSpinBox" name="CellCntSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="3">
+        <widget class="QDoubleSpinBox" name="FETControlSpin">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximum">
+          <double>70.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="DesignCapLabel">
+         <property name="text">
+          <string>Design Ah</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <zorder>AssistBox</zorder>
+    <zorder>Functions</zorder>
+    <zorder>AssistBox_3</zorder>
+    <zorder>ExitBtn</zorder>
+    <zorder>WriteEepromBtn</zorder>
+    <zorder>ReadEepromBtn</zorder>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="ampy.qrc"/>
+ </resources>
+ <connections/>
+</ui>
