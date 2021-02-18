@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="root">
+    <file>save.png</file>
     <file>bms-icon.png</file>
     <file>bms-led-green.jpg</file>
     <file>bms-led-red.jpg</file>
