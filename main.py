@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
-from sys import exit
+from sys import exit, stdout
 import os
 import time
 from multiprocessing import Process, Pipe, Queue
@@ -259,9 +259,10 @@ class BMSSerialEmitter(QtCore.QThread):
     bms_basic_msg = QtCore.pyqtSignal()
     bms_eeprom_msg = QtCore.pyqtSignal()
     bms_exception = QtCore.pyqtSignal(str)
-    def __init__(self, from_process: Pipe):
+    def __init__(self, data_from_process: Pipe, print_from_process: Pipe):
         super().__init__()
-        self.data_from_process = from_process
+        self.data_from_process = data_from_process
+        self.print_from_process = print_from_process
         self.msg = None
         self.basicMsg = None
         self.eepromMsg = None
@@ -282,9 +283,14 @@ class BMSSerialEmitter(QtCore.QThread):
                 self.bms_eeprom_msg.emit()
             else:
                 print('BMSSerialEmitter message not recognized!')
+            try:
+                msgPrint = self.print_from_process.recv()
+                print(msgPrint)
+            except Exception as e:
+                print(e)
 
 class BMSSerialProcess(Process):
-    def __init__(self, bmsport, to_emitter: Pipe, from_window: Queue):
+    def __init__(self, bmsport, to_emitter: Pipe, to_stdout: Pipe, from_window: Queue):
         #super(BMSSerialProcess, self).__init__(target=self.pickle_wrapper)
         super(BMSSerialProcess, self).__init__()
         ############################
@@ -295,7 +301,7 @@ class BMSSerialProcess(Process):
         self.daemon = True
         self.data_to_emitter = to_emitter
         self.data_from_window = from_window
-
+        self.data_to_stdout = to_stdout
         self.basicData = None
         self.cellData = None
 
@@ -319,7 +325,8 @@ class BMSSerialProcess(Process):
         #serializable, probably:
         #call_it(self, 'run')
         # todo: Replace with JBD. Poll constantly to window attribute. Inherit to bms_dialog from window.
-        print('BMSSerialProc init finish.')
+        #print('BMSSerialProc init finish.')
+        self.data_to_stdout.send('BMSSerialProc init finish.')
     @QtCore.pyqtSlot(int) # todo: deprecate
     def jbdcmd(self, cmd):
         self.jbdcmd = cmd
@@ -331,10 +338,10 @@ class BMSSerialProcess(Process):
         #self.poll_timer.setSingleShot(False)
         #self.poll_timer.start(1000)
         #self.eepromData = self.j.readEeprom()
-        print('bmsProc runloop begin.')
+        self.data_to_stdout.send('bmsProc runloop begin.')
         while True:
             self.jbdcmd = self.data_from_window.get()
-            print('bmsProc: ', self.jbdcmd)
+            self.data_to_stdout.send('bmsProc received cmd: ' + str(self.jbdcmd))
             self.bms_serloop()
     # todo: JBD port management is reliable but WAY too slow. 5x heavier than this whole app.
     #  Instead open port here. Use int to switch from polling, to eeprom, to slider controls,
@@ -349,17 +356,18 @@ class BMSSerialProcess(Process):
         #    self.j.s.close()
         #    self.j.s.open()
         if self.jbdcmd == 0:
-            print('bmsProc.loop: ', self.jbdcmd)
+            #print('bmsProc.loop: ', self.jbdcmd)
             self.basic_poller()
         elif self.jbdcmd == 1:
-            print('bmsProc.loop: ', self.jbdcmd)
+            #print('bmsProc.loop: ', self.jbdcmd)
             self.eeprom_read()
         elif self.jbdcmd == 2:
             self.j.clearErrors()
         elif len(self.jbdcmd[0]) > 1:
-            print('bmsProc::run:serloop; ', self.jbdcmd)
+            #print('bmsProc::run:serloop; ', self.jbdcmd)
             self.eeprom_write(self.jbdcmd[0]) # send eeprom dict to eeprom_write, update attr & jbccmd = 2 & add dict here
     def basic_poller(self):  # Currently JBD closes port after each call. Reliable, but slow. Consider keeping open?
+        self.data_to_stdout.send('bmsProc::run:serloop:basic_poller called.')
         lastTime = self.t1
         self.t1 = time.time_ns() / 1000000000
         self.cellData = self.j.readCellInfo()
@@ -1769,12 +1777,14 @@ if __name__ == '__main__':
 
     # Communication lines:
     window_pipe, bms_pipe = Pipe()
+    stdout_pipe, bmsprint_pipe = Pipe()
     queue = Queue()
 
     bacThread = BACSerialThread()
-    bmsThread = BMSSerialEmitter(window_pipe)
-    bmsProc = BMSSerialProcess(args.bmsport, bms_pipe, queue)
+    bmsThread = BMSSerialEmitter(window_pipe, stdout_pipe)
+    bmsProc = BMSSerialProcess(args.bmsport, bms_pipe, bmsprint_pipe, queue)
     window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin, queue, bmsThread)
+
     #window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin, queue, bmsThread)
 
     # todo: setup args/bools to disable all faulting BMS functions if -bpt not supplied. default port = False, if not port...
