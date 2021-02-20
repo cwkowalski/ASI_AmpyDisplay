@@ -297,7 +297,6 @@ class BMSSerialProcess(Process):
         ###### JBD Test Data #######
         ############################
         print('BMSSerialProc init begin.')
-        time.sleep(3)
         self.daemon = True
         self.data_to_emitter = to_emitter
         self.data_from_window = from_window
@@ -332,6 +331,7 @@ class BMSSerialProcess(Process):
         self.jbdcmd = cmd
         pass
     def run(self):
+        time.sleep(3)
         self.j = JBD(self.bmsport, timeout = 1, debug = False)
         #self.poll_timer = QtCore.QTimer()
         #self.poll_timer.timeout.connect(self.bms_serloop)
@@ -1721,9 +1721,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?)', payload)
     #### HELPER FUNCTIONS ####
     def socreset(self):
+        orig = self.flt_ah
         self.flt_ah = self.battah * (
-                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts) / 21)))  # battah * SOC used coefficient
+                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-60:]) / self.battseries)))  # battah * SOC used coefficient
         self.SQL_lifestat_upload()
+        print('socreset orig:', orig, 'new:', self.flt_ah, 'BAC-socmapper input:', mean(self.list_batt_volts[-60])/self.battseries, 'BAC-socmapper returns:', BAC.socmapper(mean(self.list_batt_volts)/self.battseries))
+        print('hook')
     def ms(self):  # helper function; nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
     def gettime(self):  # Helper function for iterators, time comparison attributes in receive_floop
