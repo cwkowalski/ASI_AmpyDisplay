@@ -572,9 +572,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_motor_rpm, self.list_floop_interval, self.list_interp_interval, self.list_whmi = \
             [], [], [], [], [], [], [], [], []
 
-
-        self.tripReset()
-
         # For lifestats:
         self.lifestat_iter_ID = 0
         # Todo: update profilestate in sql init setup
@@ -836,8 +833,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_batt_volts = self.list_batt_volts[-self.mean_length:]
         self.list_batt_amps = self.list_batt_amps[-self.mean_length:]
         self.list_motor_rpm = self.list_motor_rpm[-self.mean_length:]
-        self.list_whmi = self.list_whmi[
-                         -self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
+        self.list_interp_interval = self.list_interp_interval[-self.mean_length:]
+        self.list_whmi = self.list_whmi[-self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
     def floopProcess(self):
         # Prepare floop list data for Simpsons-method quadratic integration
         self.list_interp_interval.append(sum(self.list_floop_interval[-self.iter:]))  # May not be needed
@@ -1710,7 +1707,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     #### HELPER FUNCTIONS ####
     def socreset(self):
         self.flt_ah = self.battah * (
-                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts) / 21)))  # battah * SOC used coefficient
+                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-60:]) / self.battseries)))  # battah * SOC used coefficient
         self.SQL_lifestat_upload()
     def ms(self):  # helper function; nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
