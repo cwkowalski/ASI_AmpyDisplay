@@ -1,9 +1,8 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
-from sys import exit, stdout, stderr
+from sys import exit
 import os
 import time
-import csv
-from multiprocessing import Process, Pipe, Queue, Lock
+from multiprocessing import Process, Pipe, Queue
 import datetime
 import BACModbus
 from jbdMain import JBD
@@ -18,17 +17,17 @@ from numpy import mean, isnan, array, prod, argmin, abs
 #import logging
 # import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
+#DisableForDesktopDebug
 import platform
+if platform.system() == 'Linux': # Need better solution for crossplatform dev...
+    import RPi.GPIO as GPIO
+# import psutil # Process = psutil.Process(getpid()) # To get memory use
 import sqlite3
 import argparse
-import sys
 from number_pad import numberPopup
 from options_dialog import optionsDialog
 from bms_dialog import bmsDialog
 from bmscfg_dialog import bmscfgDialog
-if platform.system() == 'Linux': # Need better solution for crossplatform dev...
-    import RPi.GPIO as GPIO
-# import psutil # Process = psutil.Process(getpid()) # To get memory use
 
 # todo: Optional dev.
 #   A. try a fork with restricted imports/refactors and recheck strace to minimize depsize, include .pyc; e.g.
@@ -42,7 +41,7 @@ if platform.system() == 'Linux': # Need better solution for crossplatform dev...
 #       calculated battery current braking limit parameter = system voltage *  Rated motor power (Race mode PAS power)
 #       is this the only difference between rated/remote power registers?
 #  C1. Does assist level affect regeneration current?
-#  C2. Does PAS power actually control regen current with Throttle bypass assist level = 1? -> Features3 controlled
+#  C2. Does PAS power actually control regen current with Throttle bypass assist level = 1?
 #  C3. Does Race mode PAS power actually scale regen current with Alternate speed/power limit disabled?
 #  C4. 'Rated battery voltage' is supposed to be peak battery voltage...? I prefer average/shallow DoD...
 #  C5. Also test the Overload_..._current/time values (Addr 99-104) after ferrofluid mod.
@@ -74,27 +73,205 @@ if platform.system() == 'Linux': # Need better solution for crossplatform dev...
 # sys.stdout = f
 # sys.stdout = orig_stdout
 # f.close()
+"""
+jbdcell = {'cell0_mv': 3500,
+           'cell1_mv': 3505,
+           'cell2_mv': 3502,
+           'cell3_mv': 3502,
+           'cell4_mv': 3503,
+           'cell5_mv': 3506,
+           'cell6_mv': 3502,
+           'cell7_mv': 3502,
+           'cell8_mv': 3507,
+           'cell9_mv': 3502,
+           'cell10_mv': 3500,
+           'cell11_mv': 3504,
+           'cell12_mv': 3504,
+           'cell13_mv': 3488,
+           'cell14_mv': 3504,
+           'cell15_mv': 3509,
+           'cell16_mv': 3502,
+           'cell17_mv': 3507,
+           'cell18_mv': 3509,
+           'cell19_mv': 3501,
+           'cell20_mv': 3504}
+jbdbasic = {'pack_mv': 73560,
+            'pack_ma': 0,
+            'cur_cap': 38680,
+            'full_cap': 40000,
+            'cycle_cnt': 0,
+            'year': 2020,
+            'month': 9,
+            'day': 23,
+            'bal0': False,
+            'bal1': True,
+            'bal2': False,
+            'bal3': True,
+            'bal4': False,
+            'bal5': True,
+            'bal6': False,
+            'bal7': True,
+            'bal8': False,
+            'bal9': True,
+            'bal10': False,
+            'bal11': True,
+            'bal12': False,
+            'bal13': False,
+            'bal14': False,
+            'bal15': True,
+            'bal16': False,
+            'bal17': True,
+            'bal18': False,
+            'bal19': False,
+            'bal20': False,
+            'bal21': False,
+            'bal22': False,
+            'bal23': False,
+            'bal24': False,
+            'bal25': False,
+            'bal26': False,
+            'bal27': False,
+            'bal28': False,
+            'bal29': False,
+            'bal30': False,
+            'bal31': False,
+            'covp_err': False,
+            'cuvp_err': False,
+            'povp_err': False,
+            'puvp_err': False,
+            'chgot_err': False,
+            'chgut_err': False,
+            'dsgot_err': False,
+            'dsgut_err': False,
+            'chgoc_err': False,
+            'dsgoc_err': False,
+            'sc_err': False,
+            'afe_err': False,
+            'software_err': False,
+            'version': 36,
+            'cap_pct': 97,
+            'chg_fet_en': True,
+            'dsg_fet_en': True,
+            'ntc_cnt': 4,
+            'cell_cnt': 21,
+            'ntc0': 21.8,
+            'ntc1': 21.9,
+            'ntc2': 21.7,
+            'ntc3': 21.6,
+            'ntc4': None,
+            'ntc5': None,
+            'ntc6': None,
+            'ntc7': None,
+            'fault_raw': 0,
+            'bal_raw': 166570}
+jbdeeprom = {'covp': 4200,
+             'covp_rel': 4150,
+             'cuvp': 2800,
+             'cuvp_rel': 3000,
+             'povp': 88200,
+             'povp_rel': 87000,
+             'puvp': 60000,
+             'puvp_rel': 63000,
+             'chgot': 50.0,
+             'chgot_rel': 45.0,
+             'chgut': 0.0,
+             'chgut_rel': 5.0,
+             'dsgot': 55.0,
+             'dsgot_rel': 50.0,
+             'dsgut': -10.0,
+             'dsgut_rel': 0.0,
+             'chgoc': 40000,
+             'dsgoc': -50000,
+             'cuvp_delay': 2,
+             'covp_delay': 2,
+             'puvp_delay': 2,
+             'povp_delay': 2,
+             'chgut_delay': 2,
+             'chgot_delay': 2,
+             'dsgut_delay': 2,
+             'dsgot_delay': 2,
+             'chgoc_delay': 10,
+             'chgoc_rel': 32,
+             'dsgoc_delay': 10,
+             'dsgoc_rel': 32,
+             'covp_high': 4400,
+             'cuvp_high': 2500,
+             # Enum types: .value -> tuple, .name -> binding e.g. _400US
+             'sc': (89, 6),  # <ScEnum._89MV: (89, 6)>,
+             'sc_delay': (400, 3),  # <ScDelayEnum._400US: (400, 3)>,
+             'dsgoc2': (14, 2),  # <Dsgoc2Enum._14MV: (14, 2)>,
+             'dsgoc2_delay': (320, 5),  # <Dsgoc2DelayEnum._320MS: (320, 5)>,
+             'sc_dsgoc_x2': True,
+             'cuvp_high_delay': (16, 3),  # <CuvpHighDelayEnum._16S: (16, 3)>,
+             'covp_high_delay': (4, 2),  # <CovpHighDelayEnum._4S: (4, 2)>,
+             'sc_rel': 5,
+             'switch': False,
+             'scrl': True,
+             'balance_en': True,
+             'chg_balance_en': False,
+             'led_en': False,
+             'led_num': False,
+             'ntc1': True,
+             'ntc2': True,
+             'ntc3': True,
+             'ntc4': True,
+             'ntc5': False,
+             'ntc6': False,
+             'ntc7': False,
+             'ntc8': False,
+             'bal_start': 3400,
+             'bal_window': 15,
+             'shunt_res': 0.2,
+             'cell_cnt': 21,
+             'cycle_cnt': 0,
+             'serial_num': 25,
+             'mfg_name': 'ABCDEF',
+             'device_name': '15250033-SP30S005-P24S-40A-40AH',
+             'barcode': '',
+             'year': 2020,
+             'month': 9,
+             'day': 23,
+             'design_cap': 40000,
+             'cycle_cap': 42000,
+             'dsg_rate': 0.2,
+             'cap_100': 4200,
+             'cap_80': 4000,
+             'cap_60': 3800,
+             'cap_40': 3600,
+             'cap_20': 3300,
+             'cap_0': 4000,
+             'fet_ctrl': 30,
+             'led_timer': 10,
+             'sc_err_cnt': 0,
+             'chgoc_err_cnt': 0,
+             'dsgoc_err_cnt': 0,
+             'covp_err_cnt': 0,
+             'cuvp_err_cnt': 0,
+             'chgot_err_cnt': 0,
+             'chgut_err_cnt': 0,
+             'dsgot_err_cnt': 0,
+             'dsgut_err_cnt': 0,
+             'povp_err_cnt': 0,
+             'puvp_err_cnt': 0}
+"""
 
 class BMSSerialEmitter(QtCore.QThread):
     bms_basic_msg = QtCore.pyqtSignal()
     bms_eeprom_msg = QtCore.pyqtSignal()
     bms_exception = QtCore.pyqtSignal(str)
-    def __init__(self, data_from_process: Pipe, stdout_from_process):
+    def __init__(self, from_process: Pipe):
         super().__init__()
-        self.data_from_process = data_from_process
-        self.stdout_from_process = stdout_from_process
+        self.data_from_process = from_process
         self.msg = None
         self.basicMsg = None
         self.eepromMsg = None
-        self.msg_time = 0
     def run(self):
         while True:
             # todo: Check for alternative to try: if you can find a way to use 'if', may improve performance here
             try:
                 self.msg = self.data_from_process.recv()
             except EOFError:
-                print('EOF')
-                pass
+                break
             if self.msg[0] == 0:
                 # todo: instead store locally for accessing by Parent. Use signal only to trigger check whether to...
                 #  throw faults, or update bmspopup, etc
@@ -106,200 +283,19 @@ class BMSSerialEmitter(QtCore.QThread):
             else:
                 print('BMSSerialEmitter message not recognized!')
 
-            self.stdoutmsg = self.stdout_from_process.recv()
-            print('bmsemitter:run: from process: ', self.stdoutmsg)
-
 class BMSSerialProcess(Process):
-    def __init__(self, bmsport, to_emitter: Pipe, from_window: Queue, to_stdout: sys.stdout, lock: Lock()):
+    def __init__(self, bmsport, to_emitter: Pipe, from_window: Queue):
         #super(BMSSerialProcess, self).__init__(target=self.pickle_wrapper)
         super(BMSSerialProcess, self).__init__()
         ############################
         ###### JBD Test Data #######
         ############################
-        self.jbdcell = {'cell0_mv': 3500,
-                   'cell1_mv': 3505,
-                   'cell2_mv': 3502,
-                   'cell3_mv': 3502,
-                   'cell4_mv': 3503,
-                   'cell5_mv': 3506,
-                   'cell6_mv': 3502,
-                   'cell7_mv': 3502,
-                   'cell8_mv': 3507,
-                   'cell9_mv': 3502,
-                   'cell10_mv': 3500,
-                   'cell11_mv': 3504,
-                   'cell12_mv': 3504,
-                   'cell13_mv': 3488,
-                   'cell14_mv': 3504,
-                   'cell15_mv': 3509,
-                   'cell16_mv': 3502,
-                   'cell17_mv': 3507,
-                   'cell18_mv': 3509,
-                   'cell19_mv': 3501,
-                   'cell20_mv': 3504}
-        self.jbdbasic = {'pack_mv': 73560,
-                    'pack_ma': 0,
-                    'cur_cap': 38680,
-                    'full_cap': 40000,
-                    'cycle_cnt': 0,
-                    'year': 2020,
-                    'month': 9,
-                    'day': 23,
-                    'bal0': False,
-                    'bal1': True,
-                    'bal2': False,
-                    'bal3': True,
-                    'bal4': False,
-                    'bal5': True,
-                    'bal6': False,
-                    'bal7': True,
-                    'bal8': False,
-                    'bal9': True,
-                    'bal10': False,
-                    'bal11': True,
-                    'bal12': False,
-                    'bal13': False,
-                    'bal14': False,
-                    'bal15': True,
-                    'bal16': False,
-                    'bal17': True,
-                    'bal18': False,
-                    'bal19': False,
-                    'bal20': False,
-                    'bal21': False,
-                    'bal22': False,
-                    'bal23': False,
-                    'bal24': False,
-                    'bal25': False,
-                    'bal26': False,
-                    'bal27': False,
-                    'bal28': False,
-                    'bal29': False,
-                    'bal30': False,
-                    'bal31': False,
-                    'covp_err': False,
-                    'cuvp_err': False,
-                    'povp_err': False,
-                    'puvp_err': False,
-                    'chgot_err': False,
-                    'chgut_err': False,
-                    'dsgot_err': False,
-                    'dsgut_err': False,
-                    'chgoc_err': False,
-                    'dsgoc_err': False,
-                    'sc_err': False,
-                    'afe_err': False,
-                    'software_err': False,
-                    'version': 36,
-                    'cap_pct': 97,
-                    'chg_fet_en': True,
-                    'dsg_fet_en': True,
-                    'ntc_cnt': 4,
-                    'cell_cnt': 21,
-                    'ntc0': 21.8,
-                    'ntc1': 21.9,
-                    'ntc2': 21.7,
-                    'ntc3': 21.6,
-                    'ntc4': None,
-                    'ntc5': None,
-                    'ntc6': None,
-                    'ntc7': None,
-                    'fault_raw': 0,
-                    'bal_raw': 166570}
-        self.jbdeeprom = {'covp': 4200,
-                     'covp_rel': 4150,
-                     'cuvp': 2800,
-                     'cuvp_rel': 3000,
-                     'povp': 88200,
-                     'povp_rel': 87000,
-                     'puvp': 60000,
-                     'puvp_rel': 63000,
-                     'chgot': 50.0,
-                     'chgot_rel': 45.0,
-                     'chgut': 0.0,
-                     'chgut_rel': 5.0,
-                     'dsgot': 55.0,
-                     'dsgot_rel': 50.0,
-                     'dsgut': -10.0,
-                     'dsgut_rel': 0.0,
-                     'chgoc': 40000,
-                     'dsgoc': -50000,
-                     'cuvp_delay': 2,
-                     'covp_delay': 2,
-                     'puvp_delay': 2,
-                     'povp_delay': 2,
-                     'chgut_delay': 2,
-                     'chgot_delay': 2,
-                     'dsgut_delay': 2,
-                     'dsgot_delay': 2,
-                     'chgoc_delay': 10,
-                     'chgoc_rel': 32,
-                     'dsgoc_delay': 10,
-                     'dsgoc_rel': 32,
-                     'covp_high': 4400,
-                     'cuvp_high': 2500,
-                     # Enum types: .value -> tuple, .name -> binding e.g. _400US
-                     'sc': (89, 6),  # <ScEnum._89MV: (89, 6)>,
-                     'sc_delay': (400, 3),  # <ScDelayEnum._400US: (400, 3)>,
-                     'dsgoc2': (14, 2),  # <Dsgoc2Enum._14MV: (14, 2)>,
-                     'dsgoc2_delay': (320, 5),  # <Dsgoc2DelayEnum._320MS: (320, 5)>,
-                     'sc_dsgoc_x2': True,
-                     'cuvp_high_delay': (16, 3),  # <CuvpHighDelayEnum._16S: (16, 3)>,
-                     'covp_high_delay': (4, 2),  # <CovpHighDelayEnum._4S: (4, 2)>,
-                     'sc_rel': 5,
-                     'switch': False,
-                     'scrl': True,
-                     'balance_en': True,
-                     'chg_balance_en': False,
-                     'led_en': False,
-                     'led_num': False,
-                     'ntc1': True,
-                     'ntc2': True,
-                     'ntc3': True,
-                     'ntc4': True,
-                     'ntc5': False,
-                     'ntc6': False,
-                     'ntc7': False,
-                     'ntc8': False,
-                     'bal_start': 3400,
-                     'bal_window': 15,
-                     'shunt_res': 0.2,
-                     'cell_cnt': 21,
-                     'cycle_cnt': 0,
-                     'serial_num': 25,
-                     'mfg_name': 'ABCDEF',
-                     'device_name': '15250033-SP30S005-P24S-40A-40AH',
-                     'barcode': '',
-                     'year': 2020,
-                     'month': 9,
-                     'day': 23,
-                     'design_cap': 40000,
-                     'cycle_cap': 42000,
-                     'dsg_rate': 0.2,
-                     'cap_100': 4200,
-                     'cap_80': 4000,
-                     'cap_60': 3800,
-                     'cap_40': 3600,
-                     'cap_20': 3300,
-                     'cap_0': 4000,
-                     'fet_ctrl': 30,
-                     'led_timer': 10,
-                     'sc_err_cnt': 0,
-                     'chgoc_err_cnt': 0,
-                     'dsgoc_err_cnt': 0,
-                     'covp_err_cnt': 0,
-                     'cuvp_err_cnt': 0,
-                     'chgot_err_cnt': 0,
-                     'chgut_err_cnt': 0,
-                     'dsgot_err_cnt': 0,
-                     'dsgut_err_cnt': 0,
-                     'povp_err_cnt': 0,
-                     'puvp_err_cnt': 0}
-        self.lock = lock
+        print('BMSSerialProc init begin.')
+
         self.daemon = True
         self.data_to_emitter = to_emitter
         self.data_from_window = from_window
-        self.data_to_stdout = to_stdout
+
         self.basicData = None
         self.cellData = None
 
@@ -323,27 +319,26 @@ class BMSSerialProcess(Process):
         #serializable, probably:
         #call_it(self, 'run')
         # todo: Replace with JBD. Poll constantly to window attribute. Inherit to bms_dialog from window.
-        #print('BMSSerialProc init finish.')
-        self.data_to_stdout.send('BMSSerialProc init finish.')
-        try:
-            self.j = JBD(self.bmsport, timeout=1, debug=False)
-        except Exception as e:
-            with self.lock:
-                self.data_to_stdout.send(e, file=sys.stderr)
+        print('BMSSerialProc init finish.')
     @QtCore.pyqtSlot(int) # todo: deprecate
     def jbdcmd(self, cmd):
         self.jbdcmd = cmd
+        pass
     def run(self):
+        self.j = JBD(self.bmsport, timeout = 1, debug = False)
+        #self.poll_timer = QtCore.QTimer()
+        #self.poll_timer.timeout.connect(self.bms_serloop)
+        #self.poll_timer.setSingleShot(False)
+        #self.poll_timer.start(1000)
+        #self.eepromData = self.j.readEeprom()
+        print('bmsProc runloop begin.')
         while True:
-            try:
-                self.jbdcmd = self.data_from_window.get()
-                #print('bmsProc: ', self.jbdcmd)
-                self.bms_serloop()
-            except Exception as e:
-                with self.lock:
-                    self.data_to_stdout.send(e, file=sys.stderr)
-                self.j.s.close()
-                continue
+            self.jbdcmd = self.data_from_window.get()
+            print('bmsProc: ', self.jbdcmd)
+            self.bms_serloop()
+    # todo: JBD port management is reliable but WAY too slow. 5x heavier than this whole app.
+    #  Instead open port here. Use int to switch from polling, to eeprom, to slider controls,
+    #  once each Qtimer call e.g. BACSerialThread.
 
     #  Instead to maximize speed, add bool to JBDMain and while bool:
     #  self.cellinfomsg = self.readCellInfo()
@@ -364,10 +359,7 @@ class BMSSerialProcess(Process):
         elif len(self.jbdcmd[0]) > 1:
             print('bmsProc::run:serloop; ', self.jbdcmd)
             self.eeprom_write(self.jbdcmd[0]) # send eeprom dict to eeprom_write, update attr & jbccmd = 2 & add dict here
-
-
     def basic_poller(self):  # Currently JBD closes port after each call. Reliable, but slow. Consider keeping open?
-        self.data_to_stdout.send('bmsProc::run:serloop:basic_poller called.')
         lastTime = self.t1
         self.t1 = time.time_ns() / 1000000000
         self.cellData = self.j.readCellInfo()
@@ -377,7 +369,7 @@ class BMSSerialProcess(Process):
         looptime = self.t1 - lastTime
         msg = (0, self.cellData, self.basicData, looptime, runtime)
         self.data_to_emitter.send(msg)
-        self.data_to_stdout.send(msg)
+
         #print(self.cellData, '\n', self.basicData, '\n', looptime, runtime)
     def eeprom_read(self):
         if self.j.s.isOpen():
@@ -564,9 +556,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #self.bms_poll_timer.timeout.connect(self.bmsCall)
         #self.bms_poll_timer.start(500)
         self.bmspoller = QtCore.QTimer()
-        self.bmspoller.setSingleShot(False)
+        #self.bmspoller.isSingleShot(False)
         self.bmspoller.timeout.connect(self.bmsCall)
-        self.bmspoller.start(1000)
+        self.bmspoller.start(500)
         #self.bmseeprom_initter = QtCore.QTimer()
         #self.bmseeprom_initter.setSingleShot(True)
         #self.bmseeprom_initter.timeout.connect(self.bmsGetEeprom)
@@ -584,6 +576,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_motor_rpm, self.list_floop_interval, self.list_interp_interval, self.list_whmi = \
             [], [], [], [], [], [], [], [], []
 
+
+        self.tripReset()
+
         # For lifestats:
         self.lifestat_iter_ID = 0
         # Todo: update profilestate in sql init setup
@@ -591,14 +586,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.lifestat_dist, self.lifestat_Rbatt = \
             float(0), float(0), float(0), float(0), float(0), float(0), float(0)
 
-        # Init floats
-        self.tripReset()
-
         # Range limiter PID:
         self.pid_kp = 0.09375
         self.pid_ki = 0.032
         self.pid_kd = 0.008
-        self.flt_range_limit
         self.pid = pid.PID(self.pid_kp, self.pid_ki, self.pid_kd, setpoint=self.flt_range_limit,
                            sample_time=0.016, output_limits=(0, 1))
         self.pid.auto_mode = False  # Don't run PID calculation until enabled. Possibly could replace trip_range_enabled
@@ -824,7 +815,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
             self.iter_sql = 0
 
-
         ##################
         # Message indices:
         # [0] = 258 = Faults
@@ -850,8 +840,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_batt_volts = self.list_batt_volts[-self.mean_length:]
         self.list_batt_amps = self.list_batt_amps[-self.mean_length:]
         self.list_motor_rpm = self.list_motor_rpm[-self.mean_length:]
-        self.list_interp_interval = self.list_interp_interval[-self.mean_length:]
-        self.list_whmi = self.list_whmi[-self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
+        self.list_whmi = self.list_whmi[
+                         -self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
     def floopProcess(self):
         # Prepare floop list data for Simpsons-method quadratic integration
         self.list_interp_interval.append(sum(self.list_floop_interval[-self.iter:]))  # May not be needed
@@ -1724,7 +1714,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     #### HELPER FUNCTIONS ####
     def socreset(self):
         self.flt_ah = self.battah * (
-                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-60:]) / self.battseries)))  # battah * SOC used coefficient
+                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts) / 21)))  # battah * SOC used coefficient
         self.SQL_lifestat_upload()
     def ms(self):  # helper function; nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
@@ -1753,16 +1743,6 @@ if __name__ == '__main__':
     #logger = modbus_tk.utils.create_logger("console")
     #logging.basicConfig(level='INFO')
 
-    # New Setup.ini
-    #with open(os.path.abspath(os.path.dirname(__file__))+ '/setup.cfg', mode='r') as file:
-    #    reader = csv.reader(file, delimiter=':')
-    #    setupdata = []
-    #    setupdict = {}
-    #    for row in reader:
-    #        setupdata.append(row)
-    #    for i in setupdata:
-    #        setupdict[i[0]] = i[1]
-
     # Cmdline **kwargs for key vehicle stats  # Final release; my defaults --> required= True
     parser = argparse.ArgumentParser(description='Vehicle Settings')
     parser.add_argument('-battseries', '-bs', action='store', required=True, type=int, dest='bs',
@@ -1789,13 +1769,11 @@ if __name__ == '__main__':
 
     # Communication lines:
     window_pipe, bms_pipe = Pipe()
-    stdout_pipe, bmsprint_pipe = Pipe()
     queue = Queue()
-    lock = Lock()
 
     bacThread = BACSerialThread()
-    bmsThread = BMSSerialEmitter(window_pipe, stdout_pipe)
-    bmsProc = BMSSerialProcess(args.bmsport, bms_pipe, queue, bmsprint_pipe, lock)
+    bmsThread = BMSSerialEmitter(window_pipe)
+    bmsProc = BMSSerialProcess(args.bmsport, bms_pipe, queue)
     window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin, queue, bmsThread)
     #window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin, queue, bmsThread)
 

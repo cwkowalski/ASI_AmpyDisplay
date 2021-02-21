@@ -281,9 +281,7 @@ class JBD:
                 cmd = self.readCmd(reg.adx)
                 self.s.write(cmd)
                 ok, payload = self.readPacket()
-                if not ok:
-                    print('BMSError: ', payload, 'Port open: ', self.s.isOpen())
-                    raise BMSError()
+                if not ok: raise BMSError()
                 if payload is None: raise TimeoutError()
                 if progressFunc: progressFunc(int(i / (numRegs-1) * 100))
                 reg.unpack(payload)
@@ -355,15 +353,12 @@ class JBD:
             cmd = self.readCmd(self.cellInfoReg.adx)
             self.s.write(cmd)
             ok, payload = self.readPacket()
-            if not ok:
-                print('BMSError: ', payload, 'Port open: ', self.s.isOpen())
-                raise BMSError()
+            if not ok: raise BMSError()
             if payload is None: raise TimeoutError()
             self.cellInfoReg.unpack(payload)
             return dict(self.cellInfoReg)
-        except Exception as e:
-            print('j.readCellInfo exception: ', e)
         finally:
+            pass
             self.close()
 
     def readDeviceInfo(self):
@@ -377,6 +372,7 @@ class JBD:
             self.deviceInfoReg.unpack(payload)
             return dict(self.deviceInfoReg)
         finally:
+            pass
             self.close()
     
     def clearErrors(self):
