@@ -42,7 +42,7 @@ Display example with descriptions (800x480): https://i.imgur.com/HzOMMDx.jpg
 12. ACID-compliant SQL logging of all stats. A rolling database of trip statistics used for averages is stored, of the length/duration specified by `self.iter_attribute_slicer_threshold` in main.py MainWindow class. Setting this parameter to a negative value will allow the database to grow indefinitely, logging numerous variables including battery voltage and current, motor current, motor temperature, speed, etc in 16ms intervals. Another 'lifetime statistics' database stores all incremental counters e.g. Wh, Ah, distance that are updated in a row for the current discharge cycle;  when a charge is detected a new row is created. Thus depth of discharge, regen stats, distance, dates, and loads of other information can be reviewed for every discharge cycle while keeping the database <20mb even for tens of thousands of cycles. 
 IN DEVELOPMENT:
 13. Extended options and diagnostics pane is not fully implemented with extra controller tuning options, and diagnostics for all sensor voltages and input state flags. Currently, only Makerplane backlight and dark/light themes are implemented.
-14. JBD BMS support is beta and this addition is not yet married to the SQL database, but a feature to save/restore any number of EEPROM profiles will be added. 
+14. JBD BMS support is beta using work done by Eric Poulson and this addition is not yet married to the SQL database, but a feature to save/restore any number of EEPROM profiles will be added. 
 15. Support for hardware profile and assist-level switching using digital switches & GPIO will be added.
 
 ## Installation
