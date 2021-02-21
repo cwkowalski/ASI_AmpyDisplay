@@ -1,7 +1,8 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
-from sys import exit, stdout
+from sys import exit, stdout, stderr
 import os
 import time
+import csv
 from multiprocessing import Process, Pipe, Queue, Lock
 import datetime
 import BACModbus
@@ -17,7 +18,6 @@ from numpy import mean, isnan, array, prod, argmin, abs
 #import logging
 # import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
-#DisableForDesktopDebug
 import platform
 import sqlite3
 import argparse
@@ -86,13 +86,15 @@ class BMSSerialEmitter(QtCore.QThread):
         self.msg = None
         self.basicMsg = None
         self.eepromMsg = None
+        self.msg_time = 0
     def run(self):
         while True:
             # todo: Check for alternative to try: if you can find a way to use 'if', may improve performance here
             try:
                 self.msg = self.data_from_process.recv()
             except EOFError:
-                break
+                print('EOF')
+                pass
             if self.msg[0] == 0:
                 # todo: instead store locally for accessing by Parent. Use signal only to trigger check whether to...
                 #  throw faults, or update bmspopup, etc
@@ -103,11 +105,9 @@ class BMSSerialEmitter(QtCore.QThread):
                 self.bms_eeprom_msg.emit()
             else:
                 print('BMSSerialEmitter message not recognized!')
-            try:
-                self.stdoutmsg = self.stdout_from_process.recv()
-                print(str(self.stdoutmsg))
-            except Exception as e:
-                print(e)
+
+            self.stdoutmsg = self.stdout_from_process.recv()
+            print('bmsemitter:run: from process: ', self.stdoutmsg)
 
 class BMSSerialProcess(Process):
     def __init__(self, bmsport, to_emitter: Pipe, from_window: Queue, to_stdout: sys.stdout, lock: Lock()):
@@ -325,28 +325,25 @@ class BMSSerialProcess(Process):
         # todo: Replace with JBD. Poll constantly to window attribute. Inherit to bms_dialog from window.
         #print('BMSSerialProc init finish.')
         self.data_to_stdout.send('BMSSerialProc init finish.')
-    @QtCore.pyqtSlot(int) # todo: deprecate
-    def jbdcmd(self, cmd):
-        self.jbdcmd = cmd
-        pass
-    def run(self):
         try:
-            self.j = JBD(self.bmsport, timeout = 1, debug = False)
-            #self.poll_timer = QtCore.QTimer()
-            #self.poll_timer.timeout.connect(self.bms_serloop)
-            #self.poll_timer.setSingleShot(False)
-            #self.poll_timer.start(1000)
-            #self.eepromData = self.j.readEeprom()
-            while True:
-                self.jbdcmd = self.data_from_window.get()
-                print('bmsProc: ', self.jbdcmd)
-                self.bms_serloop()
+            self.j = JBD(self.bmsport, timeout=1, debug=False)
         except Exception as e:
             with self.lock:
                 self.data_to_stdout.send(e, file=sys.stderr)
-        # todo: JBD port management is reliable but WAY too slow. 5x heavier than this whole app.
-        #  Instead open port here. Use int to switch from polling, to eeprom, to slider controls,
-        #  once each Qtimer call e.g. BACSerialThread.
+    @QtCore.pyqtSlot(int) # todo: deprecate
+    def jbdcmd(self, cmd):
+        self.jbdcmd = cmd
+    def run(self):
+        while True:
+            try:
+                self.jbdcmd = self.data_from_window.get()
+                #print('bmsProc: ', self.jbdcmd)
+                self.bms_serloop()
+            except Exception as e:
+                with self.lock:
+                    self.data_to_stdout.send(e, file=sys.stderr)
+                self.j.s.close()
+                continue
 
     #  Instead to maximize speed, add bool to JBDMain and while bool:
     #  self.cellinfomsg = self.readCellInfo()
@@ -367,6 +364,8 @@ class BMSSerialProcess(Process):
         elif len(self.jbdcmd[0]) > 1:
             print('bmsProc::run:serloop; ', self.jbdcmd)
             self.eeprom_write(self.jbdcmd[0]) # send eeprom dict to eeprom_write, update attr & jbccmd = 2 & add dict here
+
+
     def basic_poller(self):  # Currently JBD closes port after each call. Reliable, but slow. Consider keeping open?
         self.data_to_stdout.send('bmsProc::run:serloop:basic_poller called.')
         lastTime = self.t1
@@ -565,7 +564,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #self.bms_poll_timer.timeout.connect(self.bmsCall)
         #self.bms_poll_timer.start(500)
         self.bmspoller = QtCore.QTimer()
-        #self.bmspoller.isSingleShot(False)
+        self.bmspoller.setSingleShot(False)
         self.bmspoller.timeout.connect(self.bmsCall)
         self.bmspoller.start(1000)
         #self.bmseeprom_initter = QtCore.QTimer()
@@ -824,6 +823,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.SQL_update_setup()
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
             self.iter_sql = 0
+
 
         ##################
         # Message indices:
@@ -1752,6 +1752,16 @@ if __name__ == '__main__':
     # Logging for debugging Modbus
     #logger = modbus_tk.utils.create_logger("console")
     #logging.basicConfig(level='INFO')
+
+    # New Setup.ini
+    #with open(os.path.abspath(os.path.dirname(__file__))+ '/setup.cfg', mode='r') as file:
+    #    reader = csv.reader(file, delimiter=':')
+    #    setupdata = []
+    #    setupdict = {}
+    #    for row in reader:
+    #        setupdata.append(row)
+    #    for i in setupdata:
+    #        setupdict[i[0]] = i[1]
 
     # Cmdline **kwargs for key vehicle stats  # Final release; my defaults --> required= True
     parser = argparse.ArgumentParser(description='Vehicle Settings')
