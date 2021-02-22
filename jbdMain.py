@@ -57,7 +57,7 @@ class JBD:
     CAP_REM_REG         = 0xE0
 
     def __init__(self, s, timeout = 1, debug = False):
-        self.s = serial.Serial(s)
+        self.s = serial.Serial(port=s, baudrate=9600, bytesize=8, parity='N', stopbits=1, timeout=1)
         try:
             self.s.close()
             s.timeout = timeout
@@ -214,7 +214,10 @@ class JBD:
         msgLen = 0
         complete = False
         while then > time.time():
-            byte = self.s.read()
+            try:
+                byte = self.s.read()
+            except Exception as e:
+                print('readPacket: byte exception:', e, byte)
             print('readPacket: byte:', byte)
             if not byte:
                 print('not byte!')

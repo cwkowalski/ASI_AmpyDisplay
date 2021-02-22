@@ -379,7 +379,7 @@ class BMSSerialProcessV2(Process):
         else:
             msg = (1, self.j.readEeprom())
             self.data_to_emitter.send(msg)
-        self.j.open()
+        #self.j.open()
     def close(self):
         pass
     @QtCore.pyqtSlot(object)
