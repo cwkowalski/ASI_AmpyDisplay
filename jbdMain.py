@@ -216,10 +216,10 @@ class JBD:
             try:
                 byte = self.s.read()
             except Exception as e:
-                print('readPacket: byte exception:', e, byte)
-            print('readPacket: byte:', byte)
+                self.dbgPrint('readPacket: byte exception:', e, byte)
+            self.dbgPrint('readPacket: byte:', byte)
             if not byte:
-                print('not byte!')
+                self.dbgPrint('not byte!')
                 continue
             byte = byte[0]
             d.append(byte)
@@ -263,7 +263,7 @@ class JBD:
                 cnt -= 1
             return False
         except Exception as e:
-            print('JBD: enterFactory: Exception: ', e)
+            self.dbgPrint('JBD: enterFactory: Exception: ', e)
         finally:
             self.close()
 
@@ -288,7 +288,7 @@ class JBD:
                 self.s.write(cmd)
                 ok, payload = self.readPacket()
                 if not ok:
-                    print('BMSError: ', ok, payload)
+                    self.dbgPrint('BMSError: ', ok, payload)
                     raise BMSError()
                 if payload is None: raise TimeoutError()
                 if progressFunc: progressFunc(int(i / (numRegs-1) * 100))
@@ -349,10 +349,10 @@ class JBD:
         self.s.write(cmd)
         ok, payload = self.readPacket()
         if not ok:
-            print('JBD: readBasicInfo: BMSError!')
+            self.dbgPrint('JBD: readBasicInfo: BMSError!')
             raise BMSError()
         if payload is None:
-            print('JBD: readBasicInfo: Timeout error!')
+            self.dbgPrint('JBD: readBasicInfo: Timeout error!')
             raise TimeoutError()
         self.basicInfoReg.unpack(payload)
         return dict(self.basicInfoReg)
@@ -361,9 +361,9 @@ class JBD:
 
     def readCellInfo(self):
         #try:
-        print('JBD: readCellInfo begin')
+        self.dbgPrint('JBD: readCellInfo begin')
         self.open()
-        print('JBD: port opened:', self.s.isOpen())
+        self.dbgPrint('JBD: port opened:', self.s.isOpen())
         cmd = self.readCmd(self.cellInfoReg.adx)
         self.s.write(cmd)
         ok, payload = self.readPacket()
