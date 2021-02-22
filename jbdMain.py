@@ -171,7 +171,6 @@ class JBD:
         if self._open_cnt == 1:
             #self._lock.acquire()
             self.s.open()
-            time.sleep(0.5)
 
     
     def close(self):
@@ -262,7 +261,6 @@ class JBD:
                     return x
                 self.dbgPrint('no response')
                 cnt -= 1
-                time.sleep(.3)
             return False
         except Exception as e:
             print('JBD: enterFactory: Exception: ', e)
