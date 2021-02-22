@@ -282,14 +282,11 @@ class BMSSerialEmitter(QtCore.QThread):
                 self.bms_eeprom_msg.emit()
             else:
                 print('BMSSerialEmitter message not recognized!')
-
-
-
-class BMSSerialProcessV2(Process):
+class BMSSerialProcess(Process):
     def __init__(self, bmsport, to_emitter: Pipe, from_window: Queue):
         #super(BMSSerialProcess, self).__init__(target=self.pickle_wrapper)
-        super(BMSSerialProcessV2, self).__init__()
-        print('BMSSerialProcV2 init begin.')
+        super(BMSSerialProcess, self).__init__()
+        #print('BMSSerialProcV2 init begin.')
         self.daemon = True
         self.data_to_emitter = to_emitter
         self.data_from_window = from_window
@@ -302,28 +299,10 @@ class BMSSerialProcessV2(Process):
 
         self.jbdcmd = 0 # 0 = basic/cell loop, 1 = eeprom read, 2 = eeprom write
         self.bmsport = bmsport
-        #self.j = JBD(bmsport, timeout = 1, debug = False)
-        self.j = JBD(self.bmsport, timeout = 1, debug = True)
-        #self.cellCmd = self.j.readCmd(self.j.cellInfoReg.adx)
-        #self.basicCmd = self.j.readCmd(self.j.basicInfoReg.adx)
-        #self.eepromData = self.j.readEeprom()
-        #self.j.open()
-        #self.j.readEeprom()
-        self.poll_timer = None
-        #self.poll_timer = QtCore.QTimer()
-        #self.poll_timer.timeout.connect(self.bms_serloop)
-        #self.poll_timer.setSingleShot(False)
-        #self.poll_timer.start(1000)
-        #serializable, probably:
-        #call_it(self, 'run')
-        print('BMSSerialProc init finish.')
+        self.j = JBD(self.bmsport, timeout = 1, debug = False)
+
 
     def run(self):
-        #self.poll_timer = QtCore.QTimer()
-        #self.poll_timer.timeout.connect(self.bms_serloop)
-        #self.poll_timer.setSingleShot(False)
-        #self.poll_timer.start(1000)
-        #self.eepromData = self.j.readEeprom()
         print('bmsProc runloop begin.')
         while self.scanning:
             try:
@@ -334,42 +313,34 @@ class BMSSerialProcessV2(Process):
             except Exception as e:
                 print('bmsProc: exception: ', e)
 
-    #  Instead to maximize speed, add bool to JBDMain and while bool:
-    #  self.cellinfomsg = self.readCellInfo()
-    #  self.basicinfomsg = self.readBasicInfo()
-    #  self.SomeSignal.emit(
     def bms_loop(self):
-        #if not self.j.s.isOpen():
-        #    self.j.s.close()
-        #    self.j.s.open()
         if self.jbdcmd == 0:
-            print('bmsProc.loop: ', self.jbdcmd)
-            self.basic_poller()
+            #print('bmsProc.loop: ', self.jbdcmd)
+            self.poller()
         elif self.jbdcmd == 1:
-            print('bmsProc.loop: ', self.jbdcmd)
+            #print('bmsProc.loop: ', self.jbdcmd)
             self.eeprom_read()
             self.jbdcmd = 0
         elif self.jbdcmd == 2:
             self.j.clearErrors()
             self.jbdcmd = 0
         elif len(self.jbdcmd[0]) > 1:
-            print('bmsProc::run:serloop; ', self.jbdcmd)
-            self.eeprom_write(self.jbdcmd[0]) # send eeprom dict to eeprom_write, update attr & jbccmd = 2 & add dict here
+            #print('bmsProc::run:serloop; ', self.jbdcmd)
+            self.eeprom_write(self.jbdcmd[0])
             self.jbdcmd = 0
-    def basic_poller(self):  # Currently JBD closes port after each call. Reliable, but slow. Consider keeping open?
+    def poller(self):
         lastTime = self.t1
         self.t1 = time.time_ns() / 1000000000
         self.cellData = self.j.readCellInfo()
-        print('bmsProc: basicPoller: cellData: ', self.cellData)
+        #print('bmsProc: basicPoller: cellData: ', self.cellData)
         self.basicData = self.j.readBasicInfo()
-        print('bmsProc: basicPoller: basicData: ', self.basicData)
+        #print('bmsProc: basicPoller: basicData: ', self.basicData)
         self.t2 = time.time_ns() / 1000000000
         runtime = self.t2 - self.t1
         looptime = self.t1 - lastTime
         msg = (0, self.cellData, self.basicData, looptime, runtime)
         self.data_to_emitter.send(msg)
-        print('bmsProc: basicPoller finished')
-
+        #print('bmsProc: basicPoller finished')
         #print(self.cellData, '\n', self.basicData, '\n', looptime, runtime)
     def eeprom_read(self):
         if self.j.s.isOpen():
@@ -379,109 +350,8 @@ class BMSSerialProcessV2(Process):
         else:
             msg = (1, self.j.readEeprom())
             self.data_to_emitter.send(msg)
-        #self.j.open()
-    def close(self):
-        pass
-    @QtCore.pyqtSlot(object)
     def eeprom_write(self, update_eeprom):
         self.j.writeEeprom(update_eeprom)
-        time.sleep(1)
-        #print('bmsProc::eeprom_write; ', update_eeprom)
-
-
-class BMSSerialProcess(Process):
-    def __init__(self, bmsport, to_emitter: Pipe, from_window: Queue):
-        #super(BMSSerialProcess, self).__init__(target=self.pickle_wrapper)
-        super(BMSSerialProcess, self).__init__()
-        ############################
-        ###### JBD Test Data #######
-        ############################
-        print('BMSSerialProc init begin.')
-
-        self.daemon = True
-        self.data_to_emitter = to_emitter
-        self.data_from_window = from_window
-
-        self.basicData = None
-        self.cellData = None
-
-        self.t1 = time.time_ns() / 1000000000
-        self.t2 = None
-
-        self.jbdcmd = 0 # 0 = basic/cell loop, 1 = eeprom read, 2 = eeprom write
-        self.bmsport = bmsport
-
-        self.j = JBD(self.bmsport, timeout = 1, debug = True)
-
-        self.poll_timer = None
-
-        print('BMSSerialProc init finish.')
-    @QtCore.pyqtSlot(int) # todo: deprecate
-    def jbdcmd(self, cmd):
-        self.jbdcmd = cmd
-        pass
-    def run(self):
-        #self.j = JBD(self.bmsport, timeout = 1, debug = False)
-        #self.poll_timer = QtCore.QTimer()
-        #self.poll_timer.timeout.connect(self.bms_serloop)
-        #self.poll_timer.setSingleShot(False)
-        #self.poll_timer.start(1000)
-        #self.eepromData = self.j.readEeprom()
-        print('bmsProc runloop begin.')
-        while True:
-            self.jbdcmd = self.data_from_window.get()
-            print('bmsProc: ', self.jbdcmd)
-            self.bms_serloop()
-
-    #  Instead to maximize speed, add bool to JBDMain and while bool:
-    #  self.cellinfomsg = self.readCellInfo()
-    #  self.basicinfomsg = self.readBasicInfo()
-    #  self.SomeSignal.emit(
-    def bms_serloop(self):
-        #if not self.j.s.isOpen():
-        #    self.j.s.close()
-        #    self.j.s.open()
-        if self.jbdcmd == 0:
-            print('bmsProc.loop: ', self.jbdcmd)
-            self.basic_poller()
-        elif self.jbdcmd == 1:
-            print('bmsProc.loop: ', self.jbdcmd)
-            self.eeprom_read()
-        elif self.jbdcmd == 2:
-            self.j.clearErrors()
-        elif len(self.jbdcmd[0]) > 1: # e.g. if dict and not int;
-            print('bmsProc::run:serloop; ', self.jbdcmd)
-            self.eeprom_write(self.jbdcmd[0]) # send eeprom dict to eeprom_write, update attr & jbccmd = 2 & add dict here
-    def basic_poller(self):  # Currently JBD closes port after each call. Reliable, but slow. Consider keeping open?
-        lastTime = self.t1
-        self.t1 = time.time_ns() / 1000000000
-        self.cellData = self.j.readCellInfo()
-        self.basicData = self.j.readBasicInfo()
-        self.t2 = time.time_ns() / 1000000000
-        runtime = self.t2 - self.t1
-        looptime = self.t1 - lastTime
-        msg = (0, self.cellData, self.basicData, looptime, runtime)
-        self.data_to_emitter.send(msg)
-
-        #print(self.cellData, '\n', self.basicData, '\n', looptime, runtime)
-    def eeprom_read(self):
-        if self.j.s.isOpen(): # Not needed anymore
-            self.j.close()
-            msg = (1, self.j.readEeprom())
-            self.data_to_emitter.send(msg)
-        else:
-            msg = (1, self.j.readEeprom())
-            self.data_to_emitter.send(msg)
-        # self.j.open()
-    def close(self):
-        pass
-    @QtCore.pyqtSlot(object)
-    def eeprom_write(self, update_eeprom):
-        self.j.writeEeprom(update_eeprom)
-        time.sleep(1)
-        #print('bmsProc::eeprom_write; ', update_eeprom)
-
-
 class BACSerialThread(QtCore.QThread):
     bac_msg = QtCore.pyqtSignal(object)
 
@@ -621,15 +491,11 @@ class BACSerialThread(QtCore.QThread):
     def write_scaled(self, address, value):  # Helper function
         write = int(value * BAC.ObdicScale[BAC.ObdicAddress[address]])
         self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, BAC.ObdicAddress[address], output_value=[write])
-
-class BMSError(Exception): pass
-
 class AmpyDisplay(QtWidgets.QMainWindow):
     workmsg = QtCore.pyqtSignal(int)
     powercmd = QtCore.pyqtSignal(int)
     bmsbasiccmd = QtCore.pyqtSignal(object)
     bmseepromcmd = QtCore.pyqtSignal(object)
-    #bmscfgbasiccmd = QtCore.pyqtSignal(object)
     def __init__(self, bs, bp, ba, whl, sp, lockpin, bmsqueue: Queue, bmsemitter: BMSSerialEmitter, *args, **kwargs,):
         self.battseries = bs
         self.battparallel = bp
@@ -644,24 +510,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.bmsemitter = bmsemitter
         self.bmsemitter.daemon = True
         self.bmsemitter.start()
-        #self.bms_poll_timer = QtCore.QTimer()
-        #self.bms_poll_timer.setSingleShot(False)
-        #self.bms_poll_timer.timeout.connect(self.bmsCall)
-        #self.bms_poll_timer.start(500)
-        #self.bmspoller = QtCore.QTimer()
-        #self.bmspoller.isSingleShot(False)
-        #self.bmspoller.timeout.connect(self.bmsCall)
-        #self.bmspoller.start(2000)
-        #self.bmschecker = QtCore.QTimer()
-        #self.bmschecker.timeout.connect(self.bmsCheck)
-        #self.bmschecker.start(5000)
-        #self.bmseeprom_initter = QtCore.QTimer()
-        #self.bmseeprom_initter.setSingleShot(True)
-        #self.bmseeprom_initter.timeout.connect(self.bmsGetEeprom)
-        #self.bmseeprom_initter.start(3000)
         self.bmseeprom_initter = True
         self.bmscmd = 10 # 0 = Basic Poll, 1 = Read EEPROM, 2 = Write EEPROM, 10 = Poll then EEPROM init
-        self.bmsCall()
+        self.bmsCall() # Init EEPROM.
 
         self.message = {}
         self.profile = 0
@@ -1185,7 +1036,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), \
             float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), \
             float(0), float(0),
-
     def tripPidUpdateTune(self, kp, ki, kd):
         self.pid_kp = kp / 200  # /200 to convert QSlider int to float coefficient
         self.pid_ki = ki / 200
@@ -1196,21 +1046,14 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.PID_Ki_Label.setText('{:.2f}'.format(self.pid_ki))
         self.ui.PID_Kd_Label.setText('{:.2f}'.format(self.pid_kd))
     def signalFaultResete(self):
-        self.workmsg.emit('faultreset')
-        self.bmsqueue.put(2)
-        # print('Button: ', i)
-        # pdb.set_trace()
+        self.workmsg.emit('faultreset') # clear BAC faults
+        self.bmsqueue.put(2) # clear BMS faults
     def signalAssistLevel(self):
         self.assist_level = -(self.ui.AssistSlider.value()+1)
-        # print('Assist State is now ', level)
-        # title = 'Assist: ' + str(level)
-        self.ui.AssistSliderLabel.setText('Assist: ' + str(self.ui.AssistSlider.value()))  # Probably best to leave command-related gui updates in their callers,
-        # as this way the elements are only updated when needed instead of repeatedly repainted.
+        self.ui.AssistSliderLabel.setText('Assist: ' + str(self.ui.AssistSlider.value()))
         self.workmsg.emit(self.assist_level)  # Positive integers in worker reserved for trip limiter %'s
-        # self.ui.SpeedGauge.update_value(level)  # Test couple assist level to speedo
-        # self.ui.SpeedGaugeLabel.setText(str(level))
     def signalProfile(self, button_bool, command):
-        if button_bool == True:  # only if toggled on, then:
+        if button_bool == True:
             self.workmsg.emit(command)  # command is integer (-11 = profile1, -12 = profile2...)
         self.profile = command
     def signalReverse(self, bool):
@@ -1263,7 +1106,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #self.bmspopup.bmscut.connect(window.bmscutoff)
         #self.bmspopupwindow.bmscut.connect(self.bmspopEepromWrite)
         #self.bmsqueue.put(1)
-        self.bmspopupwindow = bmsDialog()
+        self.bmspopupwindow = bmsDialog(self.battseries)
         self.bmsbasiccmd.connect(self.bmspopupwindow.bmsBasicUpdate)
         self.bmseepromcmd.connect(self.bmspopupwindow.bmsEepromUpdate)
         self.bmspopupwindow.bmsEepromUpdate(self.bmsemitter.eepromMsg)
@@ -1312,57 +1155,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 'cell8_mv', 'cell9_mv', 'cell10_mv', 'cell11_mv', 'cell12_mv', 'cell13_mv', 'cell14_mv', 'cell15_mv',
                  'cell16_mv', 'cell17_mv', 'cell18_mv', 'cell19_mv', 'cell20_mv']
         cellv = []
-        for i in keys:
-            cellv.append(self.bmsemitter.basicMsg[0][i] / 1000)
+        for i in range(self.battseries):
+            cellv.append(self.bmsemitter.basicMsg[0][keys[i]] / 1000) # mv -> V
         cellvmin = min(cellv)
         cellvmax = max(cellv)
         self.bmspopupwindow.ui.VRangeLabel.setText('{:.2f}'.format(cellvmax) + '~' + '{:.2f}'.format(cellvmin)
                                                    + '<sub>V</sub>')
         self.bmspopupwindow.ui.VDiffLabel.setText('{:.3f}'.format(cellvmin - cellvmax))
-        # Voltage Bars
-        self.bmspopupwindow.ui.C1Bar.setValue(self.bmsemitter.basicMsg[0]['cell0_mv'])
-        self.bmspopupwindow.ui.C2Bar.setValue(self.bmsemitter.basicMsg[0]['cell1_mv'])
-        self.bmspopupwindow.ui.C3Bar.setValue(self.bmsemitter.basicMsg[0]['cell2_mv'])
-        self.bmspopupwindow.ui.C4Bar.setValue(self.bmsemitter.basicMsg[0]['cell3_mv'])
-        self.bmspopupwindow.ui.C5Bar.setValue(self.bmsemitter.basicMsg[0]['cell4_mv'])
-        self.bmspopupwindow.ui.C6Bar.setValue(self.bmsemitter.basicMsg[0]['cell5_mv'])
-        self.bmspopupwindow.ui.C7Bar.setValue(self.bmsemitter.basicMsg[0]['cell6_mv'])
-        self.bmspopupwindow.ui.C8Bar.setValue(self.bmsemitter.basicMsg[0]['cell7_mv'])
-        self.bmspopupwindow.ui.C9Bar.setValue(self.bmsemitter.basicMsg[0]['cell8_mv'])
-        self.bmspopupwindow.ui.C10Bar.setValue(self.bmsemitter.basicMsg[0]['cell9_mv'])
-        self.bmspopupwindow.ui.C11Bar.setValue(self.bmsemitter.basicMsg[0]['cell10_mv'])
-        self.bmspopupwindow.ui.C12Bar.setValue(self.bmsemitter.basicMsg[0]['cell11_mv'])
-        self.bmspopupwindow.ui.C13Bar.setValue(self.bmsemitter.basicMsg[0]['cell12_mv'])
-        self.bmspopupwindow.ui.C14Bar.setValue(self.bmsemitter.basicMsg[0]['cell13_mv'])
-        self.bmspopupwindow.ui.C15Bar.setValue(self.bmsemitter.basicMsg[0]['cell14_mv'])
-        self.bmspopupwindow.ui.C16Bar.setValue(self.bmsemitter.basicMsg[0]['cell15_mv'])
-        self.bmspopupwindow.ui.C17Bar.setValue(self.bmsemitter.basicMsg[0]['cell16_mv'])
-        self.bmspopupwindow.ui.C18Bar.setValue(self.bmsemitter.basicMsg[0]['cell17_mv'])
-        self.bmspopupwindow.ui.C19Bar.setValue(self.bmsemitter.basicMsg[0]['cell18_mv'])
-        self.bmspopupwindow.ui.C20Bar.setValue(self.bmsemitter.basicMsg[0]['cell19_mv'])
-        self.bmspopupwindow.ui.C21Bar.setValue(self.bmsemitter.basicMsg[0]['cell20_mv'])
-        # Balance LED's
-        self.bmspopupwindow.ui.C1Balance.setChecked(self.bmsemitter.basicMsg[1]['bal0'])
-        self.bmspopupwindow.ui.C2Balance.setChecked(self.bmsemitter.basicMsg[1]['bal1'])
-        self.bmspopupwindow.ui.C3Balance.setChecked(self.bmsemitter.basicMsg[1]['bal2'])
-        self.bmspopupwindow.ui.C4Balance.setChecked(self.bmsemitter.basicMsg[1]['bal3'])
-        self.bmspopupwindow.ui.C5Balance.setChecked(self.bmsemitter.basicMsg[1]['bal4'])
-        self.bmspopupwindow.ui.C6Balance.setChecked(self.bmsemitter.basicMsg[1]['bal5'])
-        self.bmspopupwindow.ui.C7Balance.setChecked(self.bmsemitter.basicMsg[1]['bal6'])
-        self.bmspopupwindow.ui.C8Balance.setChecked(self.bmsemitter.basicMsg[1]['bal7'])
-        self.bmspopupwindow.ui.C9Balance.setChecked(self.bmsemitter.basicMsg[1]['bal8'])
-        self.bmspopupwindow.ui.C10Balance.setChecked(self.bmsemitter.basicMsg[1]['bal9'])
-        self.bmspopupwindow.ui.C11Balance.setChecked(self.bmsemitter.basicMsg[1]['bal10'])
-        self.bmspopupwindow.ui.C12Balance.setChecked(self.bmsemitter.basicMsg[1]['bal11'])
-        self.bmspopupwindow.ui.C13Balance.setChecked(self.bmsemitter.basicMsg[1]['bal12'])
-        self.bmspopupwindow.ui.C14Balance.setChecked(self.bmsemitter.basicMsg[1]['bal13'])
-        self.bmspopupwindow.ui.C15Balance.setChecked(self.bmsemitter.basicMsg[1]['bal14'])
-        self.bmspopupwindow.ui.C16Balance.setChecked(self.bmsemitter.basicMsg[1]['bal15'])
-        self.bmspopupwindow.ui.C17Balance.setChecked(self.bmsemitter.basicMsg[1]['bal16'])
-        self.bmspopupwindow.ui.C18Balance.setChecked(self.bmsemitter.basicMsg[1]['bal17'])
-        self.bmspopupwindow.ui.C19Balance.setChecked(self.bmsemitter.basicMsg[1]['bal18'])
-        self.bmspopupwindow.ui.C20Balance.setChecked(self.bmsemitter.basicMsg[1]['bal19'])
-        self.bmspopupwindow.ui.C21Balance.setChecked(self.bmsemitter.basicMsg[1]['bal20'])
         # Temp, Current, Power
         self.bmspopupwindow.ui.CurrentLabel.setText('{:.2f}'.format(self.bmsemitter.basicMsg[1]['pack_ma'] / 1000) + '<sub>A</sub>')
         self.bmspopupwindow.ui.PowerLabel.setText('{:.1f}'.format(((self.bmsemitter.basicMsg[1]['pack_ma'] / 1000) *
@@ -1371,8 +1170,52 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.bmspopupwindow.ui.T2Bar.setValue(self.bmsemitter.basicMsg[1]['ntc1'])
         self.bmspopupwindow.ui.T3Bar.setValue(self.bmsemitter.basicMsg[1]['ntc2'])
         self.bmspopupwindow.ui.T4Bar.setValue(self.bmsemitter.basicMsg[1]['ntc3'])
-
-
+        # Voltage Bars & Balance Labels # Interleaved to support <21s configurations), cheaper to `try` here
+        try:
+            self.bmspopupwindow.ui.C1Bar.setValue(self.bmsemitter.basicMsg[0]['cell0_mv'])
+            self.bmspopupwindow.ui.C1Balance.setChecked(self.bmsemitter.basicMsg[1]['bal0'])
+            self.bmspopupwindow.ui.C2Bar.setValue(self.bmsemitter.basicMsg[0]['cell1_mv'])
+            self.bmspopupwindow.ui.C2Balance.setChecked(self.bmsemitter.basicMsg[1]['bal1'])
+            self.bmspopupwindow.ui.C3Bar.setValue(self.bmsemitter.basicMsg[0]['cell2_mv'])
+            self.bmspopupwindow.ui.C3Balance.setChecked(self.bmsemitter.basicMsg[1]['bal2'])
+            self.bmspopupwindow.ui.C4Bar.setValue(self.bmsemitter.basicMsg[0]['cell3_mv'])
+            self.bmspopupwindow.ui.C4Balance.setChecked(self.bmsemitter.basicMsg[1]['bal3'])
+            self.bmspopupwindow.ui.C5Bar.setValue(self.bmsemitter.basicMsg[0]['cell4_mv'])
+            self.bmspopupwindow.ui.C5Balance.setChecked(self.bmsemitter.basicMsg[1]['bal4'])
+            self.bmspopupwindow.ui.C6Bar.setValue(self.bmsemitter.basicMsg[0]['cell5_mv'])
+            self.bmspopupwindow.ui.C6Balance.setChecked(self.bmsemitter.basicMsg[1]['bal5'])
+            self.bmspopupwindow.ui.C7Bar.setValue(self.bmsemitter.basicMsg[0]['cell6_mv'])
+            self.bmspopupwindow.ui.C7Balance.setChecked(self.bmsemitter.basicMsg[1]['bal6'])
+            self.bmspopupwindow.ui.C8Bar.setValue(self.bmsemitter.basicMsg[0]['cell7_mv'])
+            self.bmspopupwindow.ui.C8Balance.setChecked(self.bmsemitter.basicMsg[1]['bal7'])
+            self.bmspopupwindow.ui.C9Bar.setValue(self.bmsemitter.basicMsg[0]['cell8_mv'])
+            self.bmspopupwindow.ui.C9Balance.setChecked(self.bmsemitter.basicMsg[1]['bal8'])
+            self.bmspopupwindow.ui.C10Bar.setValue(self.bmsemitter.basicMsg[0]['cell9_mv'])
+            self.bmspopupwindow.ui.C10Balance.setChecked(self.bmsemitter.basicMsg[1]['bal9'])
+            self.bmspopupwindow.ui.C11Bar.setValue(self.bmsemitter.basicMsg[0]['cell10_mv'])
+            self.bmspopupwindow.ui.C11Balance.setChecked(self.bmsemitter.basicMsg[1]['bal10'])
+            self.bmspopupwindow.ui.C12Bar.setValue(self.bmsemitter.basicMsg[0]['cell11_mv'])
+            self.bmspopupwindow.ui.C12Balance.setChecked(self.bmsemitter.basicMsg[1]['bal11'])
+            self.bmspopupwindow.ui.C13Bar.setValue(self.bmsemitter.basicMsg[0]['cell12_mv'])
+            self.bmspopupwindow.ui.C13Balance.setChecked(self.bmsemitter.basicMsg[1]['bal12'])
+            self.bmspopupwindow.ui.C14Bar.setValue(self.bmsemitter.basicMsg[0]['cell13_mv'])
+            self.bmspopupwindow.ui.C14Balance.setChecked(self.bmsemitter.basicMsg[1]['bal13'])
+            self.bmspopupwindow.ui.C15Bar.setValue(self.bmsemitter.basicMsg[0]['cell14_mv'])
+            self.bmspopupwindow.ui.C15Balance.setChecked(self.bmsemitter.basicMsg[1]['bal14'])
+            self.bmspopupwindow.ui.C16Bar.setValue(self.bmsemitter.basicMsg[0]['cell15_mv'])
+            self.bmspopupwindow.ui.C16Balance.setChecked(self.bmsemitter.basicMsg[1]['bal15'])
+            self.bmspopupwindow.ui.C17Bar.setValue(self.bmsemitter.basicMsg[0]['cell16_mv'])
+            self.bmspopupwindow.ui.C17Balance.setChecked(self.bmsemitter.basicMsg[1]['bal16'])
+            self.bmspopupwindow.ui.C18Bar.setValue(self.bmsemitter.basicMsg[0]['cell17_mv'])
+            self.bmspopupwindow.ui.C18Balance.setChecked(self.bmsemitter.basicMsg[1]['bal17'])
+            self.bmspopupwindow.ui.C19Bar.setValue(self.bmsemitter.basicMsg[0]['cell18_mv'])
+            self.bmspopupwindow.ui.C19Balance.setChecked(self.bmsemitter.basicMsg[1]['bal18'])
+            self.bmspopupwindow.ui.C20Bar.setValue(self.bmsemitter.basicMsg[0]['cell19_mv'])
+            self.bmspopupwindow.ui.C20Balance.setChecked(self.bmsemitter.basicMsg[1]['bal19'])
+            self.bmspopupwindow.ui.C21Bar.setValue(self.bmsemitter.basicMsg[0]['cell20_mv'])
+            self.bmspopupwindow.ui.C21Balance.setChecked(self.bmsemitter.basicMsg[1]['bal20'])
+        except AttributeError:
+            pass # Ignore missing UI elements.
     @QtCore.pyqtSlot()
     def bmspopEepromWrite(self):
         # Get bmspop eeprom values, update eeprom, send all to bmsProc
@@ -1384,7 +1227,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         print('bmspopEepromWrite: ', self.bmsemitter.eepromMsg, '\n', msg)
         self.bmsqueue.put(msg)
         #self.bmsWriteEeprom()
-
     def bmscfgpopEepromWrite(self):
         msg = self.bmsemitter.eepromMsg
         msg[0]['switch'] = self.bmscfgpopupwindow.ui.SwitchBtn.isChecked()
@@ -1451,7 +1293,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         msg[0]['dsgoc_delay'] = self.bmscfgpopupwindow.ui.DSCHOCDelaySpin.value()
         # Finally, send updated eeprom to bms.
         self.bmsqueue.put(msg)
-
     @QtCore.pyqtSlot()
     def bmsReceiveBasic(self):
         # First process cellV's, if new low minimum, store
@@ -1486,8 +1327,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         try:
             if self.bmspopupwindow.isVisible():
                 self.bmsbasiccmd.emit(self.bmsemitter.basicMsg)
-        except AttributeError as e:
-            print('self.bmspopupwindow.bmsBasicUpdate errored;', e)
+        except AttributeError:
             pass
 
         if self.bmsemitter.basicMsg[1]['covp_err']:
@@ -1516,15 +1356,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.bmsExceptionReceive('BMS: AFE Protection:' + str(self.bmsemitter.basicMsg[1]['afe_err']))
         elif self.bmsemitter.basicMsg[1]['software_err']:
             self.bmsExceptionReceive('BMS: Software Error!' + str(self.bmsemitter.basicMsg[1]['software_err']))
-
     @QtCore.pyqtSlot()
     def bmsReceiveEeprom(self):
-        #self.bmseeprom_new = True
         print('window.receive_eeprom_msg: ', self.bmsemitter.eepromMsg)
         try:
-            #if self.bmspopupwindow.isVisible(): # Try expense to guard from nonexistent
-                #self.bmspopup.bmsEepromUpdate(self.bmsemitter.eepromMsg)
-            #self.bmseepromcmd.emit(self.bmsemitter.eepromMsg)
             self.bmspopupwindow.bmsEepromUpdate(self.bmsemitter.eepromMsg)
         except AttributeError as e:
             print(e)
@@ -1533,7 +1368,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             #self.bmscfgeepromcmd.emit(self.bmsemitter.eepromMsg)
             # todo: ensure bms parameters properly updated with simple r/w
             self.bmscfgpopupwindow.bmscfgGuiUpdate(self.bmsemitter.eepromMsg)
-
         except AttributeError as e:
             print(e)
             pass
@@ -1541,7 +1375,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             print('MainWindow has received BMS intialization data from subprocess.')
             self.ui.BMSButton.clicked.connect(self.popupBms)
             self.bmseeprom_initter = False
-        # todo: update eeprom gui objects here
 
     @QtCore.pyqtSlot(str)
     def bmsExceptionReceive(self, val):
@@ -1873,7 +1706,7 @@ if __name__ == '__main__':
 
     bacThread = BACSerialThread()
     bmsThread = BMSSerialEmitter(window_pipe)
-    bmsProc = BMSSerialProcessV2(args.bmsport, bms_pipe, queue)
+    bmsProc = BMSSerialProcess(args.bmsport, bms_pipe, queue)
     window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin, queue, bmsThread)
     #window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin, queue, bmsThread)
 

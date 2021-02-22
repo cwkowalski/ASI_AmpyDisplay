@@ -42,7 +42,7 @@ class Ui_bmscfg(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -422, 781, 1440))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 781, 1440))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
