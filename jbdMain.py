@@ -215,6 +215,7 @@ class JBD:
         complete = False
         while then > time.time():
             byte = self.s.read()
+            print('readPacket: byte:', byte)
             if not byte:
                 print('not byte!')
                 continue
