@@ -281,7 +281,9 @@ class JBD:
                 cmd = self.readCmd(reg.adx)
                 self.s.write(cmd)
                 ok, payload = self.readPacket()
-                if not ok: raise BMSError()
+                if not ok:
+                    print('BMSError: ', ok, payload)
+                    raise BMSError()
                 if payload is None: raise TimeoutError()
                 if progressFunc: progressFunc(int(i / (numRegs-1) * 100))
                 reg.unpack(payload)
@@ -335,31 +337,32 @@ class JBD:
             self.close()
 
     def readBasicInfo(self):
-        try:
-            self.open()
-            cmd = self.readCmd(self.basicInfoReg.adx)
-            self.s.write(cmd)
-            ok, payload = self.readPacket()
-            if not ok: raise BMSError()
-            if payload is None: raise TimeoutError()
-            self.basicInfoReg.unpack(payload)
-            return dict(self.basicInfoReg)
-        finally:
-            self.close()
+        #try:
+        self.open()
+        cmd = self.readCmd(self.basicInfoReg.adx)
+        self.s.write(cmd)
+        ok, payload = self.readPacket()
+        if not ok: raise BMSError()
+        if payload is None: raise TimeoutError()
+        self.basicInfoReg.unpack(payload)
+        return dict(self.basicInfoReg)
+        #finally:
+        self.close()
 
     def readCellInfo(self):
-        try:
-            self.open()
-            cmd = self.readCmd(self.cellInfoReg.adx)
-            self.s.write(cmd)
-            ok, payload = self.readPacket()
-            if not ok: raise BMSError()
-            if payload is None: raise TimeoutError()
-            self.cellInfoReg.unpack(payload)
-            return dict(self.cellInfoReg)
-        finally:
-            pass
-            self.close()
+        #try:
+        print('JBD: readCellInfo begin')
+        self.open()
+        print('JBD: port opened:', self.s.isOpen())
+        cmd = self.readCmd(self.cellInfoReg.adx)
+        self.s.write(cmd)
+        ok, payload = self.readPacket()
+        if not ok: raise BMSError()
+        if payload is None: raise TimeoutError()
+        self.cellInfoReg.unpack(payload)
+        return dict(self.cellInfoReg)
+        #finally:
+        self.close()
 
     def readDeviceInfo(self):
         try:
@@ -372,7 +375,6 @@ class JBD:
             self.deviceInfoReg.unpack(payload)
             return dict(self.deviceInfoReg)
         finally:
-            pass
             self.close()
     
     def clearErrors(self):
@@ -558,4 +560,4 @@ if errors:
     raise RuntimeError('register errors')
 del errors
 # j = JBD('COM3')
-print('dbghook')
+#print('dbghook')
