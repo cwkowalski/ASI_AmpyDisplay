@@ -171,6 +171,8 @@ class JBD:
         if self._open_cnt == 1:
             #self._lock.acquire()
             self.s.open()
+            time.sleep(0.5)
+
     
     def close(self):
         if not self._open_cnt: 
@@ -258,6 +260,8 @@ class JBD:
                 cnt -= 1
                 time.sleep(.3)
             return False
+        except Exception as e:
+            print('JBD: enterFactory: Exception: ', e)
         finally:
             self.close()
 
@@ -342,8 +346,12 @@ class JBD:
         cmd = self.readCmd(self.basicInfoReg.adx)
         self.s.write(cmd)
         ok, payload = self.readPacket()
-        if not ok: raise BMSError()
-        if payload is None: raise TimeoutError()
+        if not ok:
+            print('JBD: readBasicInfo: BMSError!')
+            raise BMSError()
+        if payload is None:
+            print('JBD: readBasicInfo: Timeout error!')
+            raise TimeoutError()
         self.basicInfoReg.unpack(payload)
         return dict(self.basicInfoReg)
         #finally:

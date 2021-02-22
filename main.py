@@ -303,7 +303,7 @@ class BMSSerialProcessV2(Process):
         self.jbdcmd = 0 # 0 = basic/cell loop, 1 = eeprom read, 2 = eeprom write
         self.bmsport = bmsport
         #self.j = JBD(bmsport, timeout = 1, debug = False)
-        self.j = None
+        self.j = JBD(self.bmsport, timeout = 1, debug = True)
         #self.cellCmd = self.j.readCmd(self.j.cellInfoReg.adx)
         #self.basicCmd = self.j.readCmd(self.j.basicInfoReg.adx)
         #self.eepromData = self.j.readEeprom()
@@ -319,7 +319,6 @@ class BMSSerialProcessV2(Process):
         print('BMSSerialProc init finish.')
 
     def run(self):
-        self.j = JBD(self.bmsport, timeout = 1, debug = False)
         #self.poll_timer = QtCore.QTimer()
         #self.poll_timer.timeout.connect(self.bms_serloop)
         #self.poll_timer.setSingleShot(False)
