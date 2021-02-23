@@ -9,13 +9,14 @@ class bmsDialog(QtWidgets.QWidget):
     bmsbal = QtCore.pyqtSignal(int)
     #bmsbasicreceiver = QtCore.pyqtSignal(object)
     #bmseepromreciever = QtCore.pyqtSignal(object)
-    def __init__(self, *args, **kwargs):
+    def __init__(self, battseries, *args, **kwargs):
         super(bmsDialog, self).__init__(parent=None, *args, **kwargs) # can be inherited with parent = parent
         #self.parent = parent
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         #self.setParent(parent)
         #self.parent = parent
-        self.ui = Ui_BMSDialog()
+        self.battseries = battseries
+        self.ui = Ui_BMSDialog(self.battseries)
         self.basicMsg = None
         self.eepromMsg = None
         self.setWindowFlags(QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint))
@@ -36,9 +37,9 @@ class bmsDialog(QtWidgets.QWidget):
         #self.bmspoll.emit(0)
         pass
     def bmscutoff(self, val):
-        self.ui.ChargeLevelLabel.setText('{:.3f}'.format(val/1000))
+        self.ui.ChargeLevelLabel.setText('Cut<sub>V</sub>: ' + '{:.2f}'.format(val/1000))
     def bmsbalance(self, val):
-        self.ui.BalanceVLabel.setText('{:.3f}'.format(val/1000))
+        self.ui.BalanceVLabel.setText('Bal<sub>V</sub>: ' + '{:.2f}'.format(val/1000))
     @QtCore.pyqtSlot(object)  # dict of BMS reads.
     def bmsBasicUpdate(self, msg):
         self.basicMsg = msg
@@ -112,11 +113,11 @@ class bmsDialog(QtWidgets.QWidget):
         self.eepromMsg = msg
         self.ui.ChargeLevelSlider.setValue(self.eepromMsg[0]['covp'])
         self.ui.BalanceLevelSlider.setValue(self.eepromMsg[0]['bal_start'])
-        self.ui.BalanceVLabel.setText(
+        self.ui.BalanceVLabel.setText('Bal<sub>V</sub>: '
             '{:.2f}'.format(self.eepromMsg[0]['bal_start'] / 1000))
         self.ui.BalanceLevelSlider.setValue(self.eepromMsg[0]['bal_start'])
         self.ui.ChargeLevelSlider.setValue(self.eepromMsg[0]['covp'])
-        self.ui.ChargeLevelLabel.setText(
+        self.ui.ChargeLevelLabel.setText('Cut<sub>V</sub>: '
             '{:.2f}'.format(self.eepromMsg[0]['covp'] / 1000))
 
     #def displayInvert(self, bool):
