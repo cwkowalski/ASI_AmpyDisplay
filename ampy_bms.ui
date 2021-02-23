@@ -80,9 +80,9 @@ QPushButton::pressed {
   <widget class="QSlider" name="ChargeLevelSlider">
    <property name="geometry">
     <rect>
-     <x>147</x>
+     <x>315</x>
      <y>95</y>
-     <width>650</width>
+     <width>480</width>
      <height>45</height>
     </rect>
    </property>
@@ -154,8 +154,8 @@ QSlider::groove:horizontal {
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>80</y>
-     <width>141</width>
+     <y>85</y>
+     <width>300</width>
      <height>65</height>
     </rect>
    </property>
@@ -165,7 +165,7 @@ QSlider::groove:horizontal {
 }</string>
    </property>
    <property name="text">
-    <string>xx.x&lt;sub&gt;%&lt;/sub&gt;</string>
+    <string>Cutoff: xx.x&lt;sub&gt;%&lt;/sub&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="PowerLabel">
@@ -264,9 +264,9 @@ QSlider::groove:horizontal {
   <widget class="QSlider" name="BalanceLevelSlider">
    <property name="geometry">
     <rect>
-     <x>145</x>
+     <x>315</x>
      <y>138</y>
-     <width>650</width>
+     <width>480</width>
      <height>45</height>
     </rect>
    </property>
@@ -337,9 +337,9 @@ QSlider::groove:horizontal {
   <widget class="QLabel" name="BalanceVLabel">
    <property name="geometry">
     <rect>
-     <x>3</x>
-     <y>123</y>
-     <width>141</width>
+     <x>5</x>
+     <y>125</y>
+     <width>306</width>
      <height>65</height>
     </rect>
    </property>
@@ -349,7 +349,7 @@ QSlider::groove:horizontal {
 }</string>
    </property>
    <property name="text">
-    <string>xx.x&lt;sub&gt;V&lt;/sub&gt;</string>
+    <string>Balance: xx.x&lt;sub&gt;V&lt;/sub&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_8">
@@ -404,11 +404,19 @@ QSlider::groove:horizontal {
    </property>
    <property name="styleSheet">
     <string notr="true">QLabel{font: 18pt 'Luxi Mono'}
-QProgressBar{font: 10pt 'Luxi Mono';
-margin: 0px;
-padding: 0px}
 QPushButton{background: white;
-border: none;}</string>
+border: none;}
+QProgressBar::chunk {
+     background-color: rgb(30, 255, 30);}
+QProgressBar {
+    background-color: white;
+	border-style: solid;
+	border-color: black;
+	border-width: 2px;
+	border-radius: 6px;
+	margin: 0px;
+	padding: 0px;
+	font: 10pt 'Luxi Mono';}</string>
    </property>
    <property name="title">
     <string/>
@@ -433,14 +441,7 @@ border: none;}</string>
      <item row="2" column="2">
       <widget class="QProgressBar" name="C3Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -475,14 +476,7 @@ QProgressBar {
      <item row="0" column="9">
       <widget class="QProgressBar" name="C15Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -539,14 +533,7 @@ QProgressBar {
      <item row="5" column="2">
       <widget class="QProgressBar" name="C6Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -611,14 +598,7 @@ QProgressBar {
      <item row="1" column="2">
       <widget class="QProgressBar" name="C2Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -676,14 +656,7 @@ QProgressBar {
      <item row="0" column="2">
       <widget class="QProgressBar" name="C1Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -692,7 +665,7 @@ QProgressBar {
         <number>4200</number>
        </property>
        <property name="value">
-        <number>3700</number>
+        <number>2499</number>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
@@ -711,14 +684,7 @@ QProgressBar {
      <item row="0" column="6">
       <widget class="QProgressBar" name="C8Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -746,14 +712,7 @@ QProgressBar {
      <item row="3" column="2">
       <widget class="QProgressBar" name="C4Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -825,14 +784,7 @@ QProgressBar {
      <item row="4" column="2">
       <widget class="QProgressBar" name="C5Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -860,14 +812,7 @@ QProgressBar {
      <item row="6" column="2">
       <widget class="QProgressBar" name="C7Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1113,14 +1058,7 @@ QProgressBar {
      <item row="1" column="6">
       <widget class="QProgressBar" name="C9Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1148,14 +1086,7 @@ QProgressBar {
      <item row="2" column="6">
       <widget class="QProgressBar" name="C10Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1183,14 +1114,7 @@ QProgressBar {
      <item row="3" column="6">
       <widget class="QProgressBar" name="C11Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1218,14 +1142,7 @@ QProgressBar {
      <item row="4" column="6">
       <widget class="QProgressBar" name="C12Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1253,14 +1170,7 @@ QProgressBar {
      <item row="5" column="6">
       <widget class="QProgressBar" name="C13Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1288,14 +1198,7 @@ QProgressBar {
      <item row="6" column="6">
       <widget class="QProgressBar" name="C14Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1323,14 +1226,7 @@ QProgressBar {
      <item row="1" column="9">
       <widget class="QProgressBar" name="C16Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1358,14 +1254,7 @@ QProgressBar {
      <item row="2" column="9">
       <widget class="QProgressBar" name="C17Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1393,14 +1282,7 @@ QProgressBar {
      <item row="3" column="9">
       <widget class="QProgressBar" name="C18Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1428,14 +1310,7 @@ QProgressBar {
      <item row="4" column="9">
       <widget class="QProgressBar" name="C19Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1463,14 +1338,7 @@ QProgressBar {
      <item row="5" column="9">
       <widget class="QProgressBar" name="C20Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
@@ -1498,14 +1366,7 @@ QProgressBar {
      <item row="6" column="9">
       <widget class="QProgressBar" name="C21Bar">
        <property name="styleSheet">
-        <string notr="true"> QProgressBar::chunk {
-     background-color: rgb(30, 255, 30);}
-QProgressBar {
-    background-color: white;
-	border-style: solid;
-	border-color: black;
-	border-width: 2px;
-	border-radius: 6px}</string>
+        <string notr="true"/>
        </property>
        <property name="minimum">
         <number>2500</number>
