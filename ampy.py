@@ -78,7 +78,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.PowerGauge.sizePolicy().hasHeightForWidth())
         self.PowerGauge.setSizePolicy(sizePolicy)
         self.PowerGauge.setMinimumSize(QtCore.QSize(100, 100))
-        self.PowerGauge.setMaximumSize(QtCore.QSize(700, 800))
+        self.PowerGauge.setMaximumSize(QtCore.QSize(699, 800))
         self.PowerGauge.setBaseSize(QtCore.QSize(300, 300))
         self.PowerGauge.setStyleSheet("")
         self.PowerGauge.setObjectName("PowerGauge")
@@ -546,7 +546,7 @@ class Ui_MainWindow(object):
 "}")
         self.BatteryVoltageBar.setMinimum(52)
         self.BatteryVoltageBar.setMaximum(89)
-        self.BatteryVoltageBar.setProperty("value", 78)
+        self.BatteryVoltageBar.setProperty("value", 52)
         self.BatteryVoltageBar.setTextVisible(False)
         self.BatteryVoltageBar.setOrientation(QtCore.Qt.Horizontal)
         self.BatteryVoltageBar.setObjectName("BatteryVoltageBar")
@@ -568,9 +568,11 @@ class Ui_MainWindow(object):
 "")
         self.BatteryVoltageLabel.setObjectName("BatteryVoltageLabel")
         self.MotorTemperatureBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.MotorTemperatureBar.setGeometry(QtCore.QRect(310, 145, 180, 23))
+        self.MotorTemperatureBar.setGeometry(QtCore.QRect(310, 140, 180, 28))
         self.MotorTemperatureBar.setStyleSheet(" QProgressBar::chunk {\n"
-"     background-color: black;}\n"
+"     background-color: black;\n"
+"    margin-top: 3px;\n"
+"    margin-bottom: 3px}\n"
 "QProgressBar {\n"
 "    background-color: rgba(0,0,0,0);\n"
 "    border-style: solid;\n"
@@ -579,12 +581,12 @@ class Ui_MainWindow(object):
 "border-radius: 6px\n"
 "}")
         self.MotorTemperatureBar.setMaximum(120)
-        self.MotorTemperatureBar.setProperty("value", 90)
+        self.MotorTemperatureBar.setProperty("value", 0)
         self.MotorTemperatureBar.setTextVisible(False)
         self.MotorTemperatureBar.setOrientation(QtCore.Qt.Horizontal)
         self.MotorTemperatureBar.setObjectName("MotorTemperatureBar")
         self.MotorTemperatureLabel = QtWidgets.QLabel(self.centralwidget)
-        self.MotorTemperatureLabel.setGeometry(QtCore.QRect(318, 110, 175, 40))
+        self.MotorTemperatureLabel.setGeometry(QtCore.QRect(318, 105, 175, 40))
         font = QtGui.QFont()
         font.setFamily("Luxi Mono")
         font.setPointSize(25)
@@ -599,7 +601,7 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "")
-        self.MotorTemperatureLabel.setAlignment(QtCore.Qt.AlignCenter)
+        self.MotorTemperatureLabel.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.MotorTemperatureLabel.setObjectName("MotorTemperatureLabel")
         self.BatterySOCBar = QtWidgets.QProgressBar(self.centralwidget)
         self.BatterySOCBar.setGeometry(QtCore.QRect(271, 265, 260, 23))
@@ -612,7 +614,7 @@ class Ui_MainWindow(object):
 "border-radius: 6px\n"
 "}")
         self.BatterySOCBar.setMaximum(100)
-        self.BatterySOCBar.setProperty("value", 50)
+        self.BatterySOCBar.setProperty("value", 0)
         self.BatterySOCBar.setTextVisible(False)
         self.BatterySOCBar.setOrientation(QtCore.Qt.Horizontal)
         self.BatterySOCBar.setObjectName("BatterySOCBar")
@@ -858,13 +860,6 @@ class Ui_MainWindow(object):
 "\n"
 "")
         self.BatteryVoltageDropLabel.setObjectName("BatteryVoltageDropLabel")
-        self.BatterySOCLine = QtWidgets.QFrame(self.centralwidget)
-        self.BatterySOCLine.setGeometry(QtCore.QRect(390, 285, 20, 8))
-        self.BatterySOCLine.setStyleSheet("QObject{color:black}")
-        self.BatterySOCLine.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.BatterySOCLine.setLineWidth(3)
-        self.BatterySOCLine.setFrameShape(QtWidgets.QFrame.VLine)
-        self.BatterySOCLine.setObjectName("BatterySOCLine")
         self.Profile1Label = QtWidgets.QLabel(self.centralwidget)
         self.Profile1Label.setGeometry(QtCore.QRect(6, 385, 66, 31))
         font = QtGui.QFont()
@@ -942,7 +937,7 @@ class Ui_MainWindow(object):
         self.AssistSliderLabel.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.AssistSliderLabel.setObjectName("AssistSliderLabel")
         self.WhmiBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.WhmiBar.setGeometry(QtCore.QRect(295, 90, 210, 23))
+        self.WhmiBar.setGeometry(QtCore.QRect(295, 85, 210, 23))
         self.WhmiBar.setStyleSheet(" QProgressBar::chunk {\n"
 "     background-color: black;}\n"
 "QProgressBar {\n"
@@ -953,12 +948,12 @@ class Ui_MainWindow(object):
 "border-radius: 6px\n"
 "}")
         self.WhmiBar.setMaximum(100)
-        self.WhmiBar.setProperty("value", 50)
+        self.WhmiBar.setProperty("value", 0)
         self.WhmiBar.setTextVisible(False)
         self.WhmiBar.setOrientation(QtCore.Qt.Horizontal)
         self.WhmiBar.setObjectName("WhmiBar")
         self.WhmiLabel = QtWidgets.QLabel(self.centralwidget)
-        self.WhmiLabel.setGeometry(QtCore.QRect(295, 50, 210, 40))
+        self.WhmiLabel.setGeometry(QtCore.QRect(295, 45, 210, 40))
         font = QtGui.QFont()
         font.setFamily("Luxi Mono")
         font.setPointSize(25)
@@ -983,7 +978,7 @@ class Ui_MainWindow(object):
         self.BatteryVoltageLine.setFrameShape(QtWidgets.QFrame.VLine)
         self.BatteryVoltageLine.setObjectName("BatteryVoltageLine")
         self.BatteryTemperatureBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.BatteryTemperatureBar.setGeometry(QtCore.QRect(310, 145, 180, 23))
+        self.BatteryTemperatureBar.setGeometry(QtCore.QRect(310, 140, 180, 28))
         self.BatteryTemperatureBar.setStyleSheet(" QProgressBar::chunk {\n"
 "     background-color: rgba(0,0,0,150);}\n"
 "QProgressBar {\n"
@@ -994,14 +989,22 @@ class Ui_MainWindow(object):
 "border-radius: 6px\n"
 "}")
         self.BatteryTemperatureBar.setMaximum(120)
-        self.BatteryTemperatureBar.setProperty("value", 90)
+        self.BatteryTemperatureBar.setProperty("value", 0)
         self.BatteryTemperatureBar.setTextVisible(False)
         self.BatteryTemperatureBar.setOrientation(QtCore.Qt.Horizontal)
         self.BatteryTemperatureBar.setObjectName("BatteryTemperatureBar")
+        self.MotorTemperatureLine_2 = QtWidgets.QFrame(self.centralwidget)
+        self.MotorTemperatureLine_2.setGeometry(QtCore.QRect(418, 135, 20, 8))
+        self.MotorTemperatureLine_2.setStyleSheet("QObject{color:black}")
+        self.MotorTemperatureLine_2.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.MotorTemperatureLine_2.setLineWidth(3)
+        self.MotorTemperatureLine_2.setFrameShape(QtWidgets.QFrame.VLine)
+        self.MotorTemperatureLine_2.setObjectName("MotorTemperatureLine_2")
+        self.TripBox.raise_()
+        self.MotorTemperatureLine_2.raise_()
         self.BatteryTemperatureBar.raise_()
         self.BatteryVoltageLine.raise_()
         self.MotorTemperatureLine.raise_()
-        self.BatterySOCLine.raise_()
         self.BatterySOCLabel.raise_()
         self.BatteryVoltageDropLabel.raise_()
         self.BatteryVoltageLabel.raise_()
@@ -1009,7 +1012,6 @@ class Ui_MainWindow(object):
         self.MotorTemperatureLabel.raise_()
         self.SpeedGauge.raise_()
         self.PowerGauge.raise_()
-        self.TripBox.raise_()
         self.BatteryVoltageBar.raise_()
         self.MotorTemperatureBar.raise_()
         self.BatterySOCBar.raise_()
