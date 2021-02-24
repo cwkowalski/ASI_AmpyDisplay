@@ -339,9 +339,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
 
         # For floop_to_list
         self.list_batt_amps, self.list_batt_volts, self.list_motor_amps, self.list_motor_temp, self.list_speed, \
-        self.list_motor_rpm, self.list_floop_interval, self.list_interp_interval, self.list_whmi = \
-            [], [], [], [], [], [], [], [], []
-
+        self.list_motor_rpm, self.list_floop_interval, self.list_whmi = \
+            [], [], [], [], [], [], [], []
 
         self.tripReset()
 
@@ -606,12 +605,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_batt_volts = self.list_batt_volts[-self.mean_length:]
         self.list_batt_amps = self.list_batt_amps[-self.mean_length:]
         self.list_motor_rpm = self.list_motor_rpm[-self.mean_length:]
-        self.list_whmi = self.list_whmi[
-                         -self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
+        self.list_whmi = self.list_whmi[-self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
+        self.list_floop_interval = self.list_floop_interval[-self.mean_length]
     def floopProcess(self):
         # Prepare floop list data for Simpsons-method quadratic integration
-        self.list_interp_interval.append(sum(self.list_floop_interval[-self.iter:]))  # May not be needed
-
         x_interval = array([sum(([(self.list_floop_interval[-self.iter:])[:i] for i in range(1, self.iter + 1, 1)])
                                 [i]) for i in range(self.iter)])  # calc cumulative time from list of intervals
 
