@@ -11,7 +11,8 @@ import serial
 #import modbus_tk
 import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
-from scipy import integrate
+#from scipy import integrate
+from integrate import simps
 #from scipy.stats import linregress
 from numpy import mean, isnan, array, prod, abs
 #import logging
@@ -676,7 +677,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         y_revsec = array(
             [(self.list_motor_rpm[-self.iter:])[i] / 60 for i in range(self.iter)])  # revolutions per second to match x
         # Integrate distance fromm speed and increment distance counter
-        revolutions = integrate.simps(y_revsec, x=x_interval, even='avg')
+        revolutions = simps(y_revsec, x=x_interval, even='avg')
         if isnan(revolutions):
             distance = 0
         else:
@@ -688,14 +689,14 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         y_current = array(self.list_batt_amps[-self.iter:])
 
         # Integrate watt-seconds from speed and increment watt-hour counter
-        wattsec = integrate.simps(y_power, x=x_interval, even='avg')
+        wattsec = simps(y_power, x=x_interval, even='avg')
         if wattsec >= 0:
             self.flt_wh += wattsec / 3600  # /(60x60) = Watt-hour
         elif wattsec < 0:
             self.flt_wh += wattsec / 3600
             self.flt_whregen += abs(wattsec)
         # Integrate amp-seconds from speed and increment amp-hour counter
-        ampsec = integrate.simps(y_current, x=x_interval, even='avg')
+        ampsec = simps(y_current, x=x_interval, even='avg')
         if ampsec >= 0:
             self.flt_ah += ampsec / 3600
         elif ampsec < 0:
@@ -1519,6 +1520,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         d["hours"], rem = divmod(tdelta.seconds, 3600)
         d["minutes"], d["seconds"] = divmod(rem, 60)
         return fmt.format(**d)
+
+
 
 if __name__ == '__main__':
     # Logging for debugging Modbus
