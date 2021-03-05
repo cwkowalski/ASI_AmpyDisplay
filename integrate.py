@@ -81,7 +81,8 @@ def _basic_simps(y, start, stop, x, dx, axis):
         tmp = hsum/6.0 * (y[slice0]*(2-1.0/h0divh1) +
                           y[slice1]*hsum*hsum/hprod +
                           y[slice2]*(2-h0divh1))
-        result = sum(tmp, axis=axis)
+        #result = sum(tmp, axis=axis)
+        result = sum(tmp)
     return result
 
 

@@ -13,6 +13,7 @@ import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 #from scipy import integrate
 from integrate import simps
+
 #from scipy.stats import linregress
 from numpy import mean, isnan, array, prod, abs
 #import logging
@@ -1514,7 +1515,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def get_battwh(self):  # For non Li-NMC or typical lithium, derive curve experimentally.
         # Many cell experiments are listed on https://lygte-info.dk/,
         # and can be digitzed with https://automeris.io/WebPlotDigitizer/
-        return BAC.whmap(BAC.wh_a2v_map(self.flt_ah / self.battparallel))*self.battseries*self.battparallel
+        return BAC.whmap.interp1d(BAC.wh_a2v_map.interp1d(self.flt_ah / self.battparallel))*self.battseries*self.battparallel
     def strfdelta(self, tdelta, fmt): # Print formatted time from timedelta object, desired format
         d = {"days": tdelta.days}
         d["hours"], rem = divmod(tdelta.seconds, 3600)

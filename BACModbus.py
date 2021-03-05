@@ -2,7 +2,8 @@ import os
 import platform
 from xml.etree import ElementTree as et
 from numpy import array
-from scipy import interpolate as interp
+#from scipy import interpolate as interp
+from interpolate import cubic_interp1d as interp
 import csv
 #import minimalmodbus
 #import serial
@@ -66,10 +67,10 @@ class BACModbus():
         #for n, val in enumerate(self.socmap_volts):
         #    pass
             #self.socmap_wh.append(self.socmap_volts[])
-        self.socmap = interp.interp1d(self.socmap_volts, self.socmap_soc, kind='cubic', fill_value='extrapolate')
-        self.ahmap = interp.interp1d(self.socmap_volts, self.socmap_ah, kind='cubic', fill_value='extrapolate')
-        self.wh_a2v_map = interp.interp1d(self.socmap_ah, self.socmap_volts, kind='cubic', fill_value='extrapolate')
-        self.whmap = interp.interp1d(self.socmap_wh_volts, self.socmap_wh_wh, kind='cubic', fill_value='extrapolate')
+        self.socmap = interp(self.socmap_volts, self.socmap_soc)
+        self.ahmap = interp(self.socmap_volts, self.socmap_ah)
+        self.wh_a2v_map = interp(self.socmap_ah, self.socmap_volts)
+        self.whmap = interp(self.socmap_wh_volts, self.socmap_wh_wh)
 
         for parent in Obdic:  # InternalAppEntity/Parameters/ParameterDescription children
             scale = parent.find('Scale').text
@@ -152,4 +153,7 @@ class BACModbus():
             procdata[label] = data[index]
         return procdata
     def socmapper(self, cell_v):
-        return float(self.socmap(cell_v))
+        return float(self.socmap.interp1d(cell_v))
+
+    import numpy as np
+    from math import sqrt
