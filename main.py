@@ -49,6 +49,7 @@ from bmscfg_dialog import bmscfgDialog
 #  C5. Also test the Overload_..._current/time values (Addr 99-104) after ferrofluid mod.
 #  E. Backup EEPROM in SQL each write, include ComboBox to select priors?
 #       Or, add a manual save/restore feature with existing JBD backend.
+#  F. Simulate cruise control by switching to remote throttle, speed type, set current speed? Then back?
 
 # Throttle bypass assist level: 6.015+ Features3 Bit0 enable, to ignore assist level and use 100% throttle input.
 # Human Power Assist Standard: If enabled: https://support.accelerated-systems.com/KB/?p=2175
@@ -202,6 +203,11 @@ class BACSerialThread(QtCore.QThread):
     def fluxcommandsetter(self, val):
         self.workercmd = -31
         self.fluxcommand = val
+    @QtCore.pyqtSlot(object)
+    def bmsupdatesetter(self, soctemp):
+        self.workercmd = -32
+        self.bmsmsg = soctemp
+
 
     def run(self):  # Executed via .start() method on instance, NOT .run()! Method name MUST be run. Probably.
         while self.running:
@@ -217,6 +223,9 @@ class BACSerialThread(QtCore.QThread):
                 self.write('Remote_Maximum_Battery_Current_Limit', self.workercmd)  # Enable to limit
                 self.bac_msg.emit(self.reads('Faults', 9))
                 # Remain in this worker while rangelimiter enabled
+            elif self.workercmd == -32:
+                self.writes('Remote_Battery_SOC', self.bmsmsg)
+                self.workercmd = 0
             elif self.workercmd == -11:
                 # Possibly need to scale up Maximum braking torque/Maximum braking current parameters
                 # which are a % of rated motor current, for consistent regen braking across profiles.
@@ -331,7 +340,7 @@ class BACSerialThread(QtCore.QThread):
                 self.write('Motor_Position_Sensor_Type', 0)
             elif self.workercmd == -27:
                 print('Motor Position Sensor Type set Hall start & Sensorless')
-                self.write('Motor_Position_Sensor_Type', 2)
+                self.write('Motor_Position_Sensor_Type', 1)
             elif self.workercmd == -28:
                 print('Motor Position Sensor Type set Sensorless Only')
                 self.write('Motor_Position_Sensor_Type', 2)
@@ -377,8 +386,8 @@ class BACSerialThread(QtCore.QThread):
         output = self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], 1)
         return output[0]
 
-    def reads(self, address, registers):
-        return self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], registers)
+    def reads(self, address, length):
+        return self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], length)
 
     def read_scaled(self, address):
         val = (self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], 1))
@@ -386,14 +395,17 @@ class BACSerialThread(QtCore.QThread):
         output = tuple([x / scalar for x in val])
         return output[0]
 
-    def reads_scaled(self, address, registers):
-        val = (self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], registers))
+    def reads_scaled(self, address, length):
+        val = (self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], length))
         scalar = BAC.ObdicScale[BAC.ObdicAddress[address]]
         output = tuple([x / scalar for x in val])
         return output
 
     def write(self, address, value):  # Helper function
         self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, BAC.ObdicAddress[address], output_value=[value])
+
+    def writes(self, address, value):  # Helper function
+        self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, BAC.ObdicAddress[address], output_value=value)
 
     def write_scaled(self, address, value):  # Helper function
         write = int(value * BAC.ObdicScale[BAC.ObdicAddress[address]])
@@ -403,6 +415,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     workmsg = QtCore.pyqtSignal(int)
     powercmd = QtCore.pyqtSignal(int)
     fluxcmd = QtCore.pyqtSignal(float)
+    bmsmsg_bac = QtCore.pyqtSignal(object)
     bmsbasiccmd = QtCore.pyqtSignal(object)
     bmseepromcmd = QtCore.pyqtSignal(object)
     def __init__(self, bs, bp, ba, whl, sp, lockpin, bmsqueue: Queue, bmsemitter: BMSSerialEmitter, *args, **kwargs,):
@@ -419,6 +432,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.bmsemitter.daemon = True
         self.bmsemitter.start()
         self.bmseeprom_initter = True
+        self.bmstemps = (21, 21, 21, 21)
         self.bmscmd = 10 # 0 = Basic Poll, 1 = Read EEPROM, 2 = Write EEPROM, 10 = Poll then EEPROM init
         self.bmsCall() # Init EEPROM.
 
@@ -468,6 +482,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.iter_threshold = 3  # Must be odd number for accurate/low-resource Simpsons integration
         self.iter_sql = 0
         self.iter_sql_threshold = 20 # ~3 hz
+        self.iter_bmsmsg_threshold = 120
+        self.iter_bmsmsg = 0
         self.iter_attribute_slicer = 0
         self.iter_attribute_slicer_threshold = self.mean_length + 500  # 500 = 8 seconds; re-slice for new means each 8 sec.
         self.iter_interp_threshold = 3750  # Equivalent time vs. mean_length
@@ -607,7 +623,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Run
         self.start_time = self.ms()
         self.time1 = self.ms()
-        self.time2 = None
+        self.time2 = self.ms()
+        self.timeinterval = 0.016 # todo: attach
         self.show()
 
     @QtCore.pyqtSlot(object)
@@ -642,7 +659,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.SQL_update_setup()
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
             self.iter_sql = 0
-
+        if self.iter_bmsmsg >= self.iter_bmsmsg_threshold:
+            self.bmsmsg_bac.emit([int(self.flt_soc), int(max(self.bmstemps))]) # todo: check if modbustk typerror problem is this tuple, or other list...
         ##################
         # Message indices:
         # [0] = 258 = Faults
@@ -674,7 +692,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Prepare floop list data for Simpsons-method quadratic integration
         x_interval = array([sum(([(self.list_floop_interval[-self.iter:])[:i] for i in range(1, self.iter + 1, 1)])
                                 [i]) for i in range(self.iter)])  # calc cumulative time from list of intervals
-
         y_revsec = array(
             [(self.list_motor_rpm[-self.iter:])[i] / 60 for i in range(self.iter)])  # revolutions per second to match x
         # Integrate distance fromm speed and increment distance counter
@@ -690,6 +707,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         y_current = array(self.list_batt_amps[-self.iter:])
 
         # Integrate watt-seconds from speed and increment watt-hour counter
+        # todo: add functions to include BMS accessories discharge like this, in each BMS loop.
         wattsec = simps(y_power, x=x_interval, even='avg')
         if wattsec >= 0:
             self.flt_wh += wattsec / 3600  # /(60x60) = Watt-hour
@@ -873,8 +891,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), \
             float(0), float(0),
         self.list_batt_amps, self.list_batt_volts, self.list_motor_amps, self.list_motor_temp, self.list_speed, \
-        self.list_motor_rpm, self.list_floop_interval, self.list_whmi, self.list_floop_interval= \
-            [], [], [], [], [], [], [], [], []
+        self.list_motor_rpm, self.list_floop_interval, self.list_whmi = \
+            [], [], [], [], [], [], [], []
     def tripPidUpdateTune(self, kp, ki, kd):
         self.pid_kp = kp / 200  # /200 to convert QSlider int to float coefficient
         self.pid_ki = ki / 200
@@ -926,6 +944,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def signalFlux(self, bool, value):
         if bool:
             self.fluxcmd.emit(value)
+    def signalBMSMsgBAC(self, bool):
+        if bool:
+            self.bmsemitter.basicMsg.emit((int(self.flt_soc), int(max(self.bmstemps))))
 
     #### Subwindow Calls ####
     def popupFault(self):  # Check Controller indicator.
@@ -1153,6 +1174,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def bmsReceiveBasic(self):
         # First process cellV's, if new low minimum, store
+        #print('bmsReceiveBasic: ', self.bmsemitter.basicMsg)
         keys = self.bmsemitter.basicMsg[0].keys()
         cellv = []
         for i in keys:
@@ -1167,15 +1189,15 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_bmscellvmin = cellvmin
 
         # Process NTC temp, if new max, store
-        temps = [self.bmsemitter.basicMsg[1]['ntc0'], self.bmsemitter.basicMsg[1]['ntc1'],
+        self.bmstemps = [self.bmsemitter.basicMsg[1]['ntc0'], self.bmsemitter.basicMsg[1]['ntc1'],
                  self.bmsemitter.basicMsg[1]['ntc2'], self.bmsemitter.basicMsg[1]['ntc3']]
         try:
-            if max(temps) > self.flt_bmsmaxtemp:
-                self.flt_bmsmaxtemp = max(temps)
+            if max(self.bmstemps) > self.flt_bmsmaxtemp:
+                self.flt_bmsmaxtemp = max(self.bmstemps)
         except TypeError:
             pass
         # Update Main BatteryTemperatureBar
-        self.ui.BatteryTemperatureBar.setValue(int(max(temps)))
+        self.ui.BatteryTemperatureBar.setValue(int(max(self.bmstemps)))
         # Process pack_ma to detect charging, accessory current drain.
         # todo: detect here whether pack_ma is negative, use to open bmspop, set charge bool and store SOC,
         #  then when not negative, use QTimer.singleShot(5000?) to store %SOC charged after ~stable voltage.
@@ -1507,7 +1529,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.iter_attribute_slicer += 1
         self.iter += 1
         self.iter_sql += 1
+        self.iter_bmsmsg += 1
         self.time2 = self.ms()
+        self.list_floop_interval.append(self.time2 - self.time1)
+        #print('gettime:', self.time2 - self.time1)
         self.time1 = self.ms()
         # self.lastfloop = self.floop  # Deprecated
     def divzero(self, n, d):  # Helper to convert division by zero to zero
@@ -1577,6 +1602,7 @@ if __name__ == '__main__':
     window.workmsg.connect(bacThread.workercommandsetter)
     window.powercmd.connect(bacThread.powercommandsetter)
     window.fluxcmd.connect(bacThread.fluxcommandsetter)
+    window.bmsmsg_bac.connect(bacThread.bmsupdatesetter)
     bacThread.start()
     bmsThread.start()
     bmsProc.start()
