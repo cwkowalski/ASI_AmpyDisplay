@@ -1,4 +1,5 @@
 from numpy import asarray, diff
+
 def simps(y, x=None, dx=1, axis=-1, even='avg'):
     y = asarray(y)
     nd = len(y.shape)

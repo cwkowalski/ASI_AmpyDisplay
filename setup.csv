@@ -1,0 +1,24 @@
+profile1, Maximum_Field_Weakening_Current, 50
+profile1, Rated_Motor_Current, 450
+profile1, Remote_Maximum_Battery_Current_Limit, 300
+profile1, Maximum_Braking_Current, 22.222
+profile1, Maximum_Braking_Torque, 22.222
+
+profile2, Maximum_Field_Weakening_Current, 0
+profile2, Rated_Motor_Current, 220
+profile2, Remote_Maximum_Battery_Current_Limit, 200
+profile2, Maximum_Braking_Current, 45.455
+profile2, Maximum_Braking_Torque, 45.455
+
+profile3, Maximum_Field_Weakening_Current, 0
+profile3, Rated_Motor_Current, 220
+profile3, Remote_Maximum_Battery_Current_Limit, 15
+profile3, Maximum_Braking_Current, 45.455
+profile3, Maximum_Braking_Torque, 45.455
+
+wheel, 1927.225
+battery, 21, 14, 42
+controllerport, COM4
+bmsport, COM3
+pin, 58008
+units, mile
