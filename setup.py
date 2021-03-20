@@ -1,13 +1,4 @@
 import csv
-import os
-
-filepath = os.path.abspath(os.path.dirname(__file__)) + '\\'
-
-with open(filepath + 'setup.csv') as file:
-    reader = csv.reader(file)
-    setup = []
-    for row in reader:
-        setup.append(row)
 
 def read_setup(f):
 
