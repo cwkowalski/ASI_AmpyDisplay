@@ -1729,7 +1729,7 @@ if __name__ == '__main__':
     args = parser.parse_args()"""
     #BAC = BACModbus.BACModbus(args.bacport)
     # print('args inside of main:', args.bs, args.bp, args.ba, args.whl, args.sp)
-    setup = read_setup(os.path.abspath((os.path.dirname(__file__))) + '\\setup.csv') # Custom setup.csv dict
+    setup = read_setup(os.path.abspath((os.path.dirname(__file__))) + '/setup.csv') # Custom setup.csv dict
     BAC = BACModbus.BACModbus(setup['cpt'])
     app = QtWidgets.QApplication([])
 
