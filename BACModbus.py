@@ -20,10 +20,7 @@ Obdic = xml.iterfind('Parameters/ParameterDescription')
 # IO class
 class BACModbus():
     def __init__(self, port):
-        if platform.system() == 'Linux':
-            self.port = "/dev/ttyUSB0"
-        elif platform.system() == 'Windows':
-            self.port = port
+        self.port = port
         self.address = 1
         self.method = 'rtu'
         self.baudrate = 115200

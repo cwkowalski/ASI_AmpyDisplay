@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from sys import exit
 import os
 import time
+import csv
 from multiprocessing import Process, Pipe, Queue
 import datetime
 import BACModbus
@@ -10,9 +11,8 @@ from jbdMain import JBD
 from ampy import Ui_MainWindow
 import serial
 import logging # logging
-import modbus_tk
-import modbus_tk.defines as cst
-from modbus_tk import modbus_rtu
+import modbus_tk_ampy.defines as cst
+from modbus_tk_ampy import modbus_rtu
 #from scipy import integrate
 from integrate import simps
 
@@ -77,33 +77,73 @@ from bmscfg_dialog import bmscfgDialog
 # sys.stdout = orig_stdout
 # f.close()
 
-class BMSSerialEmitter(QtCore.QThread):
+class BACProcessEmitter(QtCore.QThread):
+    bac_msg = QtCore.pyqtSignal(object)
+    diag_msg = QtCore.pyqtSignal(object)
+    hack_msg = QtCore.pyqtSignal(object)
+    def __init__(self, from_bac_process: Pipe):
+        super().__init__()
+        self.data_from_bacprocess = from_bac_process
+
+        self.bacmsg = None
+        self.workercmd = 0
+        self.setup = setup
+        self.running = True
+
+    def run(self):
+        while True:
+            try:
+                self.bacmsg = self.data_from_bacprocess.recv()
+                if type(self.bacmsg) is tuple:
+                    self.bac_msg.emit(self.bacmsg)
+                elif type(self.bacmsg) is dict:
+                    self.diag_msg.emit(self.bacmsg)
+                elif type(self.bacmsg) is list:
+                    self.hack_msg.emit(self.bacmsg)
+            except EOFError:
+                pass
+
+
+class BMSProcessEmitter(QtCore.QThread):
     bms_basic_msg = QtCore.pyqtSignal()
     bms_eeprom_msg = QtCore.pyqtSignal()
     bms_exception = QtCore.pyqtSignal(str)
-    def __init__(self, from_process: Pipe):
+    def __init__(self, from_bms_process: Pipe):
         super().__init__()
-        self.data_from_process = from_process
-        self.msg = None
+        # BMS Attributes
+        self.data_from_bmsprocess = from_bms_process
+        self.bmsmsg = None
         self.basicMsg = None
         self.eepromMsg = None
+        # BAC Attributes
+        # self.msg.connect(callback)
+        self.workercmd = 0
+        self.setup = setup
+
+        self.newcmd = False
+        self.running = True
+        #self.client = modbus_rtu.RtuMaster(serial.Serial(port=BAC.port, baudrate=BAC.baudrate, bytesize=BAC.bytesize,
+        #                                                 parity=BAC.parity, stopbits=BAC.stopbits))
+        #self.client.set_timeout(1)
+
     def run(self):
         while True:
             # todo: Check for alternative to try: if you can find a way to use 'if', may improve performance here
             try:
-                self.msg = self.data_from_process.recv()
+                self.bmsmsg = self.data_from_bmsprocess.recv()
             except EOFError:
                 break
-            if self.msg[0] == 0:
+            if self.bmsmsg[0] == 0:
                 # todo: instead store locally for accessing by Parent. Use signal only to trigger check whether to...
                 #  throw faults, or update bmspopup, etc
-                self.basicMsg = self.msg[1:]
+                self.basicMsg = self.bmsmsg[1:]
                 self.bms_basic_msg.emit()
-            elif self.msg[0] == 1:
-                self.eepromMsg = self.msg[1:]
+            elif self.bmsmsg[0] == 1:
+                self.eepromMsg = self.bmsmsg[1:]
                 self.bms_eeprom_msg.emit()
             else:
                 print('BMSSerialEmitter message not recognized!')
+
 class BMSSerialProcess(Process):
     def __init__(self, bmsport, to_emitter: Pipe, from_window: Queue):
         #super(BMSSerialProcess, self).__init__(target=self.pickle_wrapper)
@@ -173,293 +213,363 @@ class BMSSerialProcess(Process):
             self.data_to_emitter.send(msg)
     def eeprom_write(self, update_eeprom):
         self.j.writeEeprom(update_eeprom)
-class BACSerialThread(QtCore.QThread):
-    bac_msg = QtCore.pyqtSignal(object)
-    hack_msg = QtCore.pyqtSignal(object)  # Notify main thread when successful
+
+class BACSerialProcess(Process):
+    #bac_msg = QtCore.pyqtSignal(object)
+    #hack_msg = QtCore.pyqtSignal(object)  # Notify main thread when successful
     # cmd = QtCore.pyqtSignal(object)
-    def __init__(self, setup, parent=None):
-        QtCore.QThread.__init__(self, parent)
+    def __init__(self, setup, to_emitter: Pipe, from_window: Queue, BAC):
+        super(BACSerialProcess, self).__init__()
         # self.msg.connect(callback)
+        self.data_to_emitter = to_emitter
+        self.data_from_window = from_window
+        self.BAC = BAC
         self.workercmd = 0
+        self.lastworkercmd = None
         self.setup = setup
 
-        self.powercommand = None
-        self.fluxcommand = None
+        self.bmsmsg = None
+        self.battamps = 0
+        self.fluxcommand = 0
 
         self.newcmd = False
         self.running = True
-        self.client = modbus_rtu.RtuMaster(serial.Serial(port=BAC.port, baudrate=BAC.baudrate, bytesize=BAC.bytesize,
-                                                         parity=BAC.parity, stopbits=BAC.stopbits))
-        self.client.set_timeout(1)
+        self.time1 = time.time_ns() / 1000000000
+        self.time2 = self.time1
+        #self.client = modbus_rtu.RtuMaster(serial.Serial(port=BACport, baudrate=BACbaud, bytesize=BACbytesize,
+        #                                                 parity=BACparity, stopbits=BACstopbits))
+        #self.client.set_timeout(1)
+        #self.serial = serial.Serial(port=BACport, baudrate=BACbaud, bytesize=BACbytesize,parity=BACparity, stopbits=BACstopbits)
+        #self.client = modbus_rtu.RtuMaster(self.serial)
+
         # self.client.connect()
         # self.client.set_debug(True)
         # self.client.strict = False  # Use MODBUS interchar spacing as timeout... MODBUSIOException err
         # self.client.inter_char_timeout = 3.5 *
 
-    @QtCore.pyqtSlot(int)
-    def workercommandsetter(self, command):
-        self.workercmd = command
-    @QtCore.pyqtSlot(int) # integer %
-    def powercommandsetter(self, val):
-        self.workercmd = -30
-        self.powercommand = val
-    @QtCore.pyqtSlot(float) # float %
-    def fluxcommandsetter(self, val):
-        self.workercmd = -31
-        self.fluxcommand = val
-    @QtCore.pyqtSlot(object)
-    def bmsupdatesetter(self, soctemp):
-        self.workercmd = -32
-        self.bmsmsg = soctemp
-    def hackaccesscommandsetter(self, bool):
-        if bool:
-            self.workercmd = -33
-
-    def run(self):  # Executed via .start() method on instance, NOT .run()! Method name MUST be run. Probably.
+    def run(self):  # Executed via .start() method on instance, NOT .run()! Method name MUST be run.
+        self.client = modbus_rtu.RtuMaster(self.BAC.port, self.BAC.baudrate, self.BAC.bytesize, self.BAC.parity, self.BAC.stopbits)
+        self.client.set_timeout(1)
         while self.running:
+            #self.time2 = time.time_ns() / 1000000000
+            #print('bacProc: ', self.time2 - self.time1)
+            #self.time1 = time.time_ns() / 1000000000
+            if not self.data_from_window.empty():
+                self.lastworkercmd = self.workercmd
+                message = self.data_from_window.get()
+                if len(message) == 1: # If only integer command, update command; elif data included, update command/data
+                    self.workercmd = message[0]
+                elif message[0] == -30:
+                    self.workercmd = message[0]
+                    self.battamps = message[1]
+                elif message[0] == -31:
+                    self.workercmd = message[0]
+                    self.flux = message[1]
+                elif message[0] == -32:
+                    self.workercmd = message[0]
+                    self.bmsmsg = (message[1], message[2])
+                    print('bmsmsg:', self.bmsmsg)
+                elif message[0] == -34:
+                    self.workercmd = message[0]
+                    self.motamps = message[1]
+            self.run_command()
+
             # print('worker: ', self.workercmd)
             # time.sleep(.2)
             # Tempting to convert each 'if' into a function, use dict to lookup function. However, this setup
             # prioritizes the main fast-loop slightly which is most important.
-            if self.workercmd == 0: # Basic poller
-                # output = self.client.read_holding_registers(BAC.ObdicAddress['Faults'], count=9, unit=self.unit)
-                self.bac_msg.emit(self.reads('Faults', 9))
-            elif self.workercmd > 0: # Positive ints reserved for simple rangelimiter integration
-                print('Rangelimiter received val: ', self.workercmd)
-                self.write('Remote_Maximum_Battery_Current_Limit', self.workercmd)  # Enable to limit
-                self.bac_msg.emit(self.reads('Faults', 9))
-                # Remain in this worker while rangelimiter enabled
-            elif self.workercmd == -32:  # Update remote battery SOC/temperature for BAC foldbacks.
-                self.writes('Remote_Battery_SOC', self.bmsmsg)
-                self.workercmd = 0
-            elif self.workercmd == -11:  # Set Profile 1
-                # Possibly need to scale up Maximum braking torque/Maximum braking current parameters
-                # which are a % of rated motor current, for consistent regen braking across profiles.
-                # Currently both are 1229 / 40.96 = 30%!
-                # 84 amps would be a conservative limit. 100 ok in bursts
-                for i in self.setup['profile1']:
-                    self.write_scaled(i[0], i[1])
-                self.workercmd = 0
-                print('profile 1 called')
-            elif self.workercmd == -12: # Set Profile 2
-                for i in self.setup['profile2']:
-                    self.write_scaled(i[0], i[1])
-                self.workercmd = 0
-                print('profile 2 called')
-            elif self.workercmd == -13: # Set Profile 3
-                for i in self.setup['profile3']:
-                    self.write_scaled(i[0], i[1])
-                self.workercmd = 0
-                print('profile 3 called')
-            elif self.workercmd < 0 and self.workercmd >= -10: # -1 to -9 for Assist Levels 1-9
-                self.write_scaled('Remote_Assist_Mode', -self.workercmd)  # -(-x) = positive x
-                self.workercmd = 0
-            elif self.workercmd == -14:  # Clear Fault codes
-                self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, 508, output_value=[1])
-                self.workercmd = 0
-            elif self.workercmd == -15:
-                self.write('Remote_Maximum_Battery_Current_Limit', 0)  # Reset range power limiter-- ensure 0 = ignore.
-                # Todo: Check if 0 = ignore, then keep track of profile state to choose limit.
-                self.workercmd = 0
-            elif self.workercmd == -16:  # Antitheft disable
-                # intelligent bit-parsing for conditional switching;
-                #modbit(n, p, b):  # mod byte at bit p in n to b
-                #    mask = 1 << p
-                #    return (n & ~mask) | ((b << p) & mask)
-                bits = self.read('Features3')
-                modbyte = (bits & ~(1 << 3)) | ((1 << 3)) & (1 << 3)
-                print('Antitheft disable. bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features3', modbyte)  # 8 = 4th binary bit
-                self.workercmd = 0
-            elif self.workercmd == -17:  # Antitheft enable
-                bits = self.read('Features3')
-                modbyte = (bits & ~(1 << 3)) | ((0 << 3)) & (1 << 3)
-                print('Antitheft enable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features3', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -18:  # Reverse (cruise input) enable
-                bits = self.read('Features3')
-                modbyte = (bits & ~(1 << 4)) | ((0 << 4)) & (1 << 4)
-                print('Reverse enable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features3', modbyte)  # 16 = 5th binary bit
-                self.workercmd = 0
-            elif self.workercmd == -19:  # Reverse (cruise input) disable
-                bits = self.read('Features3')
-                modbyte = (bits & ~(0 << 4)) | ((1 << 4)) & (1 << 4)
-                print('Reverse disable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features3', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -20:
-                bits = self.read('Features3')
-                modbyte = (bits & ~(0 << 0)) | ((1 << 0)) & (1 << 0)
-                print('Throttle bypass assist level enable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits),
-                      'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features3', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -21:
-                bits = self.read('Features3')
-                modbyte = (bits & ~(1 << 0)) | ((0 << 0)) & (1 << 0)
-                print('Throttle bypass assist level disable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits),
-                      'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features3', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -22:
-                bits = self.read('Features')
-                modbyte = (bits & ~(0 << 11)) | ((1 << 11)) & (1 << 11)
-                print('Walk mode enable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits),
-                      'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -23:
-                bits = self.read('Features')
-                modbyte = (bits & ~(1 << 11)) | ((0 << 11)) & (1 << 11)
-                print('Walk mode disable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
-                      "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -24:
-                bits = self.read('Features')
-                modbyte = (bits & ~(0 << 13)) | ((1 << 13)) & (1 << 13)
-                print('Engine braking enable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
-                      "{0:b}".format(bits),
-                      'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -25:
-                bits = self.read('Features')
-                modbyte = (bits & ~(1 << 13)) | ((0 << 13)) & (1 << 13)
-                print('Engine braking disable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
-                      "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
-                self.write('Features', modbyte)
-                self.workercmd = 0
-            elif self.workercmd == -26:
-                print('Motor Position Sensor Type set Hall')
-                self.write('Motor_Position_Sensor_Type', 0)
-            elif self.workercmd == -27:
-                print('Motor Position Sensor Type set Hall start & Sensorless')
-                self.write('Motor_Position_Sensor_Type', 1)
-            elif self.workercmd == -28:
-                print('Motor Position Sensor Type set Sensorless Only')
-                self.write('Motor_Position_Sensor_Type', 2)
-            elif self.workercmd == -29: # Diagnostics Mode-- Poller
-                pass #todo: implement
-                # Digital Inputs 276
-                # Throttle_Voltage 270
-                # Brake_1_Voltage 271
-                # Brake_2_Voltage 272
-                # Analog_BMS_SOC_Voltage 275
-                # 
-                # Warnings 277
-                # Warnings2 359
-                # Sensorless State 330
-                # Motor_Temperature_Sensor_Voltage 398
-                # Ebike Flags 327
-                    # 0 Brake
-                    # 1 Cutout
-                    # 2 Run Req
-                    # 3 Pedal
-                    # 4 Regen
-                    # 5 Walk
-                    # 6 Walk Start
-                    # 7 Throttle
-                    # 8 Reverse
-                    # 9 Interlock off
-                    # 10 Pedal ramp rate active
-                    # 11 Gate enable request
-                    # 12 Gate enabled
-                    # 13 Boost Enabled
-                    # 14 Antitheft enabled
-                    # 15 Free wheel
-                # Ebike Flags2 488
-                # 0 Regen always without analog input
-                # 1 Cruise enable
-            elif self.workercmd == -30: # Adjust max battery power %
-                self.write_scaled('Remote_Maximum_Battery_Current_Limit', self.powercommand)
-                self.workercmd = 0
-            elif self.workercmd == -31:
-                self.write_scaled('Maximum_Field_Weakening_Current', self.fluxcommand)
-            elif self.workercmd == -33: # Hack access level code.
-                val = -1
-                running = True
-                code1 = False
-                code2 = False
-                code3 = False
-                while running:
-                    val += 1
-                    self.write('Parameter_Access_Code', val)
-                    read = self.read('User_Access_Level')
-                    if read == 1:
-                        print('User access code cracked! Level ', read, ' code is #', val)
-                        self.hack_msg.emit([read, val])
-                        self.code1 = read
-                    elif read == 2:
-                        print('User access code cracked! Level 2 code is #', read)
-                        self.hack_msg.emit([read, val])
-                        self.code2 = read
-                    elif read == 3:
-                        print('User access code cracked! Level 3 code is #', read)
-                        self.hack_msg.emit([read, val])
-                        self.code3 = read
-                    if code1 and code2 and code3:
-                        running = False
-                        print("Code1:", code1, "Code2:", code2, "Code3:", code3)
-                        self.write('Parameter_Access_Code', code3)
-                    elif val > 100000:
-                        running = False
+
+    def run_command(self):
+        #if not self.newcmd or self.workercmd == 0:
+        if self.workercmd == 0:
+            # output = self.client.read_holding_registers(BAC.ObdicAddress['Faults'], count=9, unit=self.unit)
+            self.data_to_emitter.send(self.reads('Faults', 9))
+        elif self.workercmd > 0:  # Positive ints reserved for simple rangelimiter integration
+            print('Rangelimiter received val: ', self.workercmd)
+            self.write('Remote_Maximum_Battery_Current_Limit', self.workercmd)  # Enable to limit
+            self.data_to_emitter.send(self.reads('Faults', 9))
+            # Remain in this worker while rangelimiter enabled
+        elif self.workercmd == -32:  # Update remote battery SOC/temperature for BAC foldbacks.
+            self.writes('Remote_Battery_SOC', self.bmsmsg)
+            self.workercmd = self.lastworkercmd # Because this is an automatic period command, do not disrupt ongoing processes.
+        elif self.workercmd == -11:  # Set Profile 1
+            # Possibly need to scale up Maximum braking torque/Maximum braking current parameters
+            # which are a % of rated motor current, for consistent regen braking across profiles.
+            # Currently both are 1229 / 40.96 = 30%!
+            # 84 amps would be a conservative limit. 100 ok in bursts
+            for i in self.setup['profile1']:
+                self.write_scaled(i[0], i[1])
+            self.workercmd = 0
+            print('profile 1 called')
+        elif self.workercmd == -12:  # Set Profile 2
+            for i in self.setup['profile2']:
+                self.write_scaled(i[0], i[1])
+            self.workercmd = 0
+            print('profile 2 called')
+        elif self.workercmd == -13:  # Set Profile 3
+            for i in self.setup['profile3']:
+                self.write_scaled(i[0], i[1])
+            self.workercmd = 0
+            print('profile 3 called')
+        elif self.workercmd < 0 and self.workercmd >= -10:  # -1 to -10 for Assist Levels 1-9
+            self.write_scaled('Remote_Assist_Mode', -self.workercmd)  # -(-x) = positive x
+            self.workercmd = 0
+        elif self.workercmd == -14:  # Clear Fault codes
+            self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, 508, output_value=[1])
+            self.workercmd = 0
+        elif self.workercmd == -15:
+            self.write('Remote_Maximum_Battery_Current_Limit', 0)  # Reset range power limiter-- ensure 0 = ignore.
+            # Todo: Check if 0 = ignore, then keep track of profile state to choose limit.
+            self.workercmd = 0
+        elif self.workercmd == -16:  # Antitheft disable
+            # intelligent bit-parsing for conditional switching;
+            # modbit(n, p, b):  # mod byte at bit p in n to b
+            #    mask = 1 << p
+            #    return (n & ~mask) | ((b << p) & mask)
+            bits = self.read('Features3')
+            modbyte = (bits & ~(1 << 3)) | ((1 << 3)) & (1 << 3)
+            print('Antitheft disable. bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits),
+                  'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features3', modbyte)  # 8 = 4th binary bit
+            self.workercmd = 0
+        elif self.workercmd == -17:  # Antitheft enable
+            bits = self.read('Features3')
+            modbyte = (bits & ~(1 << 3)) | ((0 << 3)) & (1 << 3)
+            print('Antitheft enable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
+                  "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features3', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -18:  # Reverse (cruise input) enable
+            bits = self.read('Features3')
+            modbyte = (bits & ~(1 << 4)) | ((0 << 4)) & (1 << 4)
+            print('Reverse enable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits),
+                  'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features3', modbyte)  # 16 = 5th binary bit
+            self.workercmd = 0
+        elif self.workercmd == -19:  # Reverse (cruise input) disable
+            bits = self.read('Features3')
+            modbyte = (bits & ~(0 << 4)) | ((1 << 4)) & (1 << 4)
+            print('Reverse disable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits),
+                  'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features3', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -20:
+            bits = self.read('Features3')
+            modbyte = (bits & ~(0 << 0)) | ((1 << 0)) & (1 << 0)
+            print('Throttle bypass assist level enable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
+                  "{0:b}".format(bits),
+                  'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features3', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -21:
+            bits = self.read('Features3')
+            modbyte = (bits & ~(1 << 0)) | ((0 << 0)) & (1 << 0)
+            print('Throttle bypass assist level disable. Features3 bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
+                  "{0:b}".format(bits),
+                  'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features3', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -22:
+            bits = self.read('Features')
+            modbyte = (bits & ~(0 << 11)) | ((1 << 11)) & (1 << 11)
+            print('Walk mode enable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ', "{0:b}".format(bits),
+                  'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -23:
+            bits = self.read('Features')
+            modbyte = (bits & ~(1 << 11)) | ((0 << 11)) & (1 << 11)
+            print('Walk mode disable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
+                  "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -24:
+            bits = self.read('Features')
+            modbyte = (bits & ~(0 << 13)) | ((1 << 13)) & (1 << 13)
+            print('Engine braking enable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
+                  "{0:b}".format(bits),
+                  'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -25:
+            bits = self.read('Features')
+            modbyte = (bits & ~(1 << 13)) | ((0 << 13)) & (1 << 13)
+            print('Engine braking disable. Features bits: ', bits, 'modbyte: ', modbyte, '\n', 'bits: ',
+                  "{0:b}".format(bits), 'modbyte: ', "{0:b}".format(modbyte))
+            self.write('Features', modbyte)
+            self.workercmd = 0
+        elif self.workercmd == -26:
+            print('Motor Position Sensor Type set Hall')
+            self.write('Motor_Position_Sensor_Type', 0)
+        elif self.workercmd == -27:
+            print('Motor Position Sensor Type set Hall start & Sensorless')
+            self.write('Motor_Position_Sensor_Type', 1)
+        elif self.workercmd == -28:
+            print('Motor Position Sensor Type set Sensorless Only')
+            self.write('Motor_Position_Sensor_Type', 2)
+        elif self.workercmd == -29:  # Diagnostics Mode-- Poller
+            input_voltages = self.reads('Throttle_Voltage', 8)
+            EbikeFlags = self.read('Ebike_Flags')
+            SensorlessState = self.read('Sensorless_State')
+            EbikeFlagsLabels = ['Brake', 'Cut out', 'Run Req', 'Pedal', 'Regen', 'Walk', 'Walk Start', 'Throttle',
+                                'Reverse Mode', 'Interlock Off', 'Pedal Ramps', 'Gate Req', 'Gate Enabled',
+                                'Boost Mode', 'Antitheft', 'Free Wheel']
+            DigitalInputsLabels = ['Hall C', 'Hall B', 'Hall A', 'Pedal First Input', 'Cruise Input', 'Brake 1 Input',
+                                   'Brake 2 Input', 'HWOC Pin', 'HWOC Latch', 'Remote Brake', 'Remote Pwr Rating Sw',
+                                   'Remote Regen1', 'Remote Regen2', 'Remote Spd Rating Sw', 'Throttle Spd Rating Sw', 'N/A']
+            WarningsLabels = ['Communication timeout', 'Hall sensor', 'Hall stall', 'Wheel speed sensor', 'CAN Bus',
+                              'Hall sector', 'Hall transition', 'VdcLowFLDBK', 'VdcHighFLDBK', 'MotorTempFLDBK',
+                              'ControllerTempFLDBK', 'LowSoCFLDBK', 'HiSoCFLDBK', 'I2tFLDBK', 'Reserved',
+                              'LIN - BMS communication timeout']
+            SensorlessStateEnum = ['Sensorless Idle', 'Sensorless DC-Ramp', 'Sensorless DC-Hold',
+                                   'Sensorless FreqRamp', 'Sensorless CloseLoop', 'Sensorless Stall']
+            DigitalInputsFlagged = []
+            WarningsFlagged = []
+            EbikeFlagsFlagged = []
+
+            bitstring = "{0:b}".format(input_voltages[6])
+            for i in range(len(bitstring)):
+                if int(bitstring[i]):
+                    DigitalInputsFlagged.append(DigitalInputsLabels[i])
+            bitstring = "{0:b}".format(input_voltages[7])
+            for i in range(len(bitstring)):
+                if int(bitstring[i]):
+                    WarningsFlagged.append(WarningsLabels[i])
+            bitstring = "{0:b}".format(EbikeFlags)
+            for i in range(len(bitstring)):
+                if int(bitstring[i]):
+                    EbikeFlagsFlagged.append(EbikeFlagsLabels[i])
+
+            outmsg = {'Throttle_Voltage': input_voltages[0]/self.BAC.ObdicScale[self.BAC.ObdicAddress['Throttle_Voltage']],
+                      'Brake_1_Voltage': input_voltages[1]/self.BAC.ObdicScale[self.BAC.ObdicAddress['Brake_1_Voltage']],
+                      'Brake_2_Voltage': input_voltages[2] / self.BAC.ObdicScale[self.BAC.ObdicAddress['Brake_2_Voltage']],
+                      'Analog_BMS_SOC_Voltage': input_voltages[5] / self.BAC.ObdicScale[self.BAC.ObdicAddress['Analog_BMS_SOC_Voltage']],
+                      'EbikeFlags': EbikeFlagsFlagged, 'DigitalInputs': DigitalInputsFlagged, 'Warnings': WarningsFlagged,
+                      'SensorlessState': SensorlessStateEnum[SensorlessState]}
+            self.data_to_emitter.send(outmsg)
+
+            # Digital Inputs 276
+            # Throttle_Voltage 270
+            # Brake_1_Voltage 271
+            # Brake_2_Voltage 272
+            # Analog_BMS_SOC_Voltage 275
+            #
+            # Warnings 277
+            # Warnings2 359
+            # Sensorless State 330
+            # Motor_Temperature_Sensor_Voltage 398
+            # Ebike Flags 327
+            # 0 Brake
+            # 1 Cutout
+            # 2 Run Req
+            # 3 Pedal
+            # 4 Regen
+            # 5 Walk
+            # 6 Walk Start
+            # 7 Throttle
+            # 8 Reverse
+            # 9 Interlock off
+            # 10 Pedal ramp rate active
+            # 11 Gate enable request
+            # 12 Gate enabled
+            # 13 Boost Enabled
+            # 14 Antitheft enabled
+            # 15 Free wheel
+            # Ebike Flags2 488
+            # 0 Regen always without analog input
+            # 1 Cruise enable
+        elif self.workercmd == -30:  # Adjust max battery power %
+            self.write_scaled('Remote_Maximum_Battery_Current_Limit', self.battamps)
+            self.workercmd = 0
+        elif self.workercmd == -31:
+            self.write_scaled('Maximum_Field_Weakening_Current', self.fluxcommand)
+        elif self.workercmd == -33:  # Hack access level code.
+            print('Beginning brute-force of BAC User Access Level codes.')
+            val = 15300
+            running = True
+            code1 = False
+            code2 = False
+            code3 = False
+            while running:
+                val += 1
+                self.write('Parameter_Access_Code', val)
+                read = self.read('User_Access_Level')
+                if read == 1:
+                    print('User access code cracked! Level ', read, ' code is #', val)
+                    self.data_to_emitter.send([read, val])
+                    self.code1 = read
+                elif read == 2:
+                    print('User access code cracked! Level 2 code is #', read)
+                    self.data_to_emitter.send([read, val])
+                    self.code2 = read
+                elif read == 3:
+                    print('User access code cracked! Level 3 code is #', read)
+                    self.data_to_emitter.send([read, val])
+                    self.code3 = read
+                if code1 and code2 and code3:
+                    running = False
+                    print("Code1:", code1, "Code2:", code2, "Code3:", code3)
+                    self.write('Parameter_Access_Code', code3)
+                elif val > 100000:
+                    running = False
+        elif self.workercmd == -34:
+            self.write_scaled('Phase_Motoring_Current_Power_Limit', self.motamps)
 
     def read(self, address):
-        output = self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], 1)
+        output = self.client.execute(self.BAC.address, cst.READ_HOLDING_REGISTERS, self.BAC.ObdicAddress[address], 1)
         return output[0]
 
     def reads(self, address, length):
-        return self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], length)
+        return self.client.execute(self.BAC.address, cst.READ_HOLDING_REGISTERS, self.BAC.ObdicAddress[address], length)
 
     def read_scaled(self, address):
-        val = (self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], 1))
-        scalar = BAC.ObdicScale[BAC.ObdicAddress[address]]
+        val = (self.client.execute(self.BAC.address, cst.READ_HOLDING_REGISTERS, self.BAC.ObdicAddress[address], 1))
+        scalar = self.BAC.ObdicScale[self.BAC.ObdicAddress[address]]
         output = tuple([x / scalar for x in val])
         return output[0]
 
     def reads_scaled(self, address, length):
-        val = (self.client.execute(BAC.address, cst.READ_HOLDING_REGISTERS, BAC.ObdicAddress[address], length))
-        scalar = BAC.ObdicScale[BAC.ObdicAddress[address]]
+        val = (self.client.execute(self.BAC.address, cst.READ_HOLDING_REGISTERS, self.BAC.ObdicAddress[address], length))
+        scalar = self.BAC.ObdicScale[self.BAC.ObdicAddress[address]]
         output = tuple([x / scalar for x in val])
         return output
 
     def write(self, address, value):  # Helper function
-        self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, BAC.ObdicAddress[address], output_value=[value])
+        self.client.execute(self.BAC.address, cst.WRITE_MULTIPLE_REGISTERS, self.BAC.ObdicAddress[address], output_value=[value])
 
     def writes(self, address, value):  # Helper function
-        self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, BAC.ObdicAddress[address], output_value=value)
+        self.client.execute(self.BAC.address, cst.WRITE_MULTIPLE_REGISTERS, self.BAC.ObdicAddress[address], output_value=value)
 
     def write_scaled(self, address, value):  # Helper function
         # todo: use returned values (register, 1 if written) to check for serial errors?
-        write = int(value * BAC.ObdicScale[BAC.ObdicAddress[address]])
-        self.client.execute(BAC.address, cst.WRITE_MULTIPLE_REGISTERS, BAC.ObdicAddress[address], output_value=[write])
+        write = int(value * self.BAC.ObdicScale[self.BAC.ObdicAddress[address]])
+        self.client.execute(self.BAC.address, cst.WRITE_MULTIPLE_REGISTERS, self.BAC.ObdicAddress[address], output_value=[write])
 
 class AmpyDisplay(QtWidgets.QMainWindow):
-    workmsg = QtCore.pyqtSignal(int)
+    #bacqueue = QtCore.pyqtSignal(int)
     powercmd = QtCore.pyqtSignal(int)
     fluxcmd = QtCore.pyqtSignal(float)
     hackaccesscmd = QtCore.pyqtSignal(int)
     bmsmsg_bac = QtCore.pyqtSignal(object)
     bmsbasiccmd = QtCore.pyqtSignal(object)
     bmseepromcmd = QtCore.pyqtSignal(object)
-    def __init__(self, bs, bp, ba, whl, sp, lockpin, bmsqueue: Queue, bmsemitter: BMSSerialEmitter, *args, **kwargs,):
-        self.battseries = bs
-        self.battparallel = bp
-        self.battah = ba
-        self.wheelcircum = whl  # In mm
-        self.speedparse = sp  # Assume V6 parameter addresses, scales in fastloop for ~17% less total cpu time
-        self.lockpin = str(lockpin)
+    def __init__(self, setup, bacqueue: Queue, bmsqueue: Queue, processManager: BMSProcessEmitter, *args, **kwargs, ):
+        self.setup = setup
+        self.battseries = setup['battery'][0]
+        self.battparallel = setup['battery'][1]
+        self.battah = setup['battery'][2]
+        self.wheelcircum = setup['wheel']  # In mm
+        self.speedparse = True
+        self.lockpin = setup['pin']
         super().__init__(*args, **kwargs)
         # DISPLAY AND VEHICLE VARIABLES
         self.bmsqueue = bmsqueue
-        self.bmsemitter = bmsemitter
-        self.bmsemitter.daemon = True
-        self.bmsemitter.start()
+        self.bacqueue = bacqueue
+        self.processEmitter = processManager
+        self.processEmitter.daemon = True
+        self.processEmitter.start()
         self.bmseeprom_initter = True
-        self.bmstemps = (21, 21, 21, 21)
+        self.bmstemps = (0, 0, 0, 0)
         self.bmscmd = 10 # 0 = Basic Poll, 1 = Read EEPROM, 2 = Write EEPROM, 10 = Poll then EEPROM init
         self.chargestate = False
         self.bmsCall() # Init EEPROM.
@@ -469,7 +579,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.assist_level = 0
         self.opt_tripRangeValue = None  # Check Wh/mi every interval with floop/lastfloop for Range fxn only
         self.opt_throttleAssistBool = None
-        self.opt_battaValue = None
+        self.opt_battaValue = None # todo: update in SQL setup
         self.opt_fluxValue = None
 
         self.tripReset(True) # To instantiate all floats, lists
@@ -540,14 +650,15 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 self.ui.ProfileRb2.setChecked(True)
             elif self.profile == -13:
                 self.ui.ProfileRb3.setChecked(True)
-            self.ui.AssistSlider.setValue('Assist: ', int(abs(self.assist_level)-1))
-            self.ui.AssistSliderLabel.setText(str(abs(self.assist_level)-1))
-            self.workmsg.emit(self.profile)  # Assist emitted later
-            self.workmsg.emit(self.assist_level)
+            self.ui.AssistSlider.setValue(int(abs(self.assist_level)-1))
+            #self.ui.AssistSliderLabel.setText(str('Assist: ', int(abs(self.assist_level)-1)))
+            self.ui.AssistSliderLabel.setText('Assist: ' + str(abs(self.assist_level)))
+            self.bacqueue.put([self.profile])  # Assist emitted later
+            self.bacqueue.put([self.assist_level])
             # todo: add below to sql init table. Or, setup SQL setup to write 0 = False val = true value, then check all
-            self.signalThrottleBypassAssist(True, self.opt_throttleAssistBool)
-            self.signalBatta(True, self.opt_battaValue)
-            self.signalFlux(True, self.opt_fluxValue)
+            self.signalThrottleBypassAssist(self.opt_throttleAssistBool)
+            #self.signalBatta(True, self.opt_battaValue)
+            #self.signalFlux(True, self.opt_fluxValue)
         except Exception as e:
             print('init: ', e)
         # Connect buttons
@@ -688,7 +799,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
             self.iter_sql = 0
         if self.iter_bmsmsg >= self.iter_bmsmsg_threshold: #0.5hz
-            self.bmsmsg_bac.emit([int(self.flt_soc), int(max(self.bmstemps))])
             self.SQL_update_setup()
             self.SQL_lifestat_upload_bms()
             self.iter_bmsmsg = 0
@@ -813,12 +923,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 self.gui_dict['Trip_2_2'], self.gui_dict['Trip_3_2'], self.gui_dict['Trip_3_3'] = str(0), str(0), str(0)
         if self.trip_selector == 3:
             # Setup gui_dict
-            self.gui_dict['Trip_1_1'] = '{:.0f}'.format(self.bmsemitter.basicMsg[1]['ntc0'])
-            self.gui_dict['Trip_1_2'] = '{:.0f}'.format(self.bmsemitter.basicMsg[1]['ntc1'])
+            self.gui_dict['Trip_1_1'] = '{:.0f}'.format(self.processEmitter.basicMsg[1]['ntc0'])
+            self.gui_dict['Trip_1_2'] = '{:.0f}'.format(self.processEmitter.basicMsg[1]['ntc1'])
             self.gui_dict['Trip_1_3'] = '{:.0f}'.format(self.flt_bmsmaxtemp)
-            self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.bmsemitter.basicMsg[1]['ntc2'])
-            self.gui_dict['Trip_2_2'] = '{:.0f}'.format(self.bmsemitter.basicMsg[1]['ntc3'])
-            self.gui_dict['Trip_2_3'] = '{:.2f}'.format(self.bmsemitter.basicMsg[1]['pack_ma'] / 1000)
+            self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.processEmitter.basicMsg[1]['ntc2'])
+            self.gui_dict['Trip_2_2'] = '{:.0f}'.format(self.processEmitter.basicMsg[1]['ntc3'])
+            self.gui_dict['Trip_2_3'] = '{:.2f}'.format(self.processEmitter.basicMsg[1]['pack_ma'] / 1000)
             self.gui_dict['Trip_3_1'] = '{:.3f}'.format(self.flt_bmscellvrng)
             self.gui_dict['Trip_3_2'] = '{:.2f}'.format(self.flt_bmscellvmean)
             self.gui_dict['Trip_3_3'] = '{:.2f}'.format(self.flt_bmscellvmin)
@@ -883,7 +993,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.Trip_3_1.setText(self.gui_dict['Trip_3_1'])
         self.ui.Trip_3_2.setText(self.gui_dict['Trip_3_2'])
         self.ui.Trip_3_3.setText(self.gui_dict['Trip_3_3'])
-
     #### Main Display Command Functions and BAC Signals ####
     def tripRangeEnable(self, bool, range):
         # todo: check that slider dynamically updates self.flt_range_limit
@@ -893,7 +1002,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.pid.auto_mode = True
             self.opt_tripRangeValue = True
         elif not bool:
-            self.workmsg.emit(-15)  # Code to reset range power limiter
+            self.bacqueue.put([-15])  # Code to reset range power limiter
             self.pid_auto_mode = False
             self.opt_tripRangeValue = False
         # Add var so GUI knows active profile amps. --> self.profile -11 = 1, -12 = 2...
@@ -909,7 +1018,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Instantaneous range / range limit
         # Setpoint is 1, :. range / range limit = 1 is target.
         limit = self.pid.__call__(range_div, self.list_floop_interval[-1:])
-        self.workmsg.emit(int(limit * max_amps))
+        self.bacqueue.emit([int(limit * max_amps)])
     def tripReset(self, bool):
         if bool: # Reset all variables of floop_to_list, and flt.
             self.flt_batt_volts, self.flt_batt_volts_max, self.flt_batt_volts_min, self.flt_batt_amps_max, \
@@ -934,36 +1043,36 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.optpopupwindow.ui.PID_Ki_Label.setText('{:.2f}'.format(self.pid_ki))
         self.optpopupwindow.ui.PID_Kd_Label.setText('{:.2f}'.format(self.pid_kd))
     def signalFaultReset(self):
-        self.workmsg.emit('faultreset') # clear BAC faults
+        self.bacqueue.put([-14]) # clear BAC faults
         self.bmsqueue.put(2) # clear BMS faults
     def signalAssistLevel(self):
         self.assist_level = -(self.ui.AssistSlider.value()+1)
         self.ui.AssistSliderLabel.setText('Assist: ' + str(self.ui.AssistSlider.value()))
-        self.workmsg.emit(self.assist_level)  # Positive integers in worker reserved for trip limiter %'s
+        self.bacqueue.put([self.assist_level])  # Positive integers in worker reserved for trip limiter %'s
         self.SQL_update_setup()
     def signalProfile(self, button_bool, command):
         if button_bool == True:
-            self.workmsg.emit(command)  # command is integer (-11 = profile1, -12 = profile2...)
+            self.bacqueue.put([command])  # command is integer (-11 = profile1, -12 = profile2...)
         self.profile = command
         self.SQL_update_setup()
     def signalReverse(self, bool):
         if bool:
             self.ui.Reverse.setText('R')
-            self.workmsg.emit(-18)
+            self.bacqueue.put([-18])
         if not bool:
             self.ui.Reverse.setText('D')
-            self.workmsg.emit(-19)
+            self.bacqueue.put([-19])
     def signalAntitheft(self, bool):
         if bool:
             # emit signal to enable antitheft
             self.popupAntitheft()
             print('Antitheft signal true, enabling antitheft...')
-            self.workmsg.emit(-17)
+            self.bacqueue.put([-17])
         if not bool:
             # Emit signal here to disable antitheft
             # Close popup within number_pad.py
             print('Antitheft signal false, disabling antitheft...')
-            self.workmsg.emit(-16)
+            self.bacqueue.put([-16])
     def signalTripRangeLimiter(self, bool, value):
         if bool:
             self.flt_range_limit = value
@@ -971,43 +1080,82 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_range_limit = 0
     def signalThrottleBypassAssist(self, bool):
         if bool:
-            self.workmsg.emit(-20)
+            self.bacqueue.put([-20])
             self.opt_throttleAssistBool = True
             self.SQL_update_setup()
         if not bool:
-            self.workmsg.emit(-21)
+            self.bacqueue.put([-21])
             self.opt_throttleAssistBool = False
             self.SQL_update_setup()
     def signalBatta(self, bool, value): # Bool = btn, value = slider
         if bool:
-            self.powercmd.emit(value)
-            self.opt_battaValue = value # todo: add to SQL_setup
-            self.optpopupwindow.ui.PowerLabel.setText('BattAmps:', value)
-        if not bool and self.opt_battaValue > 0:
+            self.bacqueue.put([-34, value])
+            self.opt_battaValue = value #
+            self.optpopupwindow.ui.MotPowerLabel.setText('MotAmp:' + '{:.0f}'.format(value) + '%')
+        if not bool or self.opt_battaValue == 0:
             self.opt_battaValue = 0
             self.optpopupwindow.ui.BattPowerBtn.setChecked(False)
-            self.optpopupwindow.ui.PowerLabel.setText('BattAmps: 0')
+            self.optpopupwindow.ui.BattPowerLabel.setText('BattAmp: 0%')
+    def signalMota(self, bool, value): # Bool = btn, value = slider
+        if bool:
+            self.bacqueue.put([-30, value])
+            self.opt_battaValue = value #
+            self.optpopupwindow.ui.BattPowerLabel.setText('BattAmp:' + '{:.0f}'.format(value) + '%')
+        if not bool or self.opt_battaValue == 0:
+            self.opt_battaValue = 0
+            self.optpopupwindow.ui.BattPowerBtn.setChecked(False)
+            self.optpopupwindow.ui.BattPowerLabel.setText('BattAmp: 0%')
     def signalFlux(self, bool, value):
         if bool:
-            self.fluxcmd.emit(value)
-            self.opt_fluxValue = value # todo: add to SQL_setup
-        if not bool and self.opt_fluxValue > 0: # and to both disable signals when slider to 0, and detect 0 for sql setup
+            self.bacqueue.put([-31, value])
+            self.opt_fluxValue = value #
+            self.optpopupwindow.ui.FluxLabel.setText('Flux: ' + '{:.1f}'.format(value))
+        if not bool or self.opt_fluxValue == 0: # and to both disable signals when slider to 0, and detect 0 for sql setup
             self.opt_fluxValue = 0
-    def signalBMSMsgBAC(self, bool):
+            self.optpopupwindow.ui.FluxBtn.setChecked(False)
+            self.optpopupwindow.ui.FluxLabel.setText('Flux: 0')
+
+    def signalBMSMsgBAC(self, soc, temp): #-32 bacqueue
+        self.bacqueue.put([-32, soc, temp])
+    def signalDiagnosticPoller(self, bool):
         if bool:
-            self.bmsemitter.basicMsg.emit((int(self.flt_soc), int(max(self.bmstemps))))
+            self.bacqueue.put([-29])
+        else:
+            self.bacqueue.put([0])
+    def diagnosticsReceive(self, msg):
+        self.optpopupwindow.ui.DiagThrottleV.setText('{:.4f}'.format(msg['Throttle_Voltage']))
+        self.optpopupwindow.ui.DiagBMSV.setText('{:.4f}'.format(msg['Throttle_Voltage']))
+        self.optpopupwindow.ui.DiagBrake1V.setText('{:.4f}'.format(msg['Brake_1_Voltage']))
+        self.optpopupwindow.ui.DiagBrake2V.setText('{:.4f}'.format(msg['Brake_2_Voltage']))
+        self.optpopupwindow.ui.DiagEbikeFlags.setText(', '.join(msg['EbikeFlags']))
+        self.optpopupwindow.ui.DiagDigitalInputs.setText(', '.join(msg['DigitalInputs']))
+        self.optpopupwindow.ui.DiagWarnings.setText(', '.join(msg['Warnings']))
+        self.optpopupwindow.ui.DiagSensorless.setText(msg['SensorlessState'])
     def signalHackBACAccessCode(self, bool):
         if bool:
-            self.hackaccesscmd.emit(bool)
+            self.bacqueue.put([-33])
     def receiveHackBACAccessCode(self, msg):
         level = msg[0]
         val = msg[1]
         if level == 1:
-            self.optpopupwindow.ui.HackAccessLabel_code1.setText('1: ', val)
+            self.optpopupwindow.ui.HackAccessLabel_code1.setText(('1: ' + str(val)))
+            with open((os.path.abspath((os.path.dirname(__file__)))) + '/access_codes.csv', mode='w') as file:
+                writer = csv.writer(file, delimiter = ',')
+                writer.writerow(['Level 1 Access Code: ' + str(val)])
+                file.close()
         if level == 2:
-            self.optpopupwindow.ui.HackAccessLabel_code1.setText('2: ', val)
+            self.optpopupwindow.ui.HackAccessLabel_code1.setText(str('2: ' + val))
+            with open((os.path.abspath((os.path.dirname(__file__)))) + '/access_codes.csv', mode='w') as file:
+                writer = csv.writer(file, delimiter = ',')
+                writer.writerow(['Level 2 Access Code: ' + str(val)])
+                file.close()
         if level == 3:
-            self.optpopupwindow.ui.HackAccessLabel_code1.setText('3: ', val)
+            self.optpopupwindow.ui.HackAccessLabel_code1.setText(str('3: ' + val))
+            with open((os.path.abspath((os.path.dirname(__file__)))) + '/access_codes.csv', mode='w') as file:
+                writer = csv.writer(file, delimiter = ',')
+                writer.writerow(['Level 3 Access Code: ' + str(val)])
+                file.close()
+
         #self.optpopupwindow.ui.HackAccessLabel.setText('Level:', level, '#:', val)
 
     #### Subwindow Calls ####
@@ -1021,7 +1169,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         msg.buttonClicked.connect(self.signalFaultReset)
         msg.exec_()
     def popupAntitheft(self):
-        self.pinpopup = numberPopup(self.ui, self.lockpin, self.signalAntitheft)
+        self.pinpopup = numberPopup(self.ui, self.setup['pin'], self.signalAntitheft)
         # self.pinpopup.setParent(self.ui.centralwidget)
         self.pinpopup.setStyleSheet('QPushButton {border-style: inset;border-color: dark grey;'
         'border-width: 3px;border-radius:10px;font: 40pt "Luxi Mono";font-weight: bold;padding: 0px 0px 0px 0px;} '
@@ -1034,6 +1182,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.pinpopup.show()
     def popupOptions(self):  #  Independent widget
         # todo: initialize states of btns. if self.optpopupwindow: self.___set(self.___)
+        #  Check if 'closing' window just hides it and if so, instead of re-intializing and re-populating just unhide
         self.optpopupwindow = optionsDialog(self.displayinvert_bool)
         self.optpopupwindow.displayinvertmsg.connect(self.displayinverter)
         self.optpopupwindow.displaybacklightcmd.connect(self.displaybacklight)
@@ -1044,7 +1193,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.optpopupwindow.ui.BattPowerSlider.valueChanged.connect(lambda: self.signalBatta(
             self.optpopupwindow.ui.BattPowerBtn.isChecked(), self.optpopupwindow.ui.BattPowerSlider.value()))
         self.optpopupwindow.ui.TripReset.toggled.connect(lambda: self.tripReset(self.optpopupwindow.ui.TripReset.isChecked()))
-        self.optpopupwindow.showMaximized()
+        self.optpopupwindow.ui.DiagnosticsUpdateBtn.toggled.connect(lambda:
+            self.signalDiagnosticPoller(self.optpopupwindow.ui.DiagnosticsUpdateBtn.isChecked()))
+        self.optpopupwindow.ui.HackAccessBtn.toggled.connect(lambda:
+            self.signalHackBACAccessCode(self.optpopupwindow.ui.HackAccessBtn.isChecked()))
+        #self.optpopupwindow.showMaximized()
         self.optpopupwindow.show()
     def popupBms(self):  #  Inherited widget
         #self.bmspopup.bmspoll.connect(BMSSerialThread.bmspoller)
@@ -1054,7 +1207,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.bmspopupwindow = bmsDialog(self.battseries)
         self.bmsbasiccmd.connect(self.bmspopupwindow.bmsBasicUpdate)
         self.bmseepromcmd.connect(self.bmspopupwindow.bmsEepromUpdate)
-        self.bmspopupwindow.bmsEepromUpdate(self.bmsemitter.eepromMsg)
+        self.bmspopupwindow.bmsEepromUpdate(self.processEmitter.eepromMsg)
         # Connect Btns
         self.bmspopupwindow.ui.SaveEepromBtn.clicked.connect(self.bmspopEepromWrite)
         self.bmspopupwindow.ui.ConfigBtn.clicked.connect(self.popupBmsCfg)
@@ -1062,7 +1215,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def popupBmsCfg(self):
         self.bmscfgpopupwindow = bmscfgDialog()
         self.bmscfgpopupwindow.ui.ExitBtn.clicked.connect(lambda: self.bmscfgpopupwindow.hide())
-        self.bmscfgpopupwindow.bmscfgGuiUpdate(self.bmsemitter.eepromMsg)
+        self.bmscfgpopupwindow.bmscfgGuiUpdate(self.processEmitter.eepromMsg)
         self.bmscfgpopupwindow.ui.ReadEepromBtn.clicked.connect(lambda: self.bmsqueue.put(1))
         self.bmscfgpopupwindow.ui.WriteEepromBtn.clicked.connect(self.bmscfgpopEepromWrite)
 
@@ -1098,79 +1251,79 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                  'cell16_mv', 'cell17_mv', 'cell18_mv', 'cell19_mv', 'cell20_mv', 'cell21_mv', 'cell22_mv', 'cell23_mv']
         cellv = []
         for i in range(self.battseries):
-            cellv.append(self.bmsemitter.basicMsg[0][keys[i]] / 1000) # mv -> V
+            cellv.append(self.processEmitter.basicMsg[0][keys[i]] / 1000) # mv -> V
         cellvmin = min(cellv)
         cellvmax = max(cellv)
         self.bmspopupwindow.ui.VRangeLabel.setText('{:.2f}'.format(cellvmax) + '~' + '{:.2f}'.format(cellvmin)
                                                    + '<sub>V</sub>')
         self.bmspopupwindow.ui.VDiffLabel.setText('{:.3f}'.format(cellvmin - cellvmax))
         # Temp, Current, Power
-        self.bmspopupwindow.ui.CurrentLabel.setText('{:.2f}'.format(self.bmsemitter.basicMsg[1]['pack_ma'] / 1000) + '<sub>A</sub>')
-        self.bmspopupwindow.ui.BattPowerLabel.setText('{:.1f}'.format(((self.bmsemitter.basicMsg[1]['pack_ma'] / 1000) *
-                                                   (self.bmsemitter.basicMsg[1]['pack_mv'] / 1000))) + '<sub>W</sub>')
-        self.bmspopupwindow.ui.T1Bar.setValue(self.bmsemitter.basicMsg[1]['ntc0'])
-        self.bmspopupwindow.ui.T2Bar.setValue(self.bmsemitter.basicMsg[1]['ntc1'])
-        self.bmspopupwindow.ui.T3Bar.setValue(self.bmsemitter.basicMsg[1]['ntc2'])
-        self.bmspopupwindow.ui.T4Bar.setValue(self.bmsemitter.basicMsg[1]['ntc3'])
+        self.bmspopupwindow.ui.CurrentLabel.setText('{:.2f}'.format(self.processEmitter.basicMsg[1]['pack_ma'] / 1000) + '<sub>A</sub>')
+        self.bmspopupwindow.ui.BattPowerLabel.setText('{:.1f}'.format(((self.processEmitter.basicMsg[1]['pack_ma'] / 1000) *
+                                                                       (self.processEmitter.basicMsg[1]['pack_mv'] / 1000))) + '<sub>W</sub>')
+        self.bmspopupwindow.ui.T1Bar.setValue(self.processEmitter.basicMsg[1]['ntc0'])
+        self.bmspopupwindow.ui.T2Bar.setValue(self.processEmitter.basicMsg[1]['ntc1'])
+        self.bmspopupwindow.ui.T3Bar.setValue(self.processEmitter.basicMsg[1]['ntc2'])
+        self.bmspopupwindow.ui.T4Bar.setValue(self.processEmitter.basicMsg[1]['ntc3'])
         # Voltage Bars & Balance Labels # Interleaved to support <21s configurations), cheaper to `try` here
         try:
-            self.bmspopupwindow.ui.C1Bar.setValue(self.bmsemitter.basicMsg[0]['cell0_mv'])
-            self.bmspopupwindow.ui.C1Balance.setChecked(self.bmsemitter.basicMsg[1]['bal0'])
-            self.bmspopupwindow.ui.C2Bar.setValue(self.bmsemitter.basicMsg[0]['cell1_mv'])
-            self.bmspopupwindow.ui.C2Balance.setChecked(self.bmsemitter.basicMsg[1]['bal1'])
-            self.bmspopupwindow.ui.C3Bar.setValue(self.bmsemitter.basicMsg[0]['cell2_mv'])
-            self.bmspopupwindow.ui.C3Balance.setChecked(self.bmsemitter.basicMsg[1]['bal2'])
-            self.bmspopupwindow.ui.C4Bar.setValue(self.bmsemitter.basicMsg[0]['cell3_mv'])
-            self.bmspopupwindow.ui.C4Balance.setChecked(self.bmsemitter.basicMsg[1]['bal3'])
-            self.bmspopupwindow.ui.C5Bar.setValue(self.bmsemitter.basicMsg[0]['cell4_mv'])
-            self.bmspopupwindow.ui.C5Balance.setChecked(self.bmsemitter.basicMsg[1]['bal4'])
-            self.bmspopupwindow.ui.C6Bar.setValue(self.bmsemitter.basicMsg[0]['cell5_mv'])
-            self.bmspopupwindow.ui.C6Balance.setChecked(self.bmsemitter.basicMsg[1]['bal5'])
-            self.bmspopupwindow.ui.C7Bar.setValue(self.bmsemitter.basicMsg[0]['cell6_mv'])
-            self.bmspopupwindow.ui.C7Balance.setChecked(self.bmsemitter.basicMsg[1]['bal6'])
-            self.bmspopupwindow.ui.C8Bar.setValue(self.bmsemitter.basicMsg[0]['cell7_mv'])
-            self.bmspopupwindow.ui.C8Balance.setChecked(self.bmsemitter.basicMsg[1]['bal7'])
-            self.bmspopupwindow.ui.C9Bar.setValue(self.bmsemitter.basicMsg[0]['cell8_mv'])
-            self.bmspopupwindow.ui.C9Balance.setChecked(self.bmsemitter.basicMsg[1]['bal8'])
-            self.bmspopupwindow.ui.C10Bar.setValue(self.bmsemitter.basicMsg[0]['cell9_mv'])
-            self.bmspopupwindow.ui.C10Balance.setChecked(self.bmsemitter.basicMsg[1]['bal9'])
-            self.bmspopupwindow.ui.C11Bar.setValue(self.bmsemitter.basicMsg[0]['cell10_mv'])
-            self.bmspopupwindow.ui.C11Balance.setChecked(self.bmsemitter.basicMsg[1]['bal10'])
-            self.bmspopupwindow.ui.C12Bar.setValue(self.bmsemitter.basicMsg[0]['cell11_mv'])
-            self.bmspopupwindow.ui.C12Balance.setChecked(self.bmsemitter.basicMsg[1]['bal11'])
-            self.bmspopupwindow.ui.C13Bar.setValue(self.bmsemitter.basicMsg[0]['cell12_mv'])
-            self.bmspopupwindow.ui.C13Balance.setChecked(self.bmsemitter.basicMsg[1]['bal12'])
-            self.bmspopupwindow.ui.C14Bar.setValue(self.bmsemitter.basicMsg[0]['cell13_mv'])
-            self.bmspopupwindow.ui.C14Balance.setChecked(self.bmsemitter.basicMsg[1]['bal13'])
-            self.bmspopupwindow.ui.C15Bar.setValue(self.bmsemitter.basicMsg[0]['cell14_mv'])
-            self.bmspopupwindow.ui.C15Balance.setChecked(self.bmsemitter.basicMsg[1]['bal14'])
-            self.bmspopupwindow.ui.C16Bar.setValue(self.bmsemitter.basicMsg[0]['cell15_mv'])
-            self.bmspopupwindow.ui.C16Balance.setChecked(self.bmsemitter.basicMsg[1]['bal15'])
-            self.bmspopupwindow.ui.C17Bar.setValue(self.bmsemitter.basicMsg[0]['cell16_mv'])
-            self.bmspopupwindow.ui.C17Balance.setChecked(self.bmsemitter.basicMsg[1]['bal16'])
-            self.bmspopupwindow.ui.C18Bar.setValue(self.bmsemitter.basicMsg[0]['cell17_mv'])
-            self.bmspopupwindow.ui.C18Balance.setChecked(self.bmsemitter.basicMsg[1]['bal17'])
-            self.bmspopupwindow.ui.C19Bar.setValue(self.bmsemitter.basicMsg[0]['cell18_mv'])
-            self.bmspopupwindow.ui.C19Balance.setChecked(self.bmsemitter.basicMsg[1]['bal18'])
-            self.bmspopupwindow.ui.C20Bar.setValue(self.bmsemitter.basicMsg[0]['cell19_mv'])
-            self.bmspopupwindow.ui.C20Balance.setChecked(self.bmsemitter.basicMsg[1]['bal19'])
-            self.bmspopupwindow.ui.C21Bar.setValue(self.bmsemitter.basicMsg[0]['cell20_mv'])
-            self.bmspopupwindow.ui.C21Balance.setChecked(self.bmsemitter.basicMsg[1]['bal20'])
+            self.bmspopupwindow.ui.C1Bar.setValue(self.processEmitter.basicMsg[0]['cell0_mv'])
+            self.bmspopupwindow.ui.C1Balance.setChecked(self.processEmitter.basicMsg[1]['bal0'])
+            self.bmspopupwindow.ui.C2Bar.setValue(self.processEmitter.basicMsg[0]['cell1_mv'])
+            self.bmspopupwindow.ui.C2Balance.setChecked(self.processEmitter.basicMsg[1]['bal1'])
+            self.bmspopupwindow.ui.C3Bar.setValue(self.processEmitter.basicMsg[0]['cell2_mv'])
+            self.bmspopupwindow.ui.C3Balance.setChecked(self.processEmitter.basicMsg[1]['bal2'])
+            self.bmspopupwindow.ui.C4Bar.setValue(self.processEmitter.basicMsg[0]['cell3_mv'])
+            self.bmspopupwindow.ui.C4Balance.setChecked(self.processEmitter.basicMsg[1]['bal3'])
+            self.bmspopupwindow.ui.C5Bar.setValue(self.processEmitter.basicMsg[0]['cell4_mv'])
+            self.bmspopupwindow.ui.C5Balance.setChecked(self.processEmitter.basicMsg[1]['bal4'])
+            self.bmspopupwindow.ui.C6Bar.setValue(self.processEmitter.basicMsg[0]['cell5_mv'])
+            self.bmspopupwindow.ui.C6Balance.setChecked(self.processEmitter.basicMsg[1]['bal5'])
+            self.bmspopupwindow.ui.C7Bar.setValue(self.processEmitter.basicMsg[0]['cell6_mv'])
+            self.bmspopupwindow.ui.C7Balance.setChecked(self.processEmitter.basicMsg[1]['bal6'])
+            self.bmspopupwindow.ui.C8Bar.setValue(self.processEmitter.basicMsg[0]['cell7_mv'])
+            self.bmspopupwindow.ui.C8Balance.setChecked(self.processEmitter.basicMsg[1]['bal7'])
+            self.bmspopupwindow.ui.C9Bar.setValue(self.processEmitter.basicMsg[0]['cell8_mv'])
+            self.bmspopupwindow.ui.C9Balance.setChecked(self.processEmitter.basicMsg[1]['bal8'])
+            self.bmspopupwindow.ui.C10Bar.setValue(self.processEmitter.basicMsg[0]['cell9_mv'])
+            self.bmspopupwindow.ui.C10Balance.setChecked(self.processEmitter.basicMsg[1]['bal9'])
+            self.bmspopupwindow.ui.C11Bar.setValue(self.processEmitter.basicMsg[0]['cell10_mv'])
+            self.bmspopupwindow.ui.C11Balance.setChecked(self.processEmitter.basicMsg[1]['bal10'])
+            self.bmspopupwindow.ui.C12Bar.setValue(self.processEmitter.basicMsg[0]['cell11_mv'])
+            self.bmspopupwindow.ui.C12Balance.setChecked(self.processEmitter.basicMsg[1]['bal11'])
+            self.bmspopupwindow.ui.C13Bar.setValue(self.processEmitter.basicMsg[0]['cell12_mv'])
+            self.bmspopupwindow.ui.C13Balance.setChecked(self.processEmitter.basicMsg[1]['bal12'])
+            self.bmspopupwindow.ui.C14Bar.setValue(self.processEmitter.basicMsg[0]['cell13_mv'])
+            self.bmspopupwindow.ui.C14Balance.setChecked(self.processEmitter.basicMsg[1]['bal13'])
+            self.bmspopupwindow.ui.C15Bar.setValue(self.processEmitter.basicMsg[0]['cell14_mv'])
+            self.bmspopupwindow.ui.C15Balance.setChecked(self.processEmitter.basicMsg[1]['bal14'])
+            self.bmspopupwindow.ui.C16Bar.setValue(self.processEmitter.basicMsg[0]['cell15_mv'])
+            self.bmspopupwindow.ui.C16Balance.setChecked(self.processEmitter.basicMsg[1]['bal15'])
+            self.bmspopupwindow.ui.C17Bar.setValue(self.processEmitter.basicMsg[0]['cell16_mv'])
+            self.bmspopupwindow.ui.C17Balance.setChecked(self.processEmitter.basicMsg[1]['bal16'])
+            self.bmspopupwindow.ui.C18Bar.setValue(self.processEmitter.basicMsg[0]['cell17_mv'])
+            self.bmspopupwindow.ui.C18Balance.setChecked(self.processEmitter.basicMsg[1]['bal17'])
+            self.bmspopupwindow.ui.C19Bar.setValue(self.processEmitter.basicMsg[0]['cell18_mv'])
+            self.bmspopupwindow.ui.C19Balance.setChecked(self.processEmitter.basicMsg[1]['bal18'])
+            self.bmspopupwindow.ui.C20Bar.setValue(self.processEmitter.basicMsg[0]['cell19_mv'])
+            self.bmspopupwindow.ui.C20Balance.setChecked(self.processEmitter.basicMsg[1]['bal19'])
+            self.bmspopupwindow.ui.C21Bar.setValue(self.processEmitter.basicMsg[0]['cell20_mv'])
+            self.bmspopupwindow.ui.C21Balance.setChecked(self.processEmitter.basicMsg[1]['bal20'])
         except AttributeError:
             pass # Ignore missing UI elements.
     @QtCore.pyqtSlot()
     def bmspopEepromWrite(self):
         # Get bmspop eeprom values, update eeprom, send all to bmsProc
-        msg = self.bmsemitter.eepromMsg
+        msg = self.processEmitter.eepromMsg
         msg[0]['bal_start'] = self.bmspopupwindow.ui.BalanceLevelSlider.value()
         msg[0]['covp'] = self.bmspopupwindow.ui.ChargeLevelSlider.value()
         msg[0]['covp_release'] = self.bmspopupwindow.ui.ChargeLevelSlider.value() + 50  # +0.05V default release
-        self.bmsemitter.eepromMsg = msg
-        print('bmspopEepromWrite: ', self.bmsemitter.eepromMsg, '\n', msg)
+        self.processEmitter.eepromMsg = msg
+        print('bmspopEepromWrite: ', self.processEmitter.eepromMsg, '\n', msg)
         self.bmsqueue.put(msg)
         #self.bmsWriteEeprom()
     def bmscfgpopEepromWrite(self):
-        msg = self.bmsemitter.eepromMsg
+        msg = self.processEmitter.eepromMsg
         msg[0]['switch'] = self.bmscfgpopupwindow.ui.SwitchBtn.isChecked()
         msg[0]['scrl'] = self.bmscfgpopupwindow.ui.SCReleaseBtn.isChecked()
         msg[0]['balance_en'] = self.bmscfgpopupwindow.ui.BalanceEnableBtn.isChecked()
@@ -1260,23 +1413,22 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_bmswh += wattsec / 3600
             self.flt_bmswhregen += abs(wattsec / 3600)
         #
-        if not self.chargestate:
+        if not self.chargestate: # todo verify correct boolean
             self.SQL_lifestat_upload_bms()
-
 
     @QtCore.pyqtSlot()
     def bmsReceiveBasic(self):
         self.iter_bmsmsg += 1
         # Store data for couloumb counting
-        self.list_bms_interval.append(self.bmsemitter.basicMsg[3])
-        self.list_bms_amps.append(self.bmsemitter.basicMsg[1]['pack_ma']/1000)
-        self.list_bms_volts.append(self.bmsemitter.basicMsg[1]['pack_mv']/1000)
+        self.list_bms_interval.append(self.processEmitter.basicMsg[3])
+        self.list_bms_amps.append(self.processEmitter.basicMsg[1]['pack_ma'] / 1000)
+        self.list_bms_volts.append(self.processEmitter.basicMsg[1]['pack_mv'] / 1000)
 
         # Process cellV's, if new low minimum, store
-        keys = self.bmsemitter.basicMsg[0].keys()
+        keys = self.processEmitter.basicMsg[0].keys()
         cellv = []
         for i in keys:
-            cellv.append(self.bmsemitter.basicMsg[0][i] / 1000)
+            cellv.append(self.processEmitter.basicMsg[0][i] / 1000)
         cellvmin = min(cellv)
         cellvmax = max(cellv)
         self.flt_bmscellvrng = (cellvmax - cellvmin)
@@ -1287,15 +1439,16 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_bmscellvmin = cellvmin
 
         # Process NTC temp, if new max, store
-        self.bmstemps = [self.bmsemitter.basicMsg[1]['ntc0'], self.bmsemitter.basicMsg[1]['ntc1'],
-                 self.bmsemitter.basicMsg[1]['ntc2'], self.bmsemitter.basicMsg[1]['ntc3']]
+        self.bmstemps = [self.processEmitter.basicMsg[1]['ntc0'], self.processEmitter.basicMsg[1]['ntc1'],
+                         self.processEmitter.basicMsg[1]['ntc2'], self.processEmitter.basicMsg[1]['ntc3']]
         try:
             if max(self.bmstemps) > self.flt_bmsmaxtemp:
                 self.flt_bmsmaxtemp = max(self.bmstemps)
         except TypeError:
             pass
         # Update Main BatteryTemperatureBar
-        self.ui.BatteryTemperatureBar.setValue(int(max(self.bmstemps)))
+        maxtemp = int(max(self.bmstemps))
+        self.ui.BatteryTemperatureBar.setValue(maxtemp)
         # Process pack_ma to detect charging, accessory current drain.
         # todo: detect here whether pack_ma is negative, use to open bmspop, set charge bool and store SOC,
         #  then when not negative, use QTimer.singleShot(5000?) to store %SOC charged after ~stable voltage.
@@ -1303,51 +1456,52 @@ class AmpyDisplay(QtWidgets.QMainWindow):
 
         try:
             if self.bmspopupwindow.isVisible():
-                self.bmsbasiccmd.emit(self.bmsemitter.basicMsg)
+                self.bmsbasiccmd.emit(self.processEmitter.basicMsg)
         except AttributeError:
             pass
         # 11 ~= 2 seconds
         if self.iter_bmsmsg >= self.iter_bmsmsg_threshold:
             self.bmsProcessBasic()
+            self.signalBMSMsgBAC(int(self.flt_soc), maxtemp) # todo verify
             self.iter_bmsmsg = 0
 
-        if self.bmsemitter.basicMsg[1]['covp_err']:
-            self.bmsExceptionReceive('BMS: Cell Overvoltage Protection:' + str(self.bmsemitter.basicMsg[1]['covp_err']))
-        elif self.bmsemitter.basicMsg[1]['cuvp_err']:
-            self.bmsExceptionReceive('BMS: Cell Undervoltage Protection:' + str(self.bmsemitter.basicMsg[1]['cuvp_err']))
-        elif self.bmsemitter.basicMsg[1]['povp_err']:
-            self.bmsExceptionReceive('BMS: Pack Overvoltage Protection:' + str(self.bmsemitter.basicMsg[1]['povp_err']))
-        elif self.bmsemitter.basicMsg[1]['puvp_err']:
-            self.bmsExceptionReceive('BMS: Pack Undervoltage Protection:' + str(self.bmsemitter.basicMsg[1]['puvp_err']))
-        elif self.bmsemitter.basicMsg[1]['chgot_err']:
-            self.bmsExceptionReceive('BMS: Charge Overtemperature Protection:' + str(self.bmsemitter.basicMsg[1]['chgot_err']))
-        elif self.bmsemitter.basicMsg[1]['chgut_err']:
-            self.bmsExceptionReceive('BMS: Charge Undertemperature Protection:' + str(self.bmsemitter.basicMsg[1]['chgut_err']))
-        elif self.bmsemitter.basicMsg[1]['dsgot_err']:
-            self.bmsExceptionReceive('BMS: Discharge Overtemperature Protection:' + str(self.bmsemitter.basicMsg[1]['dsgot_err']))
-        elif self.bmsemitter.basicMsg[1]['dsgut_err']:
-            self.bmsExceptionReceive('BMS: Discharge Undertemperature Protection:' + str(self.bmsemitter.basicMsg[1]['dsgut_err']))
-        elif self.bmsemitter.basicMsg[1]['chgoc_err']:
-            self.bmsExceptionReceive('BMS: Charge Overcurrent Protection:' + str(self.bmsemitter.basicMsg[1]['chgoc_err']))
-        elif self.bmsemitter.basicMsg[1]['dsgoc_err']:
-            self.bmsExceptionReceive('BMS: Discharge Overcurrent Protection:', str(self.bmsemitter.basicMsg[1]['dsgoc_err']))
-        elif self.bmsemitter.basicMsg[1]['sc_err']:
-            self.bmsExceptionReceive('BMS: High SC Protection:' + str(self.bmsemitter.basicMsg[1]['sc_err']))
-        elif self.bmsemitter.basicMsg[1]['afe_err']:
-            self.bmsExceptionReceive('BMS: AFE Protection:' + str(self.bmsemitter.basicMsg[1]['afe_err']))
-        elif self.bmsemitter.basicMsg[1]['software_err']:
-            self.bmsExceptionReceive('BMS: Software Error!' + str(self.bmsemitter.basicMsg[1]['software_err']))
+        if self.processEmitter.basicMsg[1]['covp_err']:
+            self.bmsExceptionReceive('BMS: Cell Overvoltage Protection:' + str(self.processEmitter.basicMsg[1]['covp_err']))
+        elif self.processEmitter.basicMsg[1]['cuvp_err']:
+            self.bmsExceptionReceive('BMS: Cell Undervoltage Protection:' + str(self.processEmitter.basicMsg[1]['cuvp_err']))
+        elif self.processEmitter.basicMsg[1]['povp_err']:
+            self.bmsExceptionReceive('BMS: Pack Overvoltage Protection:' + str(self.processEmitter.basicMsg[1]['povp_err']))
+        elif self.processEmitter.basicMsg[1]['puvp_err']:
+            self.bmsExceptionReceive('BMS: Pack Undervoltage Protection:' + str(self.processEmitter.basicMsg[1]['puvp_err']))
+        elif self.processEmitter.basicMsg[1]['chgot_err']:
+            self.bmsExceptionReceive('BMS: Charge Overtemperature Protection:' + str(self.processEmitter.basicMsg[1]['chgot_err']))
+        elif self.processEmitter.basicMsg[1]['chgut_err']:
+            self.bmsExceptionReceive('BMS: Charge Undertemperature Protection:' + str(self.processEmitter.basicMsg[1]['chgut_err']))
+        elif self.processEmitter.basicMsg[1]['dsgot_err']:
+            self.bmsExceptionReceive('BMS: Discharge Overtemperature Protection:' + str(self.processEmitter.basicMsg[1]['dsgot_err']))
+        elif self.processEmitter.basicMsg[1]['dsgut_err']:
+            self.bmsExceptionReceive('BMS: Discharge Undertemperature Protection:' + str(self.processEmitter.basicMsg[1]['dsgut_err']))
+        elif self.processEmitter.basicMsg[1]['chgoc_err']:
+            self.bmsExceptionReceive('BMS: Charge Overcurrent Protection:' + str(self.processEmitter.basicMsg[1]['chgoc_err']))
+        elif self.processEmitter.basicMsg[1]['dsgoc_err']:
+            self.bmsExceptionReceive('BMS: Discharge Overcurrent Protection:', str(self.processEmitter.basicMsg[1]['dsgoc_err']))
+        elif self.processEmitter.basicMsg[1]['sc_err']:
+            self.bmsExceptionReceive('BMS: High SC Protection:' + str(self.processEmitter.basicMsg[1]['sc_err']))
+        elif self.processEmitter.basicMsg[1]['afe_err']:
+            self.bmsExceptionReceive('BMS: AFE Protection:' + str(self.processEmitter.basicMsg[1]['afe_err']))
+        elif self.processEmitter.basicMsg[1]['software_err']:
+            self.bmsExceptionReceive('BMS: Software Error!' + str(self.processEmitter.basicMsg[1]['software_err']))
     @QtCore.pyqtSlot()
     def bmsReceiveEeprom(self):
-        print('window.receive_eeprom_msg: ', self.bmsemitter.eepromMsg)
+        print('window.receive_eeprom_msg: ', self.processEmitter.eepromMsg)
         try:
-            self.bmspopupwindow.bmsEepromUpdate(self.bmsemitter.eepromMsg)
+            self.bmspopupwindow.bmsEepromUpdate(self.processEmitter.eepromMsg)
         except AttributeError as e:
             print(e)
             pass
         try:
             #self.bmscfgeepromcmd.emit(self.bmsemitter.eepromMsg)
-            self.bmscfgpopupwindow.bmscfgGuiUpdate(self.bmsemitter.eepromMsg)
+            self.bmscfgpopupwindow.bmscfgGuiUpdate(self.processEmitter.eepromMsg)
         except AttributeError as e:
             print(e)
             pass
@@ -1525,8 +1679,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.sql.execute('CREATE TABLE IF NOT EXISTS setup (id integer PRIMARY KEY, '  # Identifier/key
                          'profile integer, assist integer, range_enabled integer, '  # Display/control parameters
                          'ah float, ahregen float, wh float, whregen float, bmsah float, bmsahregen float, '
-                         'bmswh float, bmswhregen float, dist float, iter integer, '
-                         'chargestate integer, triprange integer, throttleassist integer)')  # Trip counters
+                         'bmswh float, bmswhregen float, dist float, iter integer, chargestate integer, '
+                         'triprange integer, throttleassist integer, batta integer, flux integer)')  # Trip counters
 
         lfs = []
         self.sql.execute('select max(id), total(ah_used), total(ah_charged), total(ahregen), total(wh), '
@@ -1547,9 +1701,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         if len(stp) > 0:
             self.profile, self.assist_level, self.opt_tripRangeValue, self.flt_ah, self.flt_ahregen, \
             self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen, self.flt_bmswh, self.flt_bmswhregen, \
-            self.flt_dist, self.iter_attribute_slicer, self.chargestate, self.opt_tripRangeValue, self.opt_throttleAssistBool = \
+            self.flt_dist, self.iter_attribute_slicer, self.chargestate, self.opt_tripRangeValue, self.opt_throttleAssistBool,\
+            self.opt_battaValue, self.opt_fluxValue = \
                 stp[0][1], stp[0][2], stp[0][3], stp[0][4], stp[0][5], stp[0][6], stp[0][7], stp[0][8], stp[0][9], \
-                stp[0][10], stp[0][11], stp[0][12], stp[0][13], stp[0][14], stp[0][15], stp[0][16]
+                stp[0][10], stp[0][11], stp[0][12], stp[0][13], stp[0][14], stp[0][15], stp[0][16], stp[0][17], stp[0][18]
 
         # todo: add bms list stats to new table with this format. Update if-not-exists SQL inits above.
         self.sql.execute('select * from tripstat')
@@ -1571,10 +1726,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #    self.iter_sql_tripID = ID
         # self.iter_sql_tripID = [i[0] for i in self.sql][0]
     def SQL_update_setup(self):
-        self.sql.execute('replace into setup values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        self.sql.execute('replace into setup values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
          (0, self.profile, self.assist_level, self.opt_tripRangeValue, self.flt_ah, self.flt_ahregen,
           self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen, self.flt_bmswh, self.flt_bmswhregen,
-          self.flt_dist, self.iter_attribute_slicer, self.chargestate, self.opt_tripRangeValue, self.opt_throttleAssistBool))
+          self.flt_dist, self.iter_attribute_slicer, self.chargestate, self.opt_tripRangeValue, self.opt_throttleAssistBool,
+          self.opt_battaValue, self.opt_fluxValue))
     def SQL_tripstat_upload(self):
         # Committed every iter_threshold (integration) interval in receive_floop.
         payload = (self.iter_attribute_slicer, self.floop['Battery_Current'], self.floop['Battery_Voltage'],
@@ -1690,7 +1846,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def get_battwh(self):  # For non Li-NMC or typical lithium, derive curve experimentally.
         # Many cell experiments are listed on https://lygte-info.dk/,
         # and can be digitzed with https://automeris.io/WebPlotDigitizer/
-        # todo: return 0 if self.flt_ah = 0 to avoid IndexError, or try:except...
         if self.flt_ah > 0:
             return BAC.whmap.interp1d(BAC.wh_a2v_map.interp1d(self.flt_ah / self.battparallel))*self.battseries*self.battparallel
         elif self.flt_ah == 0:
@@ -1729,39 +1884,50 @@ if __name__ == '__main__':
     args = parser.parse_args()"""
     #BAC = BACModbus.BACModbus(args.bacport)
     # print('args inside of main:', args.bs, args.bp, args.ba, args.whl, args.sp)
-    setup = read_setup(os.path.abspath((os.path.dirname(__file__))) + '/setup.csv') # Custom setup.csv dict
+    setup = read_setup(os.path.abspath((os.path.dirname(__file__))) + '/setup.csv') # setup.csv dict
     BAC = BACModbus.BACModbus(setup['cpt'])
     app = QtWidgets.QApplication([])
 
     # Communication lines:
     window_bms_pipe, bms_process_pipe = Pipe()
+    window_bac_pipe, bac_process_pipe = Pipe()
     bmsqueue = Queue()
+    bacqueue = Queue()
 
-    bacThread = BACSerialThread(setup)
-    bmsThread = BMSSerialEmitter(window_bms_pipe)
+    #bacThread = BACSerialThread(setup)
+    BMSEmitter = BMSProcessEmitter(window_bms_pipe)
+    BACEmitter = BACProcessEmitter(window_bac_pipe)
+    bacProc = BACSerialProcess(setup, bac_process_pipe, bacqueue, BAC)
     bmsProc = BMSSerialProcess(setup['bpt'], bms_process_pipe, bmsqueue)
-    window = AmpyDisplay(setup['battery'][0], setup['battery'][1], setup['battery'][2], setup['wheel'], True, setup['pin'], bmsqueue, bmsThread)
+    #window = AmpyDisplay(setup['battery'][0], setup['battery'][1], setup['battery'][2], setup['wheel'], True, setup['pin'], bmsqueue, processManager)
     #window = AmpyDisplay(args.bs, args.bp, args.ba, args.whl, args.sp, args.lockpin, queue, bmsThread)
-
+    window = AmpyDisplay(setup, bacqueue, bmsqueue, BMSEmitter)
 
     # todo: setup cfg to enable GPIO e.g. -makerplaneGPIO
     #  Setup cfg for changing units from mph/kph
-    bacThread.bac_msg.connect(window.floopReceive)
-    bacThread.hack_msg.connect(window.receiveHackBACAccessCode)
+    #bacThread.bac_msg.connect(window.floopReceive)
+    #bacThread.hack_msg.connect(window.receiveHackBACAccessCode)
+    BACEmitter.bac_msg.connect(window.floopReceive)
+    BACEmitter.diag_msg.connect(window.diagnosticsReceive)
+    BACEmitter.hack_msg.connect(window.receiveHackBACAccessCode)
+    # todo: save received access codes to file
+    #  replace this signal regular bac_msg = -33
     #bmsProc.bms_basic_msg.connect(window.receive_bms_basic)
     #bmsProc.bms_eeprom_msg.connect(window.receive_bms_eeprom)
     #bmsProc.bms_exception.connect(window.receive_bms_exception)
-    bmsThread.bms_exception.connect(window.bmsExceptionReceive)
-    bmsThread.bms_eeprom_msg.connect(window.bmsReceiveEeprom)
-    bmsThread.bms_basic_msg.connect(window.bmsReceiveBasic)
+    BMSEmitter.bms_exception.connect(window.bmsExceptionReceive)
+    BMSEmitter.bms_eeprom_msg.connect(window.bmsReceiveEeprom)
+    BMSEmitter.bms_basic_msg.connect(window.bmsReceiveBasic)
 
-    window.workmsg.connect(bacThread.workercommandsetter)
-    window.powercmd.connect(bacThread.powercommandsetter)
-    window.fluxcmd.connect(bacThread.fluxcommandsetter)
-    window.bmsmsg_bac.connect(bacThread.bmsupdatesetter)
-    window.hackaccesscmd.connect(bacThread.hackaccesscommandsetter)
-    bacThread.start()
-    bmsThread.start()
+    #window.workmsg.connect(processManager.workercommandsetter)
+    #window.powercmd.connect(processManager.powercommandsetter)
+    #window.fluxcmd.connect(processManager.fluxcommandsetter)
+    #window.bmsmsg_bac.connect(processManager.bmsupdatesetter)
+    #window.hackaccesscmd.connect(processManager.hackaccesscommandsetter)
+    #bacThread.start()
+    BMSEmitter.start()
+    BACEmitter.start()
     bmsProc.start()
+    bacProc.start()
     #bmsProc.join()
     exit(app.exec_())

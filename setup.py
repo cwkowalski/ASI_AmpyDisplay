@@ -56,7 +56,7 @@ def read_setup(f):
             if i[0] == 'units':
                 output['units'] = i[1].strip()
             if i[0] == 'pin':
-                output['pin'] = int(i[1])
+                output['pin'] = i[1].strip()
         except IndexError:
             pass
     return output

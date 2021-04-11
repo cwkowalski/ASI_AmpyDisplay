@@ -59,7 +59,7 @@ border: none}</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>-74</y>
+      <y>-834</y>
       <width>781</width>
       <height>1440</height>
      </rect>
@@ -694,7 +694,7 @@ QSlider::groove:horizontal {
        <x>4</x>
        <y>825</y>
        <width>770</width>
-       <height>406</height>
+       <height>450</height>
       </rect>
      </property>
      <property name="font">
@@ -750,13 +750,195 @@ QSlider::groove:horizontal {
      <widget class="QWidget" name="gridLayoutWidget">
       <property name="geometry">
        <rect>
-        <x>11</x>
+        <x>10</x>
         <y>60</y>
-        <width>750</width>
-        <height>340</height>
+        <width>746</width>
+        <height>81</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout"/>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="1" column="2">
+        <widget class="QLabel" name="DiagBrake2VLabel">
+         <property name="text">
+          <string>Brake2 Volt:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="DiagBrake1V">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLabel" name="DiagBrake2V">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="DiagThrottleVLabel">
+         <property name="text">
+          <string>Throttle Volt:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="DiagBMSVLabel">
+         <property name="text">
+          <string>BMS ADC Volt:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="DiagThrottleV">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLabel" name="DiagBMSV">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="DiagBrake1VLabel">
+         <property name="text">
+          <string>Brake1 Volt:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="gridLayoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>140</y>
+        <width>746</width>
+        <height>303</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1">
+       <item row="1" column="0">
+        <widget class="QLabel" name="DiagDigitalInputsLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>DigiInputs:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="DiagWarningsLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Warnings:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="DiagEbikeFlagsLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>EbikeFlags:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="DiagWarnings">
+         <property name="styleSheet">
+          <string notr="true">QLabel{font: 12pt 'Luxi Mono'}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="DiagSensorlessLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Sensorless:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="DiagSensorless">
+         <property name="styleSheet">
+          <string notr="true">QLabel{font: 12pt 'Luxi Mono'}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLabel" name="DiagDigitalInputs">
+         <property name="styleSheet">
+          <string notr="true">QLabel{font: 12pt 'Luxi Mono'}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="DiagEbikeFlags">
+         <property name="font">
+          <font>
+           <family>Luxi Mono</family>
+           <pointsize>12</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QLabel{font: 12pt 'Luxi Mono'}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QSlider" name="PID_Kp_Slider">
@@ -1307,7 +1489,7 @@ QSlider::groove:horizontal {
      <property name="geometry">
       <rect>
        <x>5</x>
-       <y>1240</y>
+       <y>1280</y>
        <width>65</width>
        <height>65</height>
       </rect>
@@ -1345,7 +1527,7 @@ QSlider::groove:horizontal {
      <property name="geometry">
       <rect>
        <x>75</x>
-       <y>1240</y>
+       <y>1280</y>
        <width>670</width>
        <height>65</height>
       </rect>
@@ -1489,7 +1671,7 @@ QSlider::groove:horizontal {
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>1325</y>
+       <y>1365</y>
        <width>194</width>
        <height>65</height>
       </rect>
@@ -1507,7 +1689,7 @@ QSlider::groove:horizontal {
      <property name="geometry">
       <rect>
        <x>265</x>
-       <y>1325</y>
+       <y>1365</y>
        <width>194</width>
        <height>65</height>
       </rect>
@@ -1525,7 +1707,7 @@ QSlider::groove:horizontal {
      <property name="geometry">
       <rect>
        <x>540</x>
-       <y>1325</y>
+       <y>1365</y>
        <width>194</width>
        <height>65</height>
       </rect>
