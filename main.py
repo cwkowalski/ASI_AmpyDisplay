@@ -268,7 +268,7 @@ class BACSerialProcess(Process):
                 elif message[0] == -32:
                     self.workercmd = message[0]
                     self.bmsmsg = (message[1], message[2])
-                    print('bmsmsg:', self.bmsmsg)
+                    #print('bmsmsg:', self.bmsmsg)
                 elif message[0] == -34:
                     self.workercmd = message[0]
                     self.motamps = message[1]
