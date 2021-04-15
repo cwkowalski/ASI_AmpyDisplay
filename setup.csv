@@ -21,4 +21,4 @@ battery, 21, 14, 42
 controllerport, COM4
 bmsport, COM3
 pin, 58008
-units, mile
+units, imperial

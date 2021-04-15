@@ -561,6 +561,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.wheelcircum = setup['wheel']  # In mm
         self.speedparse = True
         self.lockpin = setup['pin']
+        if setup['units'] == 'imperial':
+            self.units = False
+        elif setup['units'] == 'metric':
+            self.units = True
+        else:
+            print('Setup.csv \"units\" parameter not recognized!')
+
         super().__init__(*args, **kwargs)
         # DISPLAY AND VEHICLE VARIABLES
         self.bmsqueue = bmsqueue
@@ -713,6 +720,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #self.ui.SpeedGauge_Static.text_radius_factor = 0.75
         #self.ui.SpeedGauge.set_enable_fine_scaled_marker(False)
         #self.ui.SpeedGauge.set_enable_big_scaled_grid(False)
+        if self.units:
+            self.ui.SpeedGaugeLabelUnits.setText('kmh')
+        else:
+            self.ui.SpeedGaugeLabelUnits.setText('mph')
         self.ui.SpeedGauge.set_enable_value_text(False)
         self.ui.SpeedGauge.set_gauge_color_inner_radius_factor(950)
         self.ui.SpeedGauge.set_scale_polygon_colors([[0.00, QtCore.Qt.red], [0.25, QtCore.Qt.yellow], [1,
@@ -814,7 +825,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # [7] = 265 = Battery_Voltage
         # [8] = 266 = Battery_Current
     def floopToLists(self):  # save each floop to instance attribute lists for trip stats
-        self.list_speed.append(self.floop['Vehicle_Speed'] * 0.621371192)  # 0.621371192 is Km -> Mph conversion
+        if self.units:
+            self.list_speed.append(self.floop['Vehicle_Speed'])
+        else:
+            self.list_speed.append(self.floop['Vehicle_Speed'] * 0.621371192)  # 0.621371192 is Km -> Mph conversion
         self.list_motor_temp.append(self.floop['Motor_Temperature'])
         self.list_motor_amps.append(self.floop['Motor_Current'])
         self.list_batt_volts.append(self.floop['Battery_Voltage'])
@@ -889,7 +903,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                                                             self.floop['Battery_Voltage']) / 1000)
         self.gui_dict['SpeedGauge'] = self.floop['Vehicle_Speed']
         self.gui_dict['PowerGauge'] = self.floop['Battery_Current'] * self.floop['Battery_Voltage']
-        self.gui_dict['WhmiLabel'] = '{:.1f}'.format(self.flt_whmi_inst) + '<sub>Wh/mi</sub>'
+        if self.units:
+            self.gui_dict['WhmiLabel'] = '{:.1f}'.format(self.flt_whmi_inst) + '<sub>Wh/km</sub>'
+        else:
+            self.gui_dict['WhmiLabel'] = '{:.1f}'.format(self.flt_whmi_inst) + '<sub>Wh/mi</sub>'
 
         if self.trip_selector == 1: # populate for first schema:
             self.gui_dict['Trip_1_1'] = '{:.2f}'.format(self.flt_wh)
@@ -940,13 +957,19 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.CheckEngineButton.hide()
         if self.trip_selector == 1:  # Update unit labels for changed trip display.
             self.ui.Trip_1_1_prefix.setText('Wh<sub>use</sub>:')
-            self.ui.Trip_1_2_prefix.setText('Wh/mi<sub>Trip</sub>:')
+            if self.units:
+                self.ui.Trip_1_2_prefix.setText('Wh/km<sub>Trip</sub>:')
+            else:
+                self.ui.Trip_1_2_prefix.setText('Wh/mi<sub>Trip</sub>:')
             self.ui.Trip_1_3_prefix.setText('Ah<sub>use</sub>:')
             self.ui.Trip_2_1_prefix.setText('Wh<sub>rem</sub>:')
             self.ui.Trip_2_2_prefix.setText('Range:')
             self.ui.Trip_2_3_prefix.setText('Ah<sub>rem</sub>:')
             self.ui.Trip_3_1_prefix.setText('Wh<sub>reg</sub>:')
-            self.ui.Trip_3_2_prefix.setText('Miles:')
+            if self.units:
+                self.ui.Trip_3_2_prefix.setText('Km:')
+            else:
+                self.ui.Trip_3_2_prefix.setText('Miles:')
             self.ui.Trip_3_3_prefix.setText('Ah<sub>reg</sub>:')
         elif self.trip_selector == 2:
             self.ui.Trip_1_1_prefix.setText('Rng<sub>avg</sub>:')
@@ -957,8 +980,14 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.Trip_2_3_prefix.setText('V<sub>min</sub>:')
             self.ui.Trip_3_1_prefix.setText('T<sub>max</sub>:')
             #self.ui.Trip_3_2_prefix.setText('Miles: ')
-            self.ui.Trip_3_2_prefix.setText('Mph<sub>mov</sub>:')
-            self.ui.Trip_3_3_prefix.setText('Mph<sub>max</sub>:')
+            if self.units:
+                self.ui.Trip_3_2_prefix.setText('Kmh<sub>mov</sub>:')
+            else:
+                self.ui.Trip_3_2_prefix.setText('Mph<sub>mov</sub>:')
+            if self.units:
+                self.ui.Trip_3_3_prefix.setText('Kmh<sub>max</sub>:')
+            else:
+                self.ui.Trip_3_3_prefix.setText('Mph<sub>max</sub>:')
         elif self.trip_selector == 3:
             self.ui.Trip_1_1_prefix.setText('T1<sub>Batt</sub>:')
             self.ui.Trip_1_2_prefix.setText('T2<sub>Batt</sub>:')
@@ -1192,7 +1221,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.optpopupwindow.ui.FluxBtn.isChecked(), self.optpopupwindow.ui.FluxSlider.value()))
         self.optpopupwindow.ui.BattPowerSlider.valueChanged.connect(lambda: self.signalBatta(
             self.optpopupwindow.ui.BattPowerBtn.isChecked(), self.optpopupwindow.ui.BattPowerSlider.value()))
-        self.optpopupwindow.ui.TripReset.toggled.connect(lambda: self.tripReset(self.optpopupwindow.ui.TripReset.isChecked()))
+        self.optpopupwindow.ui.TripReset.clicked.connect(lambda: self.tripReset(self.optpopupwindow.ui.TripReset.isChecked()))
         self.optpopupwindow.ui.DiagnosticsUpdateBtn.toggled.connect(lambda:
             self.signalDiagnosticPoller(self.optpopupwindow.ui.DiagnosticsUpdateBtn.isChecked()))
         self.optpopupwindow.ui.HackAccessBtn.toggled.connect(lambda:
@@ -1828,7 +1857,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     #### HELPER FUNCTIONS ####
     def socreset(self):
         self.flt_ah = self.battah * (
-                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts) / 21)))  # battah * SOC used coefficient
+                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-938:]) / 21)))  # battah * SOC used coefficient
     def ms(self):  # helper function; nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
     def gettime(self):  #
