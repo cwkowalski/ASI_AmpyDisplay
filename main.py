@@ -1277,7 +1277,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Get CellV's to find min/max for Range/Diff labels
         keys = ['cell0_mv', 'cell1_mv', 'cell2_mv', 'cell3_mv', 'cell4_mv', 'cell5_mv', 'cell6_mv', 'cell7_mv',
                 'cell8_mv', 'cell9_mv', 'cell10_mv', 'cell11_mv', 'cell12_mv', 'cell13_mv', 'cell14_mv', 'cell15_mv',
-                 'cell16_mv', 'cell17_mv', 'cell18_mv', 'cell19_mv', 'cell20_mv', 'cell21_mv', 'cell22_mv', 'cell23_mv']
+                 'cell16_mv', 'cell17_mv', 'cell18_mv', 'cell19_mv', 'cell20_mv', 'cell21_mv', 'cell22_mv',
+                'cell23_mv', 'cell24_mv']
         cellv = []
         for i in range(self.battseries):
             cellv.append(self.processEmitter.basicMsg[0][keys[i]] / 1000) # mv -> V
@@ -1338,6 +1339,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.bmspopupwindow.ui.C20Balance.setChecked(self.processEmitter.basicMsg[1]['bal19'])
             self.bmspopupwindow.ui.C21Bar.setValue(self.processEmitter.basicMsg[0]['cell20_mv'])
             self.bmspopupwindow.ui.C21Balance.setChecked(self.processEmitter.basicMsg[1]['bal20'])
+            self.bmspopupwindow.ui.C22Bar.setValue(self.processEmitter.basicMsg[0]['cell21_mv'])
+            self.bmspopupwindow.ui.C22Balance.setChecked(self.processEmitter.basicMsg[1]['bal21'])
+            self.bmspopupwindow.ui.C23Bar.setValue(self.processEmitter.basicMsg[0]['cell22_mv'])
+            self.bmspopupwindow.ui.C23Balance.setChecked(self.processEmitter.basicMsg[1]['bal22'])
+            self.bmspopupwindow.ui.C24Bar.setValue(self.processEmitter.basicMsg[0]['cell23_mv'])
+            self.bmspopupwindow.ui.C24Balance.setChecked(self.processEmitter.basicMsg[1]['bal23'])
         except AttributeError:
             pass # Ignore missing UI elements.
     @QtCore.pyqtSlot()
@@ -1491,7 +1498,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # 11 ~= 2 seconds
         if self.iter_bmsmsg >= self.iter_bmsmsg_threshold:
             self.bmsProcessBasic()
-            self.signalBMSMsgBAC(int(self.flt_soc), maxtemp) # todo verify
+            self.bacqueue.put([-32, int(self.flt_soc), maxtemp])
             self.iter_bmsmsg = 0
 
         if self.processEmitter.basicMsg[1]['covp_err']:
@@ -1550,6 +1557,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot(int)
     def displaybacklight(self, val):
+        self.pwm.ChangeDutyCycle(val)
         self.pwm.ChangeDutyCycle(val)
 
     @QtCore.pyqtSlot(int)
