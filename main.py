@@ -1295,7 +1295,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.bmspopupwindow.ui.T2Bar.setValue(self.processEmitter.basicMsg[1]['ntc1'])
         self.bmspopupwindow.ui.T3Bar.setValue(self.processEmitter.basicMsg[1]['ntc2'])
         self.bmspopupwindow.ui.T4Bar.setValue(self.processEmitter.basicMsg[1]['ntc3'])
-        # Voltage Bars & Balance Labels # Interleaved to support <21s configurations), cheaper to `try` here
+        # Voltage Bars & Balance Labels # Interleaved to support <24s configurations), cheaper to `try` here
         try:
             self.bmspopupwindow.ui.C1Bar.setValue(self.processEmitter.basicMsg[0]['cell0_mv'])
             self.bmspopupwindow.ui.C1Balance.setChecked(self.processEmitter.basicMsg[1]['bal0'])
@@ -1425,26 +1425,29 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Finally, send updated eeprom to bms.
         self.bmsqueue.put(msg)
     def bmsProcessBasic(self):
-        ampsec = simps(array(self.list_bms_amps[-self.iter_bmsmsg_threshold:]), x=self.list_bms_interval[-self.iter_bmsmsg_threshold:], even='avg')
+        x_interval = array([sum(([(self.list_bms_interval[-self.iter_bmsmsg_threshold:])[:i]
+                                  for i in range(1, self.iter_bmsmsg_threshold + 1, 1)])
+                                [i]) for i in range(self.iter_bmsmsg_threshold)])
+        ampsec = simps(array(self.list_bms_amps[-self.iter_bmsmsg_threshold:]), x=x_interval, even='avg')
         power = array(self.list_bms_amps[-self.iter_bmsmsg_threshold:]) * \
                 array(self.list_bms_volts[-self.iter_bmsmsg_threshold:])
-        wattsec = simps(power, x=self.list_bms_interval[-self.iter_bmsmsg_threshold:], even='avg')
-
-        if ampsec >= 0:
+        wattsec = simps(power, x=x_interval, even='avg')
+        #print('bms: ', ampsec, wattsec, '\n', ampsec/3600, wattsec/3600, '\n', power)
+        if ampsec <= 0:
             self.flt_ah += ampsec / 3600
             self.flt_bmsah += ampsec / 3600
             self.chargestate = False
-        elif ampsec < 0:
+        elif ampsec > 0:
             self.flt_ah += ampsec / 3600
             self.flt_bmsah += ampsec / 3600
             self.flt_bmsahregen += abs(ampsec / 3600)
             # Set chargestarted to detect end of charge, and create new row in SQL lifestats to mark cycle.
             self.chargestate = True
             self.SQL_lifestat_upload_bms()
-        if wattsec >= 0:
+        if wattsec <= 0:
             self.flt_wh += wattsec / 3600
             self.flt_bmswh += wattsec / 3600
-        elif wattsec < 0:
+        elif wattsec > 0:
             self.flt_wh += wattsec / 3600
             self.flt_bmswh += wattsec / 3600
             self.flt_bmswhregen += abs(wattsec / 3600)
@@ -1825,38 +1828,25 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
             self.sql.execute('SELECT * FROM lifestat ORDER BY id DESC LIMIT 1')
             lastrow = self.sql.fetchall()[0]
-            dif_ah = self.flt_ah - lastrow[2]
             charging = lastrow[12]
-            if not charging and not self.chargestate and dif_ah >= -0.01: # If not/weren't charging & dsch, update only
+            if not charging and not self.chargestate:  # if not/weren't charging, update only
                 payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, dif_ah, self.flt_ahregen,
-                       self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
-                       self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, False)
+                           self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
+                           self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, False)
                 self.sql.execute('replace into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
-            elif self.chargestate: #If you started charging, new row:
+            elif not charging and self.chargestate:  # if now/weren't charging, iterate and update
                 self.lifestat_iter_ID += 1
                 payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, 0, self.flt_ahregen,
-                       self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
-                       self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, True)
+                           self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
+                           self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, True)
                 self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
-            elif charging and self.chargestate: # If last row was charging and currently charging, update row:
-                payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, dif_ah, self.flt_ahregen,
-                       self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
-                       self.flt_bmswh, self.flt_bmswhregen,self.flt_dist, True)
-                self.sql.execute('replace into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
-            elif charging and not self.chargestate: # if were charging and now finished, new row:
-                self.lifestat_iter_ID += 1
+            elif charging and self.chargestate:  # if now/were charging, update only
                 payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, 0, self.flt_ahregen,
-                       self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
-                       self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, True)
+                           self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
+                           self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, True)
                 self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
-            elif not charging and not self.chargestate and dif_ah <=-0.01: # finally, if charged while offline:
-                self.lifestat_iter_ID += 1
-                payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, dif_ah, self.flt_ahregen,
-                       self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
-                       self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, False)
-                self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
-        except (TypeError, IndexError):  # In case of new/empty table, initialize:
-            print('SQL Lifestats empty. Initializing...')
+        except(TypeError, IndexError):  # In case of new/empty table, initialize:
+            print('SQL Lifestats TypeError or IndexError. Is this your first run? Initializing database...')
             current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
             payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, 0, self.flt_ahregen,
                        self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
