@@ -567,6 +567,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.units = True
         else:
             print('Setup.csv \"units\" parameter not recognized!')
+        # "gpio, channel, rising/both/falling"
 
         super().__init__(*args, **kwargs)
         # DISPLAY AND VEHICLE VARIABLES
@@ -1022,6 +1023,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.Trip_3_1.setText(self.gui_dict['Trip_3_1'])
         self.ui.Trip_3_2.setText(self.gui_dict['Trip_3_2'])
         self.ui.Trip_3_3.setText(self.gui_dict['Trip_3_3'])
+    def checkGPIO(self, channel):
+        # todo: implement by iterating lines from setup.csv...
+        # init: GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        # GPIO.add_event_detect(channel, GPIO.RISING)
+        if GPIO.event_detected(channel):
+            print(channel, 'pressed.')
     #### Main Display Command Functions and BAC Signals ####
     def tripRangeEnable(self, bool, range):
         # todo: check that slider dynamically updates self.flt_range_limit
@@ -1143,7 +1150,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.opt_fluxValue = 0
             self.optpopupwindow.ui.FluxBtn.setChecked(False)
             self.optpopupwindow.ui.FluxLabel.setText('Flux: 0')
-
     def signalBMSMsgBAC(self, soc, temp): #-32 bacqueue
         self.bacqueue.put([-32, soc, temp])
     def signalDiagnosticPoller(self, bool):
@@ -1268,7 +1274,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.bmsqueue.put(0)
             self.bmsqueue.put(1)
             self.bmscmd = 0
-
     @QtCore.pyqtSlot()
     def bmsGetEeprom(self):
         self.bmscmd = 1
@@ -1454,7 +1459,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #
         if not self.chargestate: # todo verify correct boolean
             self.SQL_lifestat_upload_bms()
-
     @QtCore.pyqtSlot()
     def bmsReceiveBasic(self):
         self.iter_bmsmsg += 1
@@ -1501,7 +1505,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # 11 ~= 2 seconds
         if self.iter_bmsmsg >= self.iter_bmsmsg_threshold:
             self.bmsProcessBasic()
-            self.bacqueue.put([-32, int(self.flt_soc), maxtemp])
+            mincellsoc = int(BAC.socmapper(cellvmin))
+            self.signalBMSMsgBAC(mincellsoc, maxtemp)
+            #self.bacqueue.put([-32, int(self.flt_soc), maxtemp])
             self.iter_bmsmsg = 0
 
         if self.processEmitter.basicMsg[1]['covp_err']:
@@ -1548,7 +1554,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             print('MainWindow has received BMS intialization data from subprocess.')
             self.ui.BMSButton.clicked.connect(self.popupBms)
             self.bmseeprom_initter = False
-
     @QtCore.pyqtSlot(str)
     def bmsExceptionReceive(self, val):
         isfaulted = len(self.floop['Faults'])
@@ -1557,12 +1562,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.floop['Faults'].append(val)
         else:
             self.floop['Faults'] = val
-
     @QtCore.pyqtSlot(int)
     def displaybacklight(self, val):
         self.pwm.ChangeDutyCycle(val)
         self.pwm.ChangeDutyCycle(val)
-
     @QtCore.pyqtSlot(int)
     def displayinverter(self, bool):
         # Dark Theme. Apply shiteload of stylesheets:
@@ -1793,7 +1796,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             #delta_time = datetime.timedelta(minutes=5)  # Minimum time between updating lifestat database.
             self.sql.execute('SELECT * FROM lifestat ORDER BY id DESC LIMIT 1')
             lastrow = self.sql.fetchall()[0]
-            dif_ah = self.flt_ah - lastrow[2]
+            dif_ah = self.flt_ah - lastrow[3]
             if dif_ah < -0.01:  # If difference between current Ah_used and last is negative (+ noise margin)
                 # you have just charged. A new row is created, with total Ah charged as negative float.
                 # cycle bool = True, to ensure this row is not replaced in discharged elif condition below.
@@ -1829,6 +1832,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.sql.execute('SELECT * FROM lifestat ORDER BY id DESC LIMIT 1')
             lastrow = self.sql.fetchall()[0]
             charging = lastrow[12]
+            dif_ah = self.flt_ah - lastrow[3]
             if not charging and not self.chargestate:  # if not/weren't charging, update only
                 payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, dif_ah, self.flt_ahregen,
                            self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
