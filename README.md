@@ -5,8 +5,6 @@ Discussion and suggestions welcomed here: https://endless-sphere.com/forums/view
 
 Display example with descriptions (800x480): https://i.imgur.com/HzOMMDx.jpg
 
-1872x1404 prototype example with a different style: https://i.imgur.com/vq930iW.png
-
 ## Display Elements
 1. Time of day
 2. Battery SOC -- derived from Simpsons-integrated Ah, and reset with the battery charge button after charging from a cubic fit of a high-resolution voltage:state-of-charge array that can be swapped out for different chemistries. 
