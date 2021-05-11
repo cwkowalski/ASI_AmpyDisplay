@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>802</width>
     <height>480</height>
    </rect>
   </property>
@@ -59,7 +59,7 @@ border: none}</string>
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>-834</y>
+      <y>0</y>
       <width>781</width>
       <height>1440</height>
      </rect>
@@ -1299,7 +1299,7 @@ QSlider::groove:horizontal {
 	</string>
      </property>
      <property name="maximum">
-      <number>4096</number>
+      <number>500</number>
      </property>
      <property name="pageStep">
       <number>164</number>
@@ -1646,10 +1646,10 @@ QSlider::groove:horizontal {
 	</string>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>750</number>
      </property>
      <property name="pageStep">
-      <number>10</number>
+      <number>25</number>
      </property>
      <property name="value">
       <number>100</number>

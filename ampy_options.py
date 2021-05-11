@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_OptDialog(object):
     def setupUi(self, OptDialog):
         OptDialog.setObjectName("OptDialog")
-        OptDialog.resize(800, 480)
+        OptDialog.resize(802, 480)
         OptDialog.setStyleSheet("QGroupBox{\n"
 "    background: solid white;\n"
 "    border: 5px solid black;\n"
@@ -43,7 +43,7 @@ class Ui_OptDialog(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -834, 781, 1440))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 781, 1440))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -653,7 +653,7 @@ class Ui_OptDialog(object):
 "    height: 28px\n"
 "}\n"
 "    ")
-        self.FluxSlider.setMaximum(4096)
+        self.FluxSlider.setMaximum(500)
         self.FluxSlider.setPageStep(164)
         self.FluxSlider.setOrientation(QtCore.Qt.Horizontal)
         self.FluxSlider.setInvertedAppearance(False)
@@ -787,8 +787,8 @@ class Ui_OptDialog(object):
 "    height: 28px\n"
 "}\n"
 "    ")
-        self.MotPowerSlider.setMaximum(100)
-        self.MotPowerSlider.setPageStep(10)
+        self.MotPowerSlider.setMaximum(750)
+        self.MotPowerSlider.setPageStep(25)
         self.MotPowerSlider.setProperty("value", 100)
         self.MotPowerSlider.setOrientation(QtCore.Qt.Horizontal)
         self.MotPowerSlider.setInvertedAppearance(False)

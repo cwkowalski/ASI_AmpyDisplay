@@ -19,7 +19,7 @@ from integrate import simps
 #from scipy.stats import linregress
 from numpy import mean, isnan, array, prod, abs
 
-# import pdb  # pdb.set_trace() to add breakpoint
+import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
 #DisableForDesktopDebug
 from platform import system as platsys
@@ -479,13 +479,13 @@ class BACSerialProcess(Process):
             # 0 Regen always without analog input
             # 1 Cruise enable
         elif self.workercmd == -30:  # Adjust max battery power %
-            self.write_scaled('Remote_Maximum_Battery_Current_Limit', self.battamps)
+            self.write_scaled('Battery_Current_Limit', self.battamps)
             self.workercmd = 0
         elif self.workercmd == -31:
             self.write_scaled('Maximum_Field_Weakening_Current', self.fluxcommand)
         elif self.workercmd == -33:  # Hack access level code.
             print('Beginning brute-force of BAC User Access Level codes.')
-            val = 15300
+            val = 0
             running = True
             code1 = False
             code2 = False
@@ -513,7 +513,7 @@ class BACSerialProcess(Process):
                 elif val > 100000:
                     running = False
         elif self.workercmd == -34:
-            self.write_scaled('Phase_Motoring_Current_Power_Limit', self.motamps)
+            self.write_scaled('Rated_Motor_Current', self.motamps)
 
     def read(self, address):
         output = self.client.execute(self.BAC.address, cst.READ_HOLDING_REGISTERS, self.BAC.ObdicAddress[address], 1)
@@ -560,6 +560,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.battah = setup['battery'][2]
         self.wheelcircum = setup['wheel']  # In mm
         self.speedparse = True
+        self.first_floop = True
         self.lockpin = setup['pin']
         if setup['units'] == 'imperial':
             self.units = False
@@ -623,7 +624,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.mean_length = 18750  # Average for trip_ floats over last 5 minutes (300s / 16ms)
         # trip_wh, trip_ah, trip_soc, trip_range based on cumulative integrals instead
         self.exceptions = 0
-        self.first_floop = True
         self.iter = 0
         self.iter_threshold = 3  # Must be odd number for accurate/low-resource Simpsons integration
         self.iter_sql = 0
@@ -772,7 +772,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                           'Motor_Current': 0, 'Motor_RPM': 0, 'Percent_Of_Rated_RPM': 0,
                           'Battery_Voltage': 0, 'Battery_Current': 0}
         # Run
-        self.start_time = self.ms()
         self.time1 = self.ms()
         self.time2 = self.ms()
         # self.timeinterval = 0.016 #
@@ -845,11 +844,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_whmi = self.list_whmi[-self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
         self.list_floop_interval = self.list_floop_interval[-self.mean_length:]
     def floopProcess(self):
-        # Prepare floop list data for Simpsons-method quadratic integration
         x_interval = array([sum(([(self.list_floop_interval[-self.iter:])[:i] for i in range(1, self.iter + 1, 1)])
                                 [i]) for i in range(self.iter)])  # calc cumulative time from list of intervals
-        y_revsec = array(
+        try:
+            y_revsec = array(
             [(self.list_motor_rpm[-self.iter:])[i] / 60 for i in range(self.iter)])  # revolutions per second to match x
+        except IndexError:
+            y_revsec = array([0 for i in range(len(x_interval))])
         # Integrate distance fromm speed and increment distance counter
         revolutions = simps(y_revsec, x=x_interval, even='avg')
         if isnan(revolutions):
@@ -876,7 +877,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         elif ampsec < 0:
             self.flt_ah += ampsec / 3600
             self.flt_ahregen += abs(wattsec)
-
 
         self.flt_soc = ((self.battah - self.flt_ah) / self.battah) * 100  # Percent SOC from Ah (charge)
         self.list_whmi.append(self.divzero(self.flt_wh, self.flt_dist))
@@ -1045,11 +1045,42 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def tripRangeLimiter(self):
         # Check which profile is active. Wh =/= Ah but they are proportional, and no ASI pwr limit exists.
         if self.profile == -11:
-            max_amps = 300
+            indice = ()
+            #Return 1st, 2nd index in list of Setup profile tuples for 'Battery Current Limit'
+            for i, tup in enumerate(self.setup['profile1']):
+                print('i:', i, tup)
+                for ii, string in enumerate(tup):
+                    print('ii:', ii, string)
+                    try:
+                        if 'Battery_Current_Limit' in string:
+                            indice = (i, ii+1)
+                    except Exception as e:
+                        pass
+            max_amps = self.setup['profile1'][indice[0]][indice[1]]
         elif self.profile == -12:
-            max_amps = 200
+            indice = 0
+            for i, tup in enumerate(self.setup['profile2']):
+                print('i:', i, tup)
+                for ii, string in enumerate(tup):
+                    print('ii:', ii, string)
+                    try:
+                        if 'Battery_Current_Limit' in string:
+                            indice = (i, ii+1)
+                    except Exception as e:
+                        pass
+            max_amps = self.setup['profile2'][indice[0]][indice[1]]
         elif self.profile == -13:
-            max_amps = 15
+            indice = 0
+            for i, tup in enumerate(self.setup['profile3']):
+                print('i:', i, tup)
+                for ii, string in enumerate(tup):
+                    print('ii:', ii, string)
+                    try:
+                        if 'Battery_Current_Limit' in string:
+                            indice = (i, ii+1)
+                    except Exception as e:
+                        pass
+            max_amps = self.setup['profile3'][indice[0]][indice[1]]
         range_div = ((self.get_battwh()) / (self.flt_whmi_inst)) / self.flt_range_limit
         # Instantaneous range / range limit
         # Setpoint is 1, :. range / range limit = 1 is target.
@@ -1065,10 +1096,17 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), \
                 float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), float(0), \
                 float(0), float(0), float(0), float(0), float(0), float(0),
+            #iterators:
+            self.exceptions, self.iter, self.iter_sql, self.iter_bmsmsg, self.iter_attribute_slicer = 0, 0, 0, 0, 0
+            #clear lists:
             self.list_batt_amps, self.list_batt_volts, self.list_motor_amps, self.list_motor_temp, self.list_speed, \
             self.list_motor_rpm, self.list_floop_interval, self.list_whmi, \
             self.list_bms_interval, self.list_bms_amps, self.list_bms_volts = \
                 [], [], [], [], [], [], [], [], [], [], []
+            #reset trip timer:
+            self.start_time = self.ms()
+            self.first_floop = True
+            QtCore.QTimer.singleShot(1000, lambda: self.socreset())
     def tripPidUpdateTune(self, kp, ki, kd):
         self.pid_kp = kp / 200  # /200 to convert QSlider int to float coefficient
         self.pid_ki = ki / 200
@@ -1125,28 +1163,31 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.SQL_update_setup()
     def signalBatta(self, bool, value): # Bool = btn, value = slider
         if bool:
-            self.bacqueue.put([-34, value])
-            self.opt_battaValue = value #
-            self.optpopupwindow.ui.MotPowerLabel.setText('MotAmp:' + '{:.0f}'.format(value) + '%')
+            self.bacqueue.put([-30, value])
+            self.opt_battaValue = value
+            self.optpopupwindow.ui.BattPowerLabel.setText('BattAmp:' + '{:.0f}'.format(value) + '%')
         if not bool or self.opt_battaValue == 0:
             self.opt_battaValue = 0
             self.optpopupwindow.ui.BattPowerBtn.setChecked(False)
             self.optpopupwindow.ui.BattPowerLabel.setText('BattAmp: 0%')
     def signalMota(self, bool, value): # Bool = btn, value = slider
         if bool:
-            self.bacqueue.put([-30, value])
-            self.opt_battaValue = value #
-            self.optpopupwindow.ui.BattPowerLabel.setText('BattAmp:' + '{:.0f}'.format(value) + '%')
-        if not bool or self.opt_battaValue == 0:
+            print('mota:', value)
+            self.bacqueue.put([-34, value])
+            self.opt_motaValue = value
+            self.optpopupwindow.ui.MotPowerLabel.setText('MotAmp:' + '{:.0f}'.format(value)+ '<sub>A</sub>')
+        if not bool or self.opt_motaValue == 0:
             self.opt_battaValue = 0
-            self.optpopupwindow.ui.BattPowerBtn.setChecked(False)
-            self.optpopupwindow.ui.BattPowerLabel.setText('BattAmp: 0%')
+            self.optpopupwindow.ui.MotPowerBtn.setChecked(False)
+            self.optpopupwindow.ui.MotPowerLabel.setText('MotAmp: 0<sub>A</sub>')
     def signalFlux(self, bool, value):
+        val = value/10 #500 int -> 50.0%
         if bool:
-            self.bacqueue.put([-31, value])
-            self.opt_fluxValue = value #
-            self.optpopupwindow.ui.FluxLabel.setText('Flux: ' + '{:.1f}'.format(value))
+            self.bacqueue.put([-31, val])
+            self.opt_fluxValue = val #
+            self.optpopupwindow.ui.FluxLabel.setText('Flux: ' + '{:.1f}'.format(val) + '%')
         if not bool or self.opt_fluxValue == 0: # and to both disable signals when slider to 0, and detect 0 for sql setup
+            self.bacqueue.put([-31, 0])
             self.opt_fluxValue = 0
             self.optpopupwindow.ui.FluxBtn.setChecked(False)
             self.optpopupwindow.ui.FluxLabel.setText('Flux: 0')
@@ -1179,13 +1220,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 writer.writerow(['Level 1 Access Code: ' + str(val)])
                 file.close()
         if level == 2:
-            self.optpopupwindow.ui.HackAccessLabel_code1.setText(str('2: ' + val))
+            self.optpopupwindow.ui.HackAccessLabel_code1.setText('2: ' + str(val))
             with open((os.path.abspath((os.path.dirname(__file__)))) + '/access_codes.csv', mode='w') as file:
                 writer = csv.writer(file, delimiter = ',')
                 writer.writerow(['Level 2 Access Code: ' + str(val)])
                 file.close()
         if level == 3:
-            self.optpopupwindow.ui.HackAccessLabel_code1.setText(str('3: ' + val))
+            self.optpopupwindow.ui.HackAccessLabel_code1.setText('3: ' + str(val))
             with open((os.path.abspath((os.path.dirname(__file__)))) + '/access_codes.csv', mode='w') as file:
                 writer = csv.writer(file, delimiter = ',')
                 writer.writerow(['Level 3 Access Code: ' + str(val)])
@@ -1227,7 +1268,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.optpopupwindow.ui.FluxBtn.isChecked(), self.optpopupwindow.ui.FluxSlider.value()))
         self.optpopupwindow.ui.BattPowerSlider.valueChanged.connect(lambda: self.signalBatta(
             self.optpopupwindow.ui.BattPowerBtn.isChecked(), self.optpopupwindow.ui.BattPowerSlider.value()))
-        self.optpopupwindow.ui.TripReset.clicked.connect(lambda: self.tripReset(self.optpopupwindow.ui.TripReset.isChecked()))
+        self.optpopupwindow.ui.MotPowerSlider.valueChanged.connect(lambda: self.signalMota(
+            self.optpopupwindow.ui.MotPowerBtn.isChecked(), self.optpopupwindow.ui.MotPowerSlider.value()))
+        self.optpopupwindow.ui.TripReset.clicked.connect(lambda: self.tripReset(True))
         self.optpopupwindow.ui.DiagnosticsUpdateBtn.toggled.connect(lambda:
             self.signalDiagnosticPoller(self.optpopupwindow.ui.DiagnosticsUpdateBtn.isChecked()))
         self.optpopupwindow.ui.HackAccessBtn.toggled.connect(lambda:
@@ -1443,7 +1486,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_bmsah += ampsec / 3600
             self.chargestate = False
         elif ampsec > 0:
-            self.flt_ah += ampsec / 3600
+            self.flt_ah -= ampsec / 3600
             self.flt_bmsah += ampsec / 3600
             self.flt_bmsahregen += abs(ampsec / 3600)
             # Set chargestarted to detect end of charge, and create new row in SQL lifestats to mark cycle.
@@ -1453,7 +1496,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_wh += wattsec / 3600
             self.flt_bmswh += wattsec / 3600
         elif wattsec > 0:
-            self.flt_wh += wattsec / 3600
+            self.flt_wh -= wattsec / 3600
             self.flt_bmswh += wattsec / 3600
             self.flt_bmswhregen += abs(wattsec / 3600)
         #
@@ -1848,7 +1891,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 payload = (self.lifestat_iter_ID, current_datetime, self.flt_ah, 0, self.flt_ahregen,
                            self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen,
                            self.flt_bmswh, self.flt_bmswhregen, self.flt_dist, True)
-                self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
+                self.sql.execute('replace into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
         except(TypeError, IndexError):  # In case of new/empty table, initialize:
             print('SQL Lifestats TypeError or IndexError. Is this your first run? Initializing database...')
             current_datetime = datetime.datetime.strftime(datetime.datetime.now(), '%D, %I:%M:%S')
