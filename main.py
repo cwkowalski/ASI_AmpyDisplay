@@ -485,6 +485,31 @@ class BACSerialProcess(Process):
             self.write_scaled('Maximum_Field_Weakening_Current', self.fluxcommand)
         elif self.workercmd == -33:  # Hack access level code.
             print('Beginning brute-force of BAC User Access Level codes.')
+            # todo: Spare Var 7, 8, 9 have access codes 1, 2, 3!
+            # Keys = Spare_430, Spare_431, Spare_432
+            # Check spare registers first:
+            code1_spare = self.read('Spare_430')
+            self.write('User_Access_Level', code1_spare)
+            read = self.read('User_Access_Level')
+            if read == 1:
+                print('User access code cracked! Level ', read, ' code is #', code1_spare)
+                self.data_to_emitter.send([read, code1_spare])
+                self.code1 = read
+            code2_spare = self.read('Spare_431')
+            self.write('User_Access_Level', code2_spare)
+            read = self.read('User_Access_Level')
+            if read == 2:
+                print('User access code cracked! Level ', read, ' code is #', code2_spare)
+                self.data_to_emitter.send([read, code2_spare])
+                self.code2 = read
+            code3_spare = self.read('Spare_432')
+            self.write('User_Access_Level', code3_spare)
+            read = self.read('User_Access_Level')
+            if read == 3:
+                print('User access code cracked! Level ', read, ' code is #', code3_spare)
+                self.data_to_emitter.send([read, code3_spare])
+                self.code3 = read
+            # If any of the above failed/deprecated, fallback to bruteforce, passes if code1 & code2 & code3 > 0
             val = 0
             running = True
             code1 = False
@@ -1481,6 +1506,17 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 array(self.list_bms_volts[-self.iter_bmsmsg_threshold:])
         wattsec = simps(power, x=x_interval, even='avg')
         #print('bms: ', ampsec, wattsec, '\n', ampsec/3600, wattsec/3600, '\n', power)
+        #todo: Wh used/rem counter is still reversed during charging.
+        #  bmshah/bmswh/__regen vars used for nothing.
+        #  FIXED: TripReset doesn't reset Time<sub>trip</sub> in #2 parameter display.
+        #  FIXED: Or CV<sub>min</sub>
+        #  FIXED: Options Pane BatAmp/MotAmp labels don't update on slider toggle.
+        #  FIXED: When button pressed, BattAmp slider updates MotorAmp label!
+        #  FIXED: MotAmp still doesn't with button.
+        #  Update options pane with values from profile or with special controller cmd.
+        #  Range label doesn't update.
+        #  FIXEDFlux label always updates to Flux: 0
+        #  FIXED: Check PrintScrn for slider fault error
         if ampsec <= 0:
             self.flt_ah += ampsec / 3600
             self.flt_bmsah += ampsec / 3600
