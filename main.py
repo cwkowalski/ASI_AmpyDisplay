@@ -1937,8 +1937,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.sql.execute('insert into lifestat values (?,?,?,?,?,?,?,?,?,?,?,?,?)', payload)
     #### HELPER FUNCTIONS ####
     def socreset(self):
+        if self.iter > 938:
+            val = 938
+        else:
+            val = self.iter
         self.flt_ah = self.battah * (
-                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-938:]) / 21)))  # battah * SOC used coefficient
+                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-val:]) / 21)))  # battah * SOC used coefficient
     def ms(self):  # helper function; nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
     def gettime(self):  #
