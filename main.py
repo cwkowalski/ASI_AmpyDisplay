@@ -22,9 +22,9 @@ from numpy import mean, isnan, array, prod, abs
 import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
 #DisableForDesktopDebug
-from platform import system as platsys
-if platsys() == 'Linux': # Need better solution for crossplatform dev...
-    import RPi.GPIO as GPIO
+#from platform import system as platsys
+#if platsys() == 'Linux': # Need better solution for crossplatform dev...
+import RPi.GPIO as GPIO
 # import psutil # Process = psutil.Process(getpid()) # To get memory use
 import sqlite3
 import argparse
@@ -593,8 +593,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.units = True
         else:
             print('Setup.csv \"units\" parameter not recognized!')
-        # "gpio, channel, rising/both/falling"
 
+        #
         super().__init__(*args, **kwargs)
         # DISPLAY AND VEHICLE VARIABLES
         self.bmsqueue = bmsqueue
@@ -639,11 +639,16 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Kd = 0.5*dead time
 
         #RPi GPIO Brightness for Makerplane 5" display (pin18) conditional for PC development
-        if platsys() == 'Linux':
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setup(18, GPIO.OUT)
-            self.pwm = GPIO.PWM(18, 100)
-            self.pwm.start(0)
+        #if platsys() == 'Linux':
+        #Makerplane Brightness Output
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(18, GPIO.OUT)
+        self.pwm = GPIO.PWM(18, 100)
+        self.pwm.start(0)
+        # Profile Selector Switch
+        GPIO.setup([22, 23], GPIO.IN, GPIO.PUD_DOWN)
+        GPIO.add_event_detect(22, GPIO.BOTH)
+        GPIO.add_event_detect(23, GPIO.BOTH)
 
         # Iterators and thresholds for averaging, interpolation, etc
         self.mean_length = 18750  # Average for trip_ floats over last 5 minutes (300s / 16ms)
@@ -667,8 +672,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setWindowFlags(QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint))
         self.statusBar().setVisible(False)
-        if platsys() == 'Linux':
-            QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.BlankCursor))
+        #if platsys() == 'Linux':
+        QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.BlankCursor))
         #QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         # Initialize stored profile/assist states;
         # First Setup SQL and populate lifestats, send optional controls to ASI
@@ -830,6 +835,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 self.floopProcess()
                 self.guiPrepare()
                 self.guiUpdate()
+                self.checkGPIO()
                 self.iter = 0
         if self.iter_sql >= self.iter_sql_threshold: # 3hz
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
@@ -1048,12 +1054,19 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.ui.Trip_3_1.setText(self.gui_dict['Trip_3_1'])
         self.ui.Trip_3_2.setText(self.gui_dict['Trip_3_2'])
         self.ui.Trip_3_3.setText(self.gui_dict['Trip_3_3'])
-    def checkGPIO(self, channel):
-        # todo: implement by iterating lines from setup.csv...
-        # init: GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        # GPIO.add_event_detect(channel, GPIO.RISING)
-        if GPIO.event_detected(channel):
-            print(channel, 'pressed.')
+    def checkGPIO(self):
+        #Profile Signaller.
+        # 22/23 for 3p switch. if A = 1, if not A and not B = 2, if B = 3
+        if GPIO.event_detected(22) or GPIO.event_detected(23):
+            pinA = GPIO.input(22)
+            pinB = GPIO.input(23)
+            if pinA:
+                self.signalProfile(True, -11)
+            if not pinA and not pinB:
+                self.signalProfile(True, -12)
+            if pinB:
+                self.signalProfile(True, -13)
+
     #### Main Display Command Functions and BAC Signals ####
     def tripRangeEnable(self, bool, range):
         # todo: check that slider dynamically updates self.flt_range_limit
@@ -1153,6 +1166,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         if button_bool == True:
             self.bacqueue.put([command])  # command is integer (-11 = profile1, -12 = profile2...)
         self.profile = command
+        if command == -11 and not self.ui.ProfileRb1.isChecked():
+            self.ui.ProfileRb1.setChecked(True)
+        elif command == -12 and not self.ui.ProfileRb2.isChecked():
+            self.ui.ProfileRb2.setChecked(True)
+        elif command == -13 and not self.ui.ProfileRb3.isChecked():
+            self.ui.ProfileRb2.setChecked(True)
         self.SQL_update_setup()
     def signalReverse(self, bool):
         if bool:
