@@ -827,15 +827,17 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         if self.iter >= self.iter_threshold:  # Ideally an odd number to pass even number of *intervals* to Simpsons quadratic integrator
             if self.first_floop:  # Needed so socreset(), SQL has data for first init
                 # Also will compensate for any self-discharge, charge since last start.
+                #todo: find a way around unitasker bool in such a frequently used loop
                 self.first_floop = False
                 self.floopProcess()  # of last -self.iter in lists from floop_to_list()
                 self.socreset()
                 # self.SQL_lifestat_upload() # todo: update fxn for new table, if not bmsinitted, upload...
             else:
                 self.floopProcess()
+                if self.setup['gpioprofile']: # If gpioprofiles in setup.csv, set profile with SPTT switch
+                    self.checkGPIO()
                 self.guiPrepare()
                 self.guiUpdate()
-                self.checkGPIO()
                 self.iter = 0
         if self.iter_sql >= self.iter_sql_threshold: # 3hz
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
