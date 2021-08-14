@@ -485,7 +485,6 @@ class BACSerialProcess(Process):
             self.write_scaled('Maximum_Field_Weakening_Current', self.fluxcommand)
         elif self.workercmd == -33:  # Hack access level code.
             print('Beginning brute-force of BAC User Access Level codes.')
-            # todo: Spare Var 7, 8, 9 have access codes 1, 2, 3!
             # Keys = Spare_430, Spare_431, Spare_432
             # Check spare registers first:
             code1_spare = self.read('Spare_430')
@@ -1146,7 +1145,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             #reset trip timer:
             self.start_time = self.ms()
             self.first_floop = True
-            QtCore.QTimer.singleShot(1000, lambda: self.socreset())
+            #QtCore.QTimer.singleShot(1000, lambda: self.socreset())
     def tripPidUpdateTune(self, kp, ki, kd):
         self.pid_kp = kp / 200  # /200 to convert QSlider int to float coefficient
         self.pid_ki = ki / 200
