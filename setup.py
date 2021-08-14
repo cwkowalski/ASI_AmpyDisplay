@@ -60,7 +60,7 @@ def read_setup(f):
             elif i[0] == 'pin':
                 output['pin'] = i[1].strip()
             elif i[0] == 'gpioprofiles':
-                output['gpioprofile'] == True
+                output['gpioprofile'] = True
         except IndexError:
             pass
     return output

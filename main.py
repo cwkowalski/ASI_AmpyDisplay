@@ -1538,24 +1538,23 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #  FIXEDFlux label always updates to Flux: 0
         #  FIXED: Check PrintScrn for slider fault error
         if ampsec <= 0:
-            self.flt_ah += ampsec / 3600
-            self.flt_bmsah += ampsec / 3600
+            self.flt_ah -= ampsec / 3600
+            self.flt_bmsah -= ampsec / 3600
             self.chargestate = False
         elif ampsec > 0:
             self.flt_ah -= ampsec / 3600
-            self.flt_bmsah += ampsec / 3600
+            self.flt_bmsah -= ampsec / 3600
             self.flt_bmsahregen += abs(ampsec / 3600)
             # Set chargestarted to detect end of charge, and create new row in SQL lifestats to mark cycle.
             self.chargestate = True
             self.SQL_lifestat_upload_bms()
         if wattsec <= 0:
-            self.flt_wh += wattsec / 3600
-            self.flt_bmswh += wattsec / 3600
+            self.flt_wh -= wattsec / 3600
+            self.flt_bmswh -= wattsec / 3600
         elif wattsec > 0:
             self.flt_wh -= wattsec / 3600
-            self.flt_bmswh += wattsec / 3600
+            self.flt_bmswh -= wattsec / 3600
             self.flt_bmswhregen += abs(wattsec / 3600)
-        #
         if not self.chargestate: # todo verify correct boolean
             self.SQL_lifestat_upload_bms()
     @QtCore.pyqtSlot()
