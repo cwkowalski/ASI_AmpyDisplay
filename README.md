@@ -1,7 +1,7 @@
 # ASI_AmpyDisplay
 This project aims to improve the functionality of the incredibly high-performance field-oriented controllers created by Accelerated Systems. Most EV hotrodders using these controllers have plenty of tinkering abilities but the programming skills required for amateurs to fully utilize the abilities of this controller, which is designed as a base system for commercial development, are nontrivial. Generic displays like Kingmeter don't display or control all relevant information, while more versatile universal displays like Justin Le's phenomenal CycleAnalyst require an external shunt instead of reading this controllers internal shunt values. The current branch in open Python is intended for use with piCore from Tinycore Linux and has been tested on a Raspberry Pi4 successfully. RPi was chosen since it has enough headroom for not only these display functions, but many other potential functions in future revisions. Planned future feature additions include GPS navigation powered by Marble with low-power lowjack logging and periodic IoT updates with push notifications as an alarm, GPIO control of lighting relays, a dashcam logger, and finally route-based trip simulations to predict energy required to reach a destination  and allocate power limits according to elevation/wind/vehicle physics/speed limits and maintain a consistent speed, 
 
-Discussion and suggestions welcomed here: https://endless-sphere.com/forums/viewtopic.php?f=2&t=108580
+Discussion and suggestions welcomed here, which also includes a detailed description of project goals, revision logs, and extra implementation advice: https://endless-sphere.com/forums/viewtopic.php?f=2&t=108580
 
 Display example with descriptions (800x480): https://i.imgur.com/HzOMMDx.jpg
 
