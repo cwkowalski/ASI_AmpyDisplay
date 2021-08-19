@@ -9,17 +9,15 @@ import BACModbus
 from setup import read_setup
 from jbdMain import JBD
 from ampy import Ui_MainWindow
-import serial
-import logging # logging
+#import serial
+#import logging # logging
 import modbus_tk_ampy.defines as cst
 from modbus_tk_ampy import modbus_rtu
 #from scipy import integrate
 from integrate import simps
-
 #from scipy.stats import linregress
 from numpy import mean, isnan, array, prod, abs
-
-import pdb  # pdb.set_trace() to add breakpoint
+#import pdb  # pdb.set_trace() to add breakpoint
 import simple_pid as pid
 #DisableForDesktopDebug
 #from platform import system as platsys
@@ -27,7 +25,7 @@ import simple_pid as pid
 import RPi.GPIO as GPIO
 # import psutil # Process = psutil.Process(getpid()) # To get memory use
 import sqlite3
-import argparse
+#import argparse
 from number_pad import numberPopup
 from options_dialog import optionsDialog
 from bms_dialog import bmsDialog
@@ -76,6 +74,9 @@ from bmscfg_dialog import bmscfgDialog
 # sys.stdout = f
 # sys.stdout = orig_stdout
 # f.close()
+
+#############################
+# 139mA draw controller + display at 76.719 volts. NO running lights.
 
 class BACProcessEmitter(QtCore.QThread):
     bac_msg = QtCore.pyqtSignal(object)
@@ -272,7 +273,13 @@ class BACSerialProcess(Process):
                 elif message[0] == -34:
                     self.workercmd = message[0]
                     self.motamps = message[1]
-            self.run_command()
+            try: # Try to poll BAC. If problem with connection, reset and try again.
+                self.run_command()
+            except Exception as e:
+                print('BACSerial exception: ', e)
+                self.client.close()
+                self.client.open()
+                self.run_command()
 
             # print('worker: ', self.workercmd)
             # time.sleep(.2)
@@ -401,12 +408,15 @@ class BACSerialProcess(Process):
         elif self.workercmd == -26:
             print('Motor Position Sensor Type set Hall')
             self.write('Motor_Position_Sensor_Type', 0)
+            self.workercmd = 0
         elif self.workercmd == -27:
             print('Motor Position Sensor Type set Hall start & Sensorless')
             self.write('Motor_Position_Sensor_Type', 1)
+            self.workercmd = 0
         elif self.workercmd == -28:
             print('Motor Position Sensor Type set Sensorless Only')
             self.write('Motor_Position_Sensor_Type', 2)
+            self.workercmd = 0
         elif self.workercmd == -29:  # Diagnostics Mode-- Poller
             input_voltages = self.reads('Throttle_Voltage', 8)
             EbikeFlags = self.read('Ebike_Flags')
@@ -483,6 +493,7 @@ class BACSerialProcess(Process):
             self.workercmd = 0
         elif self.workercmd == -31:
             self.write_scaled('Maximum_Field_Weakening_Current', self.fluxcommand)
+            self.workercmd = 0
         elif self.workercmd == -33:  # Hack access level code.
             print('Beginning brute-force of BAC User Access Level codes.')
             # Keys = Spare_430, Spare_431, Spare_432
@@ -538,6 +549,7 @@ class BACSerialProcess(Process):
                     running = False
         elif self.workercmd == -34:
             self.write_scaled('Rated_Motor_Current', self.motamps)
+            self.workercmd = 0
 
     def read(self, address):
         output = self.client.execute(self.BAC.address, cst.READ_HOLDING_REGISTERS, self.BAC.ObdicAddress[address], 1)

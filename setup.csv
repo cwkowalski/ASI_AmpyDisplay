@@ -17,7 +17,7 @@ profile3, Maximum_Braking_Current, 45.455
 profile3, Maximum_Braking_Torque, 45.455
 
 gpioprofiles
-wheel, 1927.225
+wheel, 1226.91
 battery, 21, 14, 42
 controllerport, /dev/ttyUSB1
 bmsport, /dev/ttyUSB0
