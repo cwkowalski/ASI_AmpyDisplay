@@ -126,7 +126,7 @@ class BACModbus():
             if bool(bit) == True:
                 output.append(self.ObdicBit[address][position])
         return output
-    def floop_parse(self, rawdata):
+    def floop_parse(self, rawdata): # todo: delete, moved to BACSerialEmitter
         data = {'Faults': self.bitflags(0, 'Faults'), 'Powerboard_Temperature': rawdata[1],
                     'Vehicle_Speed': rawdata[2] / 256, 'Motor_Temperature': rawdata[3],
                     'Motor_Current': rawdata[4] / 32, 'Motor_RPM': rawdata[5],

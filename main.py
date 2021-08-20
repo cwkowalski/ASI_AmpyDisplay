@@ -604,7 +604,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.units = True
         else:
             print('Setup.csv \"units\" parameter not recognized!')
-
+        print('self.units:', self.units, setup['units'])
         #
         super().__init__(*args, **kwargs)
         # DISPLAY AND VEHICLE VARIABLES
@@ -822,6 +822,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     #### Fast Loop (FLOOP) Processing ####
     def floopReceive(self, message):  # You can update the UI from here.
         self.gettime()  # Calculate msg interval, increment iterators
+        # todo: gettime should be called in the BACProc or maybe emitter, to ensure accuracy in multiproc version
         if self.speedparse:
             self.floop = BAC.floop_parse(message)
         else:
@@ -840,11 +841,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 # Also will compensate for any self-discharge, charge since last start.
                 #todo: find a way around unitasker bool in such a frequently used loop
                 self.first_floop = False
-                self.floopProcess()  # of last -self.iter in lists from floop_to_list()
+                self.floopProcessBasic()  # of last -self.iter in lists from floop_to_list()
                 self.socreset()
                 # self.SQL_lifestat_upload() # todo: update fxn for new table, if not bmsinitted, upload...
             else:
-                self.floopProcess()
+                self.floopProcessBasic()
                 if self.setup['gpioprofile']: # If gpioprofiles in setup.csv, set profile with SPTT switch
                     self.checkGPIO()
                 self.guiPrepare()
@@ -856,6 +857,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         if self.iter_bmsmsg >= self.iter_bmsmsg_threshold: #0.5hz
             self.SQL_update_setup()
             self.SQL_lifestat_upload_bms()
+            self.floopProcessLong()
             self.iter_bmsmsg = 0
         ##################
         # Message indices:
@@ -869,10 +871,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # [7] = 265 = Battery_Voltage
         # [8] = 266 = Battery_Current
     def floopToLists(self):  # save each floop to instance attribute lists for trip stats
-        if self.units:
-            self.list_speed.append(self.floop['Vehicle_Speed'])
+        if self.units: # todo: use RPM/wheelcircum instead. Consider reducing unused floop_parse for cpu.
+            self.list_speed.append(self.floop['Vehicle_Speed']) # 0.621371192 is Km -> Mph conversion
         else:
-            self.list_speed.append(self.floop['Vehicle_Speed'] * 0.621371192)  # 0.621371192 is Km -> Mph conversion
+            self.list_speed.append(self.floop['Vehicle_Speed'] * 0.621371192)
+            print('FloopToLists:' , )
         self.list_motor_temp.append(self.floop['Motor_Temperature'])
         self.list_motor_amps.append(self.floop['Motor_Current'])
         self.list_batt_volts.append(self.floop['Battery_Voltage'])
@@ -887,7 +890,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.list_motor_rpm = self.list_motor_rpm[-self.mean_length:]
         self.list_whmi = self.list_whmi[-self.iter_interp_threshold:]  # From integral; self.mean_length/self.iter threshold = 986.842
         self.list_floop_interval = self.list_floop_interval[-self.mean_length:]
-    def floopProcess(self):
+    def floopProcessBasic(self):
         x_interval = array([sum(([(self.list_floop_interval[-self.iter:])[:i] for i in range(1, self.iter + 1, 1)])
                                 [i]) for i in range(self.iter)])  # calc cumulative time from list of intervals
         try:
@@ -897,7 +900,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             y_revsec = array([0 for i in range(len(x_interval))])
         # Integrate distance fromm speed and increment distance counter
         revolutions = simps(y_revsec, x=x_interval, even='avg')
-        if isnan(revolutions):
+        if isnan(revolutions) or self.floop['Motor_RPM'] > 2000: # RPM >65k in reverse
             distance = 0
         else:
             distance = (revolutions * self.wheelcircum) / (1609344)  ## miles
@@ -924,13 +927,14 @@ class AmpyDisplay(QtWidgets.QMainWindow):
 
         self.flt_soc = ((self.battah - self.flt_ah) / self.battah) * 100  # Percent SOC from Ah (charge)
         self.list_whmi.append(self.divzero(self.flt_wh, self.flt_dist))
+        self.flt_range = self.divzero((self.get_battwh()), self.flt_whmi_inst)  # Wh for range to account for eff.
+        self.flt_batt_volts_drop = self.flt_batt_volts_min - self.flt_batt_volts_max
+    def floopProcessLong(self):
         self.flt_whmi_avg = mean(self.list_whmi[-self.iter_interp_threshold:])  # 18750 / 19 self.iter =
         self.flt_whmi_inst = mean(self.list_whmi[-3:])
-        self.flt_range = self.divzero((self.get_battwh()), self.flt_whmi_inst)  # Wh for range to account for eff.
         self.flt_batt_volts = mean(self.list_batt_volts)
         self.flt_batt_volts_max = max(self.list_batt_volts)
         self.flt_batt_volts_min = min(self.list_batt_volts)
-        self.flt_batt_volts_drop = self.flt_batt_volts_min - self.flt_batt_volts_max
         self.flt_batt_amps_max = max(self.list_batt_amps)
         self.flt_motor_amps = mean(self.list_motor_amps[-self.mean_length:])
         self.flt_motor_temp_max = max(self.list_motor_temp)
@@ -943,11 +947,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.gui_dict['BatteryVoltageBar'] = int(self.floop['Battery_Voltage'])
         self.gui_dict['BatterySOCLabel'] = 'SOC: ' + '{:.1f}'.format(self.flt_soc)
         self.gui_dict['BatterySOCBar'] = int(self.flt_soc)
-        self.gui_dict['SpeedGaugeLabel'] = '{:.0f}'.format(self.floop['Vehicle_Speed'])
-        self.gui_dict['PowerGaugeLabel'] = '{:.2f}'.format((self.floop['Battery_Current'] *
-                                                            self.floop['Battery_Voltage']) / 1000)
+        self.gui_dict['SpeedGaugeLabel'] = '{:.0f}'.format(self.floop['Vehicle_Speed']) # todo: use RPM
         self.gui_dict['SpeedGauge'] = self.floop['Vehicle_Speed']
-        self.gui_dict['PowerGauge'] = self.floop['Battery_Current'] * self.floop['Battery_Voltage']
+        power = self.floop['Battery_Current'] * self.floop['Battery_Voltage'] / 1000
+        self.gui_dict['PowerGaugeLabel'] = '{:.2f}'.format(power)
+        self.gui_dict['PowerGauge'] = power
         if self.units:
             self.gui_dict['WhmiLabel'] = '{:.1f}'.format(self.flt_whmi_inst) + '<sub>Wh/km</sub>'
         else:
@@ -1073,6 +1077,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         if GPIO.event_detected(22) or GPIO.event_detected(23):
             pinA = GPIO.input(22)
             pinB = GPIO.input(23)
+            print('GPIO event; pinA: ', pinA, 'pinB: ', pinB)
             if pinA:
                 self.signalProfile(True, -11)
             if not pinA and not pinB:
