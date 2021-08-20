@@ -946,9 +946,9 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.gui_dict['BatteryVoltageBar'] = int(self.floop['Battery_Voltage'])
         self.gui_dict['BatterySOCLabel'] = 'SOC: ' + '{:.1f}'.format(self.flt_soc)
         self.gui_dict['BatterySOCBar'] = int(self.flt_soc)
-        self.gui_dict['SpeedGaugeLabel'] = '{:.0f}'.format(self.floop['Vehicle_Speed']) # todo: use RPM
-        self.gui_dict['SpeedGauge'] = self.floop['Vehicle_Speed']
-        power = self.floop['Battery_Current'] * self.floop['Battery_Voltage'] / 1000
+        self.gui_dict['SpeedGaugeLabel'] = '{:.0f}'.format(self.list_speed[-1]) # todo: use RPM
+        self.gui_dict['SpeedGauge'] = self.list_speed[-1]
+        power = (self.floop['Battery_Current'] * self.floop['Battery_Voltage']) / 1000
         self.gui_dict['PowerGaugeLabel'] = '{:.2f}'.format(power)
         self.gui_dict['PowerGauge'] = power
         if self.units:
