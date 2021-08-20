@@ -6,7 +6,7 @@ profile1, Maximum_Braking_Torque, 22.222
 
 profile2, Maximum_Field_Weakening_Current, 0
 profile2, Rated_Motor_Current, 220
-profile2, Remote_Maximum_Battery_Current_Limit, 200
+profile2, Remote_Maximum_Battery_Current_Limit, 125
 profile2, Maximum_Braking_Current, 45.455
 profile2, Maximum_Braking_Torque, 45.455
 
