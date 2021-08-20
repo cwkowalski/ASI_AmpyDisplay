@@ -875,7 +875,6 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.list_speed.append(self.floop['Vehicle_Speed']) # 0.621371192 is Km -> Mph conversion
         else:
             self.list_speed.append(self.floop['Vehicle_Speed'] * 0.621371192)
-            print('FloopToLists:' , )
         self.list_motor_temp.append(self.floop['Motor_Temperature'])
         self.list_motor_amps.append(self.floop['Motor_Current'])
         self.list_batt_volts.append(self.floop['Battery_Voltage'])
