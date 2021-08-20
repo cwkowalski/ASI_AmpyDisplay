@@ -1110,6 +1110,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                         if 'Battery_Current_Limit' in string:
                             indice = (i, ii+1)
                     except Exception as e:
+                        print('profile1;', e)
                         pass
             max_amps = self.setup['profile1'][indice[0]][indice[1]]
         elif self.profile == -12:
@@ -1122,6 +1123,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                         if 'Battery_Current_Limit' in string:
                             indice = (i, ii+1)
                     except Exception as e:
+                        print('profile2;', e)
                         pass
             max_amps = self.setup['profile2'][indice[0]][indice[1]]
         elif self.profile == -13:
@@ -1134,6 +1136,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                         if 'Battery_Current_Limit' in string:
                             indice = (i, ii+1)
                     except Exception as e:
+                        print('profile3;', e)
                         pass
             max_amps = self.setup['profile3'][indice[0]][indice[1]]
         range_div = ((self.get_battwh()) / (self.flt_whmi_inst)) / self.flt_range_limit
@@ -1656,13 +1659,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         try:
             self.bmspopupwindow.bmsEepromUpdate(self.processEmitter.eepromMsg)
         except AttributeError as e:
-            print(e)
+            print('BMSReceiveEeprom1:', e)
             pass
         try:
             #self.bmscfgeepromcmd.emit(self.bmsemitter.eepromMsg)
             self.bmscfgpopupwindow.bmscfgGuiUpdate(self.processEmitter.eepromMsg)
         except AttributeError as e:
-            print(e)
+            print('BMSReceiveEeprom2:', e)
             pass
         if self.bmseeprom_initter:  # Now that EEPROM/Basic are read, allow BMS window popup.
             print('MainWindow has received BMS intialization data from subprocess.')
