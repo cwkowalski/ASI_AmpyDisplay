@@ -1186,13 +1186,13 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         if button_bool == True:
             self.bacqueue.put([command])  # command is integer (-11 = profile1, -12 = profile2...)
         self.profile = command
-        if command == -11 and not self.ui.ProfileRb1.isChecked():
-            self.ui.ProfileRb1.setChecked(True)
-        elif command == -12 and not self.ui.ProfileRb2.isChecked():
-            self.ui.ProfileRb2.setChecked(True)
-        elif command == -13 and not self.ui.ProfileRb3.isChecked():
-            self.ui.ProfileRb2.setChecked(True)
-        self.SQL_update_setup()
+        #if command == -11: # Added for GPIO, debugging recursion....
+        #    self.ui.ProfileRb1.setChecked(True)
+        #elif command == -12:
+        #    self.ui.ProfileRb2.setChecked(True)
+        #elif command == -13:
+        #    self.ui.ProfileRb2.setChecked(True)
+        #self.SQL_update_setup() # not needed; do each 2sec
     def signalReverse(self, bool):
         if bool:
             self.ui.Reverse.setText('R')
