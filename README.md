@@ -79,8 +79,8 @@ All you need is a Raspberry Pi, at least one UART/usb serial output for the cont
     https://www.adafruit.com/product/3553
     https://www.adafruit.com/product/3560
 6. If accurate time-of-day is desired you will have to add an RTC, e.g. this module is especially precise, using an onboard temp sensor for drift compensation; https://www.adafruit.com/product/4282
-7. Case: https://www.thingiverse.com/thing:4752509
-8. An alternative slim case for the display only is in development, if internally mounting the Pi is preferred.
+7. Case: https://www.thingiverse.com/thing:4752509 This one is big but holds the Pi and display together so you can use the header. I also made a much slimmer remix of it for just the display that is preferable if you can find a way to mount the Pi internally.
+
 
 ### Development Notes and Customization Tips
 * The GUI refresh is tied directly to the controller serial updates which are a 16ms interval, since it does not make sense to update the GUI without any new information. A few parameters including Watt-hour calculation require at least 3 updates for precise Simpsons-method integration so this results in approximately 21fps by default. This update rate, the SQL update rate, the number of updates used for averages, etc can be changed with the MainWindow class iterator thresholds attributes in main.py (`self.iter_xxx` and `self.mean_length`). For example, if you have a fast Pi4B doing nothing else and don't mind tripling the modest CPU usage to update the speedo and power gauges at ~60fps set MainWindow `self.iter_threshold=1` instead of `=3`.
