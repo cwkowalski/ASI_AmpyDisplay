@@ -899,7 +899,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             y_revsec = array([0 for i in range(len(x_interval))])
         # Integrate distance fromm speed and increment distance counter
         revolutions = simps(y_revsec, x=x_interval, even='avg')
-        if isnan(revolutions) or self.floop['Motor_RPM'] > 2000: # RPM >65k in reverse
+        if isnan(revolutions) or self.list_motor_rpm[-self.iter:] > 2000: # RPM >65k in reverse
             distance = 0
         else:
             distance = (revolutions * self.wheelcircum) / (1609344)  ## miles
@@ -923,10 +923,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         elif ampsec < 0:
             self.flt_ah += ampsec / 3600
             self.flt_ahregen += abs(wattsec)
+        print('x_interval: ', x_interval, 'y_revsec: ', y_revsec, 'revolutions: ', revolutions, 'y_power: ', y_power,
+              'y_current: ', y_current, 'wattsec: ', wattsec, 'ampsec: ', ampsec)
 
         self.flt_soc = ((self.battah - self.flt_ah) / self.battah) * 100  # Percent SOC from Ah (charge)
         self.list_whmi.append(self.divzero(self.flt_wh, self.flt_dist))
-        self.flt_range = self.divzero((self.get_battwh()), self.flt_whmi_inst)  # Wh for range to account for eff.
+        self.flt_range = self.divzero(self.flt_wh, self.flt_whmi_inst)  # Wh for range to account for eff.
         self.flt_batt_volts_drop = self.flt_batt_volts_min - self.flt_batt_volts_max
     def floopProcessLong(self):
         self.flt_whmi_avg = mean(self.list_whmi[-self.iter_interp_threshold:])  # 18750 / 19 self.iter =
