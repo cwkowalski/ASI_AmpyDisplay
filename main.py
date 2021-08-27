@@ -899,7 +899,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             y_revsec = array([0 for i in range(len(x_interval))])
         # Integrate distance fromm speed and increment distance counter
         revolutions = simps(y_revsec, x=x_interval, even='avg')
-        if isnan(revolutions) or self.list_motor_rpm[-self.iter:] > 2000: # RPM >65k in reverse
+        if isnan(revolutions) or max(self.list_motor_rpm[-self.iter:]) > 2000: # RPM >65k in reverse
             distance = 0
         else:
             distance = (revolutions * self.wheelcircum) / (1609344)  ## miles
