@@ -915,14 +915,14 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_wh += wattsec / 3600  # /(60x60) = Watt-hour
         elif wattsec < 0:
             self.flt_wh += wattsec / 3600
-            self.flt_whregen += abs(wattsec)
+            self.flt_whregen += abs(wattsec) / 3600
         # Integrate amp-seconds from speed and increment amp-hour counter
         ampsec = simps(y_current, x=x_interval, even='avg')
         if ampsec >= 0:
             self.flt_ah += ampsec / 3600
         elif ampsec < 0:
             self.flt_ah += ampsec / 3600
-            self.flt_ahregen += abs(wattsec)
+            self.flt_ahregen += abs(wattsec) / 3600
         print('x_interval: ', x_interval, 'y_revsec: ', y_revsec, 'revolutions: ', revolutions, 'y_power: ', y_power,
               'y_current: ', y_current, 'wattsec: ', wattsec, 'ampsec: ', ampsec)
 
