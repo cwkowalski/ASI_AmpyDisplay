@@ -894,12 +894,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                                 [i]) for i in range(self.iter)])  # calc cumulative time from list of intervals
         try:
             y_revsec = array(
-            [(self.list_motor_rpm[-self.iter:])[i] / 60 for i in range(self.iter)])  # revolutions per second to match x
+            [(self.list_motor_rpm[-self.iter:])[i] / 60 for i in range(self.iter)])  # revolutions per second to match x, detect reverse RPM (65530) clipping
         except IndexError:
             y_revsec = array([0 for i in range(len(x_interval))])
         # Integrate distance fromm speed and increment distance counter
         revolutions = simps(y_revsec, x=x_interval, even='avg')
-        if isnan(revolutions) or max(self.list_motor_rpm[-self.iter:]) > 2000: # RPM >65k in reverse
+        if isnan(revolutions):
             distance = 0
         else:
             distance = (revolutions * self.wheelcircum) / (1609344)  ## miles

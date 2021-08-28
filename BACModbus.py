@@ -128,10 +128,10 @@ class BACModbus():
         return output
     def floop_parse(self, rawdata): # todo: delete, moved to BACSerialEmitter
         data = {'Faults': self.bitflags(0, 'Faults'), 'Powerboard_Temperature': rawdata[1],
-                    'Vehicle_Speed': rawdata[2] / 256, 'Motor_Temperature': rawdata[3],
-                    'Motor_Current': rawdata[4] / 32, 'Motor_RPM': rawdata[5],
+                    'Vehicle_Speed': self.twocomp(rawdata[2], 16) / 256, 'Motor_Temperature': rawdata[3],
+                    'Motor_Current': self.twocomp(rawdata[4], 16) / 32, 'Motor_RPM': self.twocomp(rawdata[5], 16),
                     'Percent_Of_Rated_RPM': rawdata[6] / 40.96, 'Battery_Voltage': rawdata[7] / 32,
-                    'Battery_Current': rawdata[8] / 32}
+                    'Battery_Current': self.twocomp(rawdata[8], 16) / 32}
         return data
     def parse(self, rawdata, address):
         # Parse register(s)-- return bitstrings or scaled values as appropriate in dict of [label name]:val OR [strings]
@@ -149,6 +149,20 @@ class BACModbus():
         for index, label in enumerate(labels):
             procdata[label] = data[index]
         return procdata
+    def twocomp(self, val_int, val_size):
+        # Calculate the 2's complement
+        # avoid overflow
+        if not -1 << val_size - 1 <= val_int < 1 << val_size:
+            err_msg = 'BACModbus: floop_parse: twocomp: could not compute two\'s complement for %i on %i bits'
+            err_msg %= (val_int, val_size)
+            raise ValueError(err_msg)
+        # test negative int
+        if val_int < 0:
+            val_int += 1 << val_size
+        # test MSB (do two's comp if set)
+        elif val_int & (1 << (val_size - 1)):
+            val_int -= 1 << val_size
+        return val_int
     def socmapper(self, cell_v):
         return float(self.socmap.interp1d(cell_v))
 
