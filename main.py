@@ -923,13 +923,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         elif ampsec < 0:
             self.flt_ah += ampsec / 3600
             self.flt_ahregen += abs(wattsec) / 3600
-        print('x_interval: ', x_interval, 'y_revsec: ', y_revsec, 'revolutions: ', revolutions, 'y_power: ', y_power,
-              'y_current: ', y_current, 'wattsec: ', wattsec, 'ampsec: ', ampsec)
-
         self.flt_soc = ((self.battah - self.flt_ah) / self.battah) * 100  # Percent SOC from Ah (charge)
         self.list_whmi.append(self.divzero(self.flt_wh, self.flt_dist))
         self.flt_range = self.divzero(self.flt_wh, self.flt_whmi_inst)  # Wh for range to account for eff.
         self.flt_batt_volts_drop = self.flt_batt_volts_min - self.flt_batt_volts_max
+        print('list_whmi: ', self.list_whmi[-self.iter], 'flt_wh: ', self.flt_wh, 'flt_dist: ', self.flt_dist, 'revolutions: ', revolutions)
     def floopProcessLong(self):
         self.flt_whmi_avg = mean(self.list_whmi[-self.iter_interp_threshold:])  # 18750 / 19 self.iter =
         self.flt_whmi_inst = mean(self.list_whmi[-3:])
@@ -1049,7 +1047,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.Trip_3_2_prefix.setText('CV<sub>avg</sub>:')
             self.ui.Trip_3_3_prefix.setText('CV<sub>min</sub>:')
 
-        self.ui.WhmiBar.setValue(int(self.flt_whmi_inst)) # Breaking dict rules but-- performance trumps them.
+        self.ui.WhmiBar.setValue(int(self.flt_whmi_inst)) # Breaking dict format style but performance wins out.
         self.ui.WhmiLabel.setText(self.gui_dict['WhmiLabel'])
         self.ui.MotorTemperatureLabel.setText(self.gui_dict['MotorTemperatureLabel'])
         self.ui.MotorTemperatureBar.setValue(self.gui_dict['MotorTemperatureBar'])
