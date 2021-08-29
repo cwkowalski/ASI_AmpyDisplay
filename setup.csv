@@ -18,7 +18,7 @@ profile3, Maximum_Braking_Torque, 45.455
 
 gpioprofiles
 wheel, 1927.225
-battery, 21, 14, 42
+battery, 21, 14, 42, 3050
 controllerport, /dev/ttyUSB1
 bmsport, /dev/ttyUSB0
 pin, 58008

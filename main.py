@@ -594,6 +594,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.battseries = setup['battery'][0]
         self.battparallel = setup['battery'][1]
         self.battah = setup['battery'][2]
+        self.battwh = setup['battery'][3]
         self.wheelcircum = setup['wheel']  # In mm
         self.speedparse = True
         self.first_floop = True
@@ -2029,8 +2030,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # Many cell experiments are listed on https://lygte-info.dk/,
         # and can be digitzed with https://automeris.io/WebPlotDigitizer/
         if self.flt_ah > 0:
-            return BAC.whmap.interp1d(BAC.wh_a2v_map.interp1d(self.flt_ah / self.battparallel))*self.battseries*self.battparallel
-        elif self.flt_ah == 0:
+            return BAC.wh_ah2wh_map.interp1d(self.flt_ah / self.battparallel)*self.battseries*self.battparallel
+        elif self.flt_ah <= 0:
             return BAC.whmap.interp1d(4.2)*self.battseries*self.battparallel
     def strfdelta(self, tdelta, fmt): # Print formatted time from timedelta object, desired format
         d = {"days": tdelta.days}

@@ -50,7 +50,7 @@ def read_setup(f):
             elif i[0] == 'wheel' or i[0] == 'whl':
                 output['wheel'] = float(i[1])
             elif i[0] == 'battery' or i[0] == 'batt':
-                output['battery'] = (int(i[1]), int(i[2]), float(i[3]))
+                output['battery'] = (int(i[1]), int(i[2]), float(i[3]), int(i[4]))
             elif i[0] == 'controllerport' or i[0] == 'cpt' or i[0] == 'bacport':
                 output['cpt'] = i[1].strip()
             elif i[0] == 'bmsport' or i[0] == 'bpt':

@@ -46,7 +46,7 @@ class BACModbus():
                 self.socmap_ah.append(float(row[0]))
                 self.socmap_volts.append(float(row[1]))
                 self.socmap_soc.append(float(row[2]))
-                self.socmap_wh.append(float(row[0]))
+                self.socmap_wh.append(float(row[3]))
         self.socmap_volts = array(self.socmap_volts)
         self.socmap_soc = array(self.socmap_soc)
         self.socmap_ah = array(self.socmap_ah)
@@ -59,7 +59,7 @@ class BACModbus():
             #self.socmap_wh.append(self.socmap_volts[])
         self.socmap = interp(self.socmap_volts, self.socmap_soc)
         self.ahmap = interp(self.socmap_volts, self.socmap_ah)
-        self.wh_a2v_map = interp(self.socmap_ah, self.socmap_volts)
+        self.wh_ah2wh_map = interp(self.socmap_ah, self.socmap_wh)
         self.whmap = interp(self.socmap_volts, self.socmap_wh)
 
         for parent in Obdic:  # InternalAppEntity/Parameters/ParameterDescription children
