@@ -22,7 +22,7 @@ import simple_pid as pid
 #DisableForDesktopDebug
 #from platform import system as platsys
 #if platsys() == 'Linux': # Need better solution for crossplatform dev...
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 # import psutil # Process = psutil.Process(getpid()) # To get memory use
 import sqlite3
 #import argparse
@@ -2010,7 +2010,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         else:
             val = self.iter
         self.flt_ah = self.battah * (
-                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-val:]))))  # battah * SOC used coefficient
+                    1 - (0.01 * BAC.socmapper(mean(self.list_batt_volts[-val:]) / 21)))  # battah * SOC used coefficient
     def ms(self):  # helper function; nanosecond-scale time in milli units, for comparisons
         return time.time_ns() / 1000000000  # Returns time to nanoseconds in units seconds
     def gettime(self):  #
