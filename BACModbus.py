@@ -158,7 +158,3 @@ class BACModbus():
         return val_int
     def socmapper(self, cell_v):
         return float(self.socmap.interp1d(cell_v))
-
-    import numpy as np
-    from math import sqrt
-    print('debughook')
