@@ -816,6 +816,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.time1 = self.ms()
         self.time2 = self.ms()
         # self.timeinterval = 0.016 #
+        self.displayinverter(self.displayinvert_bool) # Restore last display inversion state.
         self.show()
 
     @QtCore.pyqtSlot(object)
@@ -925,11 +926,12 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.flt_ahregen += abs(wattsec) / 3600
         self.flt_soc = ((self.battah - self.flt_ah) / self.battah) * 100  # Percent SOC from Ah (charge)
         self.list_whmi.append(self.divzero(self.flt_wh, self.flt_dist))
+        self.flt_whmi_inst = mean(self.list_whmi[-3:])
         self.flt_range = self.divzero(self.flt_wh, self.flt_whmi_inst)  # Wh for range to account for eff.
         self.flt_batt_volts_drop = self.flt_batt_volts_min - self.flt_batt_volts_max
-        self.flt_whmi_inst = mean(self.list_whmi[-3:])
         try:
-            print(self.iter, 'list_whmi: ', self.list_whmi[-self.iter], 'flt_wh: ', self.flt_wh, 'flt_dist: ', self.flt_dist, 'revolutions: ', revolutions)
+            print(self.iter, 'list_whmi: ', self.list_whmi[-self.iter], 'flt_wh: ', self.flt_wh, 'flt_dist: ', self.flt_dist,
+                  'revolutions: ', revolutions, 'y_revsec: ', y_revsec, 'distance: ', distance, 'y_power: ', y_power, 'wattsec: ', wattsec,)
         except IndexError:
             pass
     def floopProcessLong(self):
@@ -965,10 +967,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.gui_dict['Trip_1_3'] = '{:.1f}'.format(self.flt_ah)
             self.gui_dict['Trip_2_1'] = '{:.0f}'.format(self.get_battwh())
             #self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_inst)
-            self.gui_dict['Trip_2_2'] = '{:.1f}'.format(self.flt_whmi_avg / self.get_battwh())
+            self.gui_dict['Trip_2_2'] = '{:.2f}'.format(self.flt_whmi_avg / self.get_battwh())
             self.gui_dict['Trip_2_3'] = '{:.1f}'.format(self.battah - self.flt_ah)
             self.gui_dict['Trip_3_1'] = '{:.0f}'.format(self.flt_whregen)
-            self.gui_dict['Trip_3_2'] = '{:.0f}'.format(self.flt_dist)
+            self.gui_dict['Trip_3_2'] = '{:.2f}'.format(self.flt_dist)
             self.gui_dict['Trip_3_3'] = '{:.1f}'.format(self.flt_ahregen)
         if self.trip_selector == 2:
             # Get indexes where speed > 0
@@ -1720,18 +1722,18 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.BatteryVoltageDropLabel.setStyleSheet("QLabel{font: 16pt \"Luxi Mono\";font-weight: bold;\n"
             "color: white}")
             self.ui.BatteryVoltageLine.setStyleSheet("QObject{color:white}")
-            self.ui.BatterySOCBar.setStyleSheet("QProgressBar::chunk {background-color: white;}\n"
+            self.ui.BatterySOCBar.setStyleSheet("QProgressBar::chunk {background-color: black;}\n"
             "QProgressBar {border-style: solid; border-color: gray; background-color: gray; border-width: 3px; border-radius: 6px}")
             self.ui.BatterySOCLabel.setStyleSheet("QLabel{font: 25pt \"Luxi Mono\";font-weight: bold;\n"
             "color: white}")
             self.ui.MotorTemperatureLine.setStyleSheet("QObject{color:white}")
             self.ui.MotorTemperatureLine_2.setStyleSheet("QObject{color:white}")
             self.ui.MotorTemperatureBar.setStyleSheet("QProgressBar::chunk {margin-top: 3px; margin-bottom: 3px; background-color: white;}\n"
-            "QProgressBar {border-style: solid; border-color: black; background-color: rgba(0,0,0,0); border-width: 3px; border-radius: 6px}")
+            "QProgressBar {border-style: solid; border-color: black; background-color: gray; border-width: 3px; border-radius: 6px}")
             self.ui.BatteryTemperatureBar.setStyleSheet(" QProgressBar::chunk {\n"
-                                                     "     background-color: rgba(0,0,0,150);}\n"
+                                                     "     background-color: black;}\n"
                                                      "QProgressBar {\n"
-                                                     "     background-color: rgba(0,0,0,0);\n"
+                                                     "     background-color: gray;\n"
                                                      "    border-style: solid;\n"
                                                      "    border-color: gray;\n"
                                                      "    border-width: 3px;\n"
@@ -1754,6 +1756,18 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.ProfileRb1.setStyleSheet("QPushButton{border: none; background: transparent;}")
             self.ui.ProfileRb2.setStyleSheet("QPushButton{border: none; background: transparent;}")
             self.ui.ProfileRb3.setStyleSheet("QPushButton{border: none; background: transparent;}")
+            self.ui.TripBox.setStyleSheet("QGroupBox{background: solid white; border: 5px solid black; border-radius: 10px; margin-top: 50px;}"
+                                        "QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; left: 25px;"
+                                        "padding: -25 0px 0 0px;}"
+                                        "QLabel{font: 18pt \"Luxi Mono\"; font-weight: bold; color: white} " \
+                                        "QCheckBox::indicator {width: 60px; height: 60px; } " \
+                                        "QSlider::groove:horizontal {border: 1px solid; height: 30px; margin: 0px;}" \
+                                        "QSlider::handle:horizontal {background-color: black; border: 5px solid; "
+                                        "height: 100px; width: 70px; margin: 0px 0px;}"
+                                        "QPushButton { background: white; font: 48pt \"Luxi Mono\"; font-weight: bold;"
+                                        "color: black; border-style: inset; border-color: dark grey; border-width: 4px;"
+                                        "border-radius:20px;} "
+                                        "QPushButton::pressed {border-style:outset;}")
         else: # Light Theme
             self.ui.centralwidget.setStyleSheet("QWidget#centralwidget{background: solid white; }")
             self.ui.SpeedGaugeLabel.setStyleSheet("QLabel{font: 70pt \"Luxi Mono\"; font-weight: bold; color: black}")
@@ -1821,6 +1835,18 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.ui.ProfileRb1.setStyleSheet("QPushButton{border: none; background: transparent;}")
             self.ui.ProfileRb2.setStyleSheet("QPushButton{border: none; background: transparent;}")
             self.ui.ProfileRb3.setStyleSheet("QPushButton{border: none; background: transparent;}")
+            self.ui.TripBox.setStyleSheet("QGroupBox{background: solid white; border: 5px solid black; border-radius: 10px; margin-top: 50px;}"
+                                        "QGroupBox::title {subcontrol-origin: margin; subcontrol-position: top left; left: 25px;"
+                                        "padding: -25 0px 0 0px;}"
+                                        "QLabel{font: 18pt \"Luxi Mono\"; font-weight: bold; color: black} " \
+                                        "QCheckBox::indicator {width: 60px; height: 60px; } " \
+                                        "QSlider::groove:horizontal {border: 1px solid; height: 30px; margin: 0px;}" \
+                                        "QSlider::handle:horizontal {background-color: black; border: 5px solid; "
+                                        "height: 100px; width: 70px; margin: 0px 0px;}"
+                                        "QPushButton { background: white; font: 48pt \"Luxi Mono\"; font-weight: bold;"
+                                        "color: black; border-style: inset; border-color: dark grey; border-width: 4px;"
+                                        "border-radius:20px;} "
+                                        "QPushButton::pressed {border-style:outset;}")
     def tripselect(self, button_bool, command):
         print('Trip Selector ' + str(command) + ' is: ' + str(button_bool))
         if button_bool == True:
@@ -1843,7 +1869,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                          'profile integer, assist integer, range_enabled integer, '  # Display/control parameters
                          'ah float, ahregen float, wh float, whregen float, bmsah float, bmsahregen float, '
                          'bmswh float, bmswhregen float, dist float, iter integer, chargestate integer, '
-                         'triprange integer, throttleassist integer, batta integer, flux integer)')  # Trip counters
+                         'triprange integer, throttleassist integer, batta integer, flux integer, displayinvert integer)')  # Trip counters
 
         lfs = []
         self.sql.execute('select max(id), total(ah_used), total(ah_charged), total(ahregen), total(wh), '
@@ -1865,9 +1891,10 @@ class AmpyDisplay(QtWidgets.QMainWindow):
             self.profile, self.assist_level, self.opt_tripRangeValue, self.flt_ah, self.flt_ahregen, \
             self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen, self.flt_bmswh, self.flt_bmswhregen, \
             self.flt_dist, self.iter_attribute_slicer, self.chargestate, self.opt_tripRangeValue, self.opt_throttleAssistBool,\
-            self.opt_battaValue, self.opt_fluxValue = \
+            self.opt_battaValue, self.opt_fluxValue, self.displayinvert_bool = \
                 stp[0][1], stp[0][2], stp[0][3], stp[0][4], stp[0][5], stp[0][6], stp[0][7], stp[0][8], stp[0][9], \
-                stp[0][10], stp[0][11], stp[0][12], stp[0][13], stp[0][14], stp[0][15], stp[0][16], stp[0][17], stp[0][18]
+                stp[0][10], stp[0][11], stp[0][12], stp[0][13], stp[0][14], stp[0][15], stp[0][16], stp[0][17], \
+                stp[0][18], stp[0][19]
 
         # todo: add bms list stats to new table with this format. Update if-not-exists SQL inits above.
         self.sql.execute('select * from tripstat')
@@ -1889,11 +1916,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         #    self.iter_sql_tripID = ID
         # self.iter_sql_tripID = [i[0] for i in self.sql][0]
     def SQL_update_setup(self):
-        self.sql.execute('replace into setup values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        self.sql.execute('replace into setup values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
          (0, self.profile, self.assist_level, self.opt_tripRangeValue, self.flt_ah, self.flt_ahregen,
           self.flt_wh, self.flt_whregen, self.flt_bmsah, self.flt_bmsahregen, self.flt_bmswh, self.flt_bmswhregen,
           self.flt_dist, self.iter_attribute_slicer, self.chargestate, self.opt_tripRangeValue, self.opt_throttleAssistBool,
-          self.opt_battaValue, self.opt_fluxValue))
+          self.opt_battaValue, self.opt_fluxValue, self.displayinvert_bool))
     def SQL_tripstat_upload(self):
         # Committed every iter_threshold (integration) interval in receive_floop.
         payload = (self.iter_attribute_slicer, self.floop['Battery_Current'], self.floop['Battery_Voltage'],
