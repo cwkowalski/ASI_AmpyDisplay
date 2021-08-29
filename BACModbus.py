@@ -40,7 +40,7 @@ class BACModbus():
         self.socmap_volts, self.socmap_soc, self.socmap_ah, self.socmap_wh_volts, self.socmap_wh = \
             [],[],[],[],[]
 
-        with open(filepath + 'socmap.csv', mode='r') as file:
+        with open(filepath + 'socmap.csv', mode='r', encoding='utf-8-sig') as file:
             reader = csv.reader(file, delimiter=',')
             for row in reader:  # If using own socmap, identify columns appropriately.
                 self.socmap_ah.append(float(row[0]))
