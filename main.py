@@ -929,11 +929,11 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.flt_whmi_inst = mean(self.list_whmi[-3:])
         self.flt_range = self.divzero(self.flt_wh, self.flt_whmi_inst)  # Wh for range to account for eff.
         self.flt_batt_volts_drop = self.flt_batt_volts_min - self.flt_batt_volts_max
-        try:
-            print(self.iter, 'list_whmi: ', self.list_whmi[-self.iter], 'flt_wh: ', self.flt_wh, 'flt_dist: ', self.flt_dist,
-                  'revolutions: ', revolutions, 'y_revsec: ', y_revsec, 'distance: ', distance, 'y_power: ', y_power, 'wattsec: ', wattsec,)
-        except IndexError:
-            pass
+        #try:
+        #    print(self.iter, 'list_whmi: ', self.list_whmi[-self.iter], 'flt_wh: ', self.flt_wh, 'flt_dist: ', self.flt_dist,
+        #          'revolutions: ', revolutions, 'y_revsec: ', y_revsec, 'distance: ', distance, 'y_power: ', y_power, 'wattsec: ', wattsec,)
+        #except IndexError:
+        #    pass
     def floopProcessLong(self):
         self.flt_whmi_avg = mean(self.list_whmi[-self.iter_interp_threshold:])  # 18750 / 19 self.iter =
         self.flt_batt_volts = mean(self.list_batt_volts)
