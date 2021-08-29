@@ -161,3 +161,4 @@ class BACModbus():
 
     import numpy as np
     from math import sqrt
+    print('debughook')
