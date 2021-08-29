@@ -22,7 +22,7 @@ import simple_pid as pid
 #DisableForDesktopDebug
 #from platform import system as platsys
 #if platsys() == 'Linux': # Need better solution for crossplatform dev...
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 # import psutil # Process = psutil.Process(getpid()) # To get memory use
 import sqlite3
 #import argparse
