@@ -37,27 +37,20 @@ class BACModbus():
         self.ObdicBits = {}
         self.RegsDic = {}
 
-        self.socmap_volts, self.socmap_soc, self.socmap_ah, self.socmap_wh_volts, self.socmap_wh_wh = \
+        self.socmap_volts, self.socmap_soc, self.socmap_ah, self.socmap_wh_volts, self.socmap_wh = \
             [],[],[],[],[]
 
-        with open(filepath + 'socmap_ahv.csv', mode='r') as file:
+        with open(filepath + 'socmap.csv', mode='r') as file:
             reader = csv.reader(file, delimiter=',')
             for row in reader:  # If using own socmap, identify columns appropriately.
                 self.socmap_ah.append(float(row[0]))
                 self.socmap_volts.append(float(row[1]))
                 self.socmap_soc.append(float(row[2]))
+                self.socmap_wh.append(float(row[0]))
         self.socmap_volts = array(self.socmap_volts)
         self.socmap_soc = array(self.socmap_soc)
         self.socmap_ah = array(self.socmap_ah)
-        file.close()
-
-        with open(filepath + 'WhVmap.csv', mode='r') as file:
-            reader = csv.reader(file, delimiter=',')
-            for row in reader:  # If using own socmap, identify columns appropriately.
-                self.socmap_wh_wh.append(float(row[0]))
-                self.socmap_wh_volts.append(float(row[1]))
-        self.socmap_wh_wh = array(self.socmap_wh_wh)
-        self.socmap_wh_volts = array(self.socmap_wh_volts)
+        self.socmap_wh = array(self.socmap_wh)
         file.close()
 
         #self.socmap_wh = []
@@ -67,7 +60,7 @@ class BACModbus():
         self.socmap = interp(self.socmap_volts, self.socmap_soc)
         self.ahmap = interp(self.socmap_volts, self.socmap_ah)
         self.wh_a2v_map = interp(self.socmap_ah, self.socmap_volts)
-        self.whmap = interp(self.socmap_wh_volts, self.socmap_wh_wh)
+        self.whmap = interp(self.socmap_volts, self.socmap_wh)
 
         for parent in Obdic:  # InternalAppEntity/Parameters/ParameterDescription children
             scale = parent.find('Scale').text
