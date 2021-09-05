@@ -907,7 +907,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         if isnan(revolutions):
             distance = 0
         else:
-            distance = (revolutions * self.wheelcircum) / (1609344)  ## miles
+            distance = (revolutions * self.wheelcircum) / (1609344)  ## miles #todo: if self.units: 1000000
         self.flt_dist += distance
 
         array_volts, array_amps = array(self.list_batt_volts[-self.iter:]), array(self.list_batt_amps[-self.iter:])
