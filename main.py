@@ -668,6 +668,8 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         self.exceptions = 0
         self.iter = 0
         self.iter_threshold = 3  # Must be odd number for accurate/low-resource Simpsons integration
+        self.iter_long = 0
+        self.iter_long_threshold = 60
         self.iter_sql = 0
         self.iter_sql_threshold = 20 # ~3 hz
         self.iter_bmsmsg_threshold = 11
@@ -853,13 +855,14 @@ class AmpyDisplay(QtWidgets.QMainWindow):
                 self.guiPrepare()
                 self.guiUpdate()
                 self.iter = 0
+        if self.iter_long >= self.iter_long_threshold:
+            self.SQL_update_setup()
+            self.SQL_lifestat_upload_bms()
+            self.floopProcessLong()
         if self.iter_sql >= self.iter_sql_threshold: # 3hz
             self.sql_conn.commit()  # Previously in sql_tripstat_upload but moved here for massive speedup
             self.iter_sql = 0
         if self.iter_bmsmsg >= self.iter_bmsmsg_threshold: #0.5hz
-            self.SQL_update_setup()
-            self.SQL_lifestat_upload_bms()
-            self.floopProcessLong()
             self.iter_bmsmsg = 0
         ##################
         # Message indices:
@@ -1628,7 +1631,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
         # 11 ~= 2 seconds
         if self.iter_bmsmsg >= self.iter_bmsmsg_threshold:
             self.bmsProcessBasic()
-            mincellsoc = int(BAC.socmapper(cellvmin))
+            mincellsoc = int(BAC.socmapper(cellvmin)) # todo: use wh SOC instead. min instantaneous voltage is bad idea for foldbacks.
             self.signalBMSMsgBAC(mincellsoc, maxtemp)
             #self.bacqueue.put([-32, int(self.flt_soc), maxtemp])
             self.iter_bmsmsg = 0
@@ -2017,6 +2020,7 @@ class AmpyDisplay(QtWidgets.QMainWindow):
     def gettime(self):  #
         self.iter_attribute_slicer += 1
         self.iter += 1
+        self.iter_long +=1
         self.iter_sql += 1
         #self.iter_bmsmsg += 1
         self.time2 = self.ms()
